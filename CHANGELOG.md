@@ -5,6 +5,31 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-01-27
+
+### Fixed
+
+- Fixed Docker build issues in CI/CD pipeline
+- Resolved linting and formatting errors for automated workflows
+- Fixed Docker test step to properly load built images
+- Corrected exception chaining in SSH client error handling
+- Fixed loop variable binding issues in progress callbacks
+
+### Changed
+
+- Updated Python base image to 3.14-slim for latest security patches
+- Improved Docker build process with better .dockerignore configuration
+- Enhanced CI/CD workflows with proper dependency management
+- Updated development dependencies (black, ruff, mypy, pytest)
+
+### Added
+
+- Automated dependency management with Dependabot
+- Comprehensive CI/CD pipeline with linting, testing, and Docker builds
+- Automated code formatting and type checking
+- Docker Compose setup with automated configuration
+- Example configuration files and setup scripts
+
 ## [0.1.0] - 2025-10-21
 
 ### Added
