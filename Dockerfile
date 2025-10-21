@@ -21,8 +21,13 @@ WORKDIR /app
 # Copy project
 COPY pyproject.toml README.md LICENSE /app/
 COPY src /app/src
-COPY config /app/config
 COPY examples /app/examples
+
+# Create config directory and copy example configs if they exist
+RUN mkdir -p /app/config
+COPY examples/example-servers.yml /app/config/servers.yml.example
+COPY examples/example-credentials.yml /app/config/credentials.yml.example  
+COPY examples/example-policy.yml /app/config/policy.yml.example
 ENV PATH="/home/appuser/.local/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip && \
