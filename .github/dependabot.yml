@@ -80,7 +80,3 @@ updates:
     labels:
       - "dependencies"
       - "docker"
-    # Ignore major version updates for Python base image to avoid invalid versions
-    ignore:
-      - dependency-name: "python"
-        update-types: ["version-update:semver-major"]
