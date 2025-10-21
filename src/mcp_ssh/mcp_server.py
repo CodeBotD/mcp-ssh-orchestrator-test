@@ -1,12 +1,12 @@
-import sys
 import json
 import time
+
 from mcp.server.fastmcp import FastMCP
+
 from mcp_ssh.config import Config
 from mcp_ssh.policy import Policy
 from mcp_ssh.ssh_client import SSHClient
-from mcp_ssh.tools.utilities import hash_command, TASKS, log_json
-
+from mcp_ssh.tools.utilities import TASKS, hash_command, log_json
 
 mcp = FastMCP()
 config = Config()
@@ -19,34 +19,40 @@ def _client_for(alias: str, limits: dict, require_known_host: bool) -> SSHClient
     creds = config.get_credentials(creds_ref) if creds_ref else {}
     known_hosts_path = (config.get_policy() or {}).get("known_hosts_path", "")
     auto_add = bool(limits.get("host_key_auto_add", False))
-    
+
     # Input validation
     hostname = host.get("host", "").strip()
     if not hostname:
         raise ValueError(f"Host '{alias}' has no hostname configured")
-    
+
     username = creds.get("username", "").strip()
     if not username:
         if creds_ref:
-            raise ValueError(f"Host '{alias}' references credentials '{creds_ref}' but no username found")
+            raise ValueError(
+                f"Host '{alias}' references credentials '{creds_ref}' but no username found"
+            )
         else:
-            raise ValueError(f"Host '{alias}' has no credentials reference and no username configured")
-    
+            raise ValueError(
+                f"Host '{alias}' has no credentials reference and no username configured"
+            )
+
     port = host.get("port", 22)
     try:
         port = int(port)
         if not (1 <= port <= 65535):
             raise ValueError(f"Invalid port {port} for host '{alias}'")
-    except (ValueError, TypeError):
-        raise ValueError(f"Invalid port '{port}' for host '{alias}'")
-    
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid port '{port}' for host '{alias}'") from e
+
     # Validate authentication method
     key_path = creds.get("key_path", "").strip()
     password = creds.get("password", "").strip()
-    
+
     if not key_path and not password:
-        raise ValueError(f"Host '{alias}' has no authentication method configured (neither key_path nor password)")
-    
+        raise ValueError(
+            f"Host '{alias}' has no authentication method configured (neither key_path nor password)"
+        )
+
     return SSHClient(
         host=hostname,
         username=username,
@@ -134,7 +140,7 @@ def ssh_run(alias: str = "", command: str = "") -> str:
             return "Error: alias is required"
         if not command.strip():
             return "Error: command is required"
-        
+
         # Basic command validation
         command = command.strip()
         if len(command) > 10000:  # Reasonable limit
@@ -159,7 +165,9 @@ def ssh_run(alias: str = "", command: str = "") -> str:
         limits = pol.limits_for(alias, tags)
         max_seconds = int(limits.get("max_seconds", 60))
         max_output_bytes = int(limits.get("max_output_bytes", 1024 * 1024))
-        require_known_host = bool(limits.get("require_known_host", pol.require_known_host()))
+        require_known_host = bool(
+            limits.get("require_known_host", pol.require_known_host())
+        )
 
         task_id = TASKS.create(alias, cmd_hash)
 
@@ -168,7 +176,16 @@ def ssh_run(alias: str = "", command: str = "") -> str:
 
         client = _client_for(alias, limits, require_known_host)
         cancel_event = TASKS.get_event(task_id)
-        exit_code, duration_ms, cancelled, timeout, bytes_out, bytes_err, combined, peer_ip = client.run_streaming(
+        (
+            exit_code,
+            duration_ms,
+            cancelled,
+            timeout,
+            bytes_out,
+            bytes_err,
+            combined,
+            peer_ip,
+        ) = client.run_streaming(
             command=command,
             cancel_event=cancel_event,
             max_seconds=max_seconds,
@@ -180,14 +197,28 @@ def ssh_run(alias: str = "", command: str = "") -> str:
         # Post-connect enforcement: ensure actual peer IP is allowed
         if peer_ip and not pol.is_ip_allowed(peer_ip):
             pol.log_audit(
-                alias, cmd_hash, int(exit_code), int(duration_ms),
-                int(bytes_out), int(bytes_err), bool(cancelled), bool(timeout), peer_ip
+                alias,
+                cmd_hash,
+                int(exit_code),
+                int(duration_ms),
+                int(bytes_out),
+                int(bytes_err),
+                bool(cancelled),
+                bool(timeout),
+                peer_ip,
             )
             return f"Denied by network policy: peer IP {peer_ip} not allowed"
 
         pol.log_audit(
-            alias, cmd_hash, int(exit_code), int(duration_ms),
-            int(bytes_out), int(bytes_err), bool(cancelled), bool(timeout), peer_ip
+            alias,
+            cmd_hash,
+            int(exit_code),
+            int(duration_ms),
+            int(bytes_out),
+            int(bytes_err),
+            bool(cancelled),
+            bool(timeout),
+            peer_ip,
         )
         result = {
             "task_id": task_id,
@@ -218,14 +249,16 @@ def ssh_run_on_tag(tag: str = "", command: str = "") -> str:
             return "Error: tag is required"
         if not command.strip():
             return "Error: command is required"
-        
+
         # Basic command validation
         command = command.strip()
         if len(command) > 10000:  # Reasonable limit
             return "Error: command too long (max 10000 characters)"
         aliases = config.find_hosts_by_tag(tag)
         if not aliases:
-            return json.dumps({"tag": tag, "results": [], "note": "No hosts matched."}, indent=2)
+            return json.dumps(
+                {"tag": tag, "results": [], "note": "No hosts matched."}, indent=2
+            )
 
         results = []
         for alias in aliases:
@@ -239,28 +272,55 @@ def ssh_run_on_tag(tag: str = "", command: str = "") -> str:
             allowed = pol.is_allowed(alias, tags, command)
             pol.log_decision(alias, cmd_hash, allowed)
             if not allowed:
-                results.append({"alias": alias, "hash": cmd_hash, "denied": True, "reason": "policy"})
+                results.append(
+                    {
+                        "alias": alias,
+                        "hash": cmd_hash,
+                        "denied": True,
+                        "reason": "policy",
+                    }
+                )
                 continue
 
             # Network precheck
             ok, reason = _precheck_network(pol, hostname)
             if not ok:
-                results.append({"alias": alias, "hash": cmd_hash, "denied": True, "reason": f"network: {reason}"})
+                results.append(
+                    {
+                        "alias": alias,
+                        "hash": cmd_hash,
+                        "denied": True,
+                        "reason": f"network: {reason}",
+                    }
+                )
                 continue
 
             limits = pol.limits_for(alias, tags)
             max_seconds = int(limits.get("max_seconds", 60))
             max_output_bytes = int(limits.get("max_output_bytes", 1024 * 1024))
-            require_known_host = bool(limits.get("require_known_host", pol.require_known_host()))
+            require_known_host = bool(
+                limits.get("require_known_host", pol.require_known_host())
+            )
 
             task_id = TASKS.create(alias, cmd_hash)
 
-            def progress_cb(phase, bytes_read, elapsed_ms):
-                pol.log_progress(task_id, phase, int(bytes_read), int(elapsed_ms))
+            def progress_cb(
+                phase, bytes_read, elapsed_ms, pol_ref=pol, task_ref=task_id
+            ):
+                pol_ref.log_progress(task_ref, phase, int(bytes_read), int(elapsed_ms))
 
             client = _client_for(alias, limits, require_known_host)
             cancel_event = TASKS.get_event(task_id)
-            exit_code, duration_ms, cancelled, timeout, bytes_out, bytes_err, combined, peer_ip = client.run_streaming(
+            (
+                exit_code,
+                duration_ms,
+                cancelled,
+                timeout,
+                bytes_out,
+                bytes_err,
+                combined,
+                peer_ip,
+            ) = client.run_streaming(
                 command=command,
                 cancel_event=cancel_event,
                 max_seconds=max_seconds,
@@ -272,30 +332,51 @@ def ssh_run_on_tag(tag: str = "", command: str = "") -> str:
             # Post-connect enforcement
             if peer_ip and not pol.is_ip_allowed(peer_ip):
                 pol.log_audit(
-                    alias, cmd_hash, int(exit_code), int(duration_ms),
-                    int(bytes_out), int(bytes_err), bool(cancelled), bool(timeout), peer_ip
+                    alias,
+                    cmd_hash,
+                    int(exit_code),
+                    int(duration_ms),
+                    int(bytes_out),
+                    int(bytes_err),
+                    bool(cancelled),
+                    bool(timeout),
+                    peer_ip,
                 )
-                results.append({
-                    "alias": alias, "task_id": task_id, "hash": cmd_hash,
-                    "denied": True, "reason": f"network: peer {peer_ip} not allowed"
-                })
+                results.append(
+                    {
+                        "alias": alias,
+                        "task_id": task_id,
+                        "hash": cmd_hash,
+                        "denied": True,
+                        "reason": f"network: peer {peer_ip} not allowed",
+                    }
+                )
                 continue
 
             pol.log_audit(
-                alias, cmd_hash, int(exit_code), int(duration_ms),
-                int(bytes_out), int(bytes_err), bool(cancelled), bool(timeout), peer_ip
+                alias,
+                cmd_hash,
+                int(exit_code),
+                int(duration_ms),
+                int(bytes_out),
+                int(bytes_err),
+                bool(cancelled),
+                bool(timeout),
+                peer_ip,
             )
-            results.append({
-                "alias": alias,
-                "task_id": task_id,
-                "hash": cmd_hash,
-                "exit_code": int(exit_code),
-                "duration_ms": int(duration_ms),
-                "cancelled": bool(cancelled),
-                "timeout": bool(timeout),
-                "target_ip": peer_ip,
-                "output": combined,
-            })
+            results.append(
+                {
+                    "alias": alias,
+                    "task_id": task_id,
+                    "hash": cmd_hash,
+                    "exit_code": int(exit_code),
+                    "duration_ms": int(duration_ms),
+                    "cancelled": bool(cancelled),
+                    "timeout": bool(timeout),
+                    "target_ip": peer_ip,
+                    "output": combined,
+                }
+            )
 
         return json.dumps({"tag": tag, "results": results}, indent=2)
     except Exception as e:

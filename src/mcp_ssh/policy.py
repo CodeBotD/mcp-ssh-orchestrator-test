@@ -1,8 +1,8 @@
-import sys
 import fnmatch
-import time
-import json
 import ipaddress
+import json
+import sys
+import time
 
 
 def _match_any(value: str, patterns) -> bool:
@@ -198,7 +198,18 @@ class Policy:
         }
         print(json.dumps(entry), file=sys.stderr)
 
-    def log_audit(self, alias: str, command_hash: str, exit_code: int, duration_ms: int, bytes_out: int, bytes_err: int, cancelled: bool, timeout: bool, target_ip: str):
+    def log_audit(
+        self,
+        alias: str,
+        command_hash: str,
+        exit_code: int,
+        duration_ms: int,
+        bytes_out: int,
+        bytes_err: int,
+        cancelled: bool,
+        timeout: bool,
+        target_ip: str,
+    ):
         """Log execution audit JSON."""
         entry = {
             "type": "audit",

@@ -1,14 +1,26 @@
-import paramiko
+import socket
 import sys
 import time
 import traceback
-import socket
+
+import paramiko
 
 
 class SSHClient:
     """Paramiko SSH wrapper with streaming, cancellation, and IP auditing."""
 
-    def __init__(self, host: str, username: str, port: int = 22, key_path: str = "", password: str = "", passphrase: str = "", known_hosts_path: str = "", auto_add_host_keys: bool = False, require_known_host: bool = True):
+    def __init__(
+        self,
+        host: str,
+        username: str,
+        port: int = 22,
+        key_path: str = "",
+        password: str = "",
+        passphrase: str = "",
+        known_hosts_path: str = "",
+        auto_add_host_keys: bool = False,
+        require_known_host: bool = True,
+    ):
         self.host = host
         self.username = username
         self.port = int(port) if port else 22
@@ -40,7 +52,10 @@ class SSHClient:
                 try:
                     client.load_host_keys(self.known_hosts_path)
                 except Exception as e:
-                    print(f'{{"level":"warn","msg":"load_host_keys_failed","path":"{self.known_hosts_path}","error":"{e}"}}', file=sys.stderr)
+                    print(
+                        f'{{"level":"warn","msg":"load_host_keys_failed","path":"{self.known_hosts_path}","error":"{e}"}}',
+                        file=sys.stderr,
+                    )
             else:
                 try:
                     client.load_system_host_keys()
@@ -58,27 +73,39 @@ class SSHClient:
                 try:
                     hk = client.get_host_keys()
                     if self.host not in hk or len(hk[self.host].keys()) == 0:
-                        raise RuntimeError(f"known_hosts entry required for {self.host} but not found")
+                        raise RuntimeError(
+                            f"known_hosts entry required for {self.host} but not found"
+                        )
                 except Exception as e:
-                    raise RuntimeError(f"known_hosts verification failed for {self.host}: {e}")
+                    raise RuntimeError(
+                        f"known_hosts verification failed for {self.host}: {e}"
+                    ) from e
 
             # Connect
             if self.key_path:
                 pkey = None
                 try:
                     # Try RSA key first
-                    pkey = paramiko.RSAKey.from_private_key_file(self.key_path, password=self.passphrase)
+                    pkey = paramiko.RSAKey.from_private_key_file(
+                        self.key_path, password=self.passphrase
+                    )
                 except Exception:
                     try:
                         # Try Ed25519 key
-                        pkey = paramiko.Ed25519Key.from_private_key_file(self.key_path, password=self.passphrase)
+                        pkey = paramiko.Ed25519Key.from_private_key_file(
+                            self.key_path, password=self.passphrase
+                        )
                     except Exception:
                         try:
                             # Try ECDSA key
-                            pkey = paramiko.ECDSAKey.from_private_key_file(self.key_path, password=self.passphrase)
-                        except Exception:
-                            raise RuntimeError(f"Failed to load private key from {self.key_path}")
-                
+                            pkey = paramiko.ECDSAKey.from_private_key_file(
+                                self.key_path, password=self.passphrase
+                            )
+                        except Exception as e:
+                            raise RuntimeError(
+                                f"Failed to load private key from {self.key_path}"
+                            ) from e
+
                 client.connect(
                     hostname=self.host,
                     username=self.username,
@@ -116,19 +143,34 @@ class SSHClient:
                 pass
             # Provide more specific error context
             if "Authentication failed" in str(e):
-                raise RuntimeError(f"SSH authentication failed for {self.username}@{self.host}:{self.port}")
+                raise RuntimeError(
+                    f"SSH authentication failed for {self.username}@{self.host}:{self.port}"
+                ) from e
             elif "No such file or directory" in str(e) and self.key_path:
-                raise RuntimeError(f"SSH key file not found: {self.key_path}")
+                raise RuntimeError(f"SSH key file not found: {self.key_path}") from e
             elif "Permission denied" in str(e):
-                raise RuntimeError(f"SSH permission denied for {self.username}@{self.host}:{self.port}")
+                raise RuntimeError(
+                    f"SSH permission denied for {self.username}@{self.host}:{self.port}"
+                ) from e
             elif "Connection refused" in str(e):
-                raise RuntimeError(f"SSH connection refused to {self.host}:{self.port}")
+                raise RuntimeError(
+                    f"SSH connection refused to {self.host}:{self.port}"
+                ) from e
             elif "Name or service not known" in str(e):
-                raise RuntimeError(f"SSH hostname not found: {self.host}")
+                raise RuntimeError(f"SSH hostname not found: {self.host}") from e
             else:
-                raise RuntimeError(f"SSH connection failed to {self.host}:{self.port}: {str(e)}")
+                raise RuntimeError(
+                    f"SSH connection failed to {self.host}:{self.port}: {str(e)}"
+                ) from e
 
-    def run_streaming(self, command: str, cancel_event, max_seconds: int, max_output_bytes: int, progress_cb=None):
+    def run_streaming(
+        self,
+        command: str,
+        cancel_event,
+        max_seconds: int,
+        max_output_bytes: int,
+        progress_cb=None,
+    ):
         """Execute command with streaming, cancellation, timeout, and size caps.
 
         Returns: (exit_code, duration_ms, cancelled, timeout, bytes_out, bytes_err, combined, peer_ip)
@@ -190,10 +232,16 @@ class SSHClient:
                         if len(err_buf) > max_output_bytes:
                             err_buf = err_buf[:max_output_bytes]
                     if progress_cb and (now - last_progress) > 0.5:
-                        progress_cb("running", len(out_buf) + len(err_buf), int(elapsed * 1000))
+                        progress_cb(
+                            "running", len(out_buf) + len(err_buf), int(elapsed * 1000)
+                        )
                         last_progress = now
 
-                if chan.exit_status_ready() and not chan.recv_ready() and not chan.recv_stderr_ready():
+                if (
+                    chan.exit_status_ready()
+                    and not chan.recv_ready()
+                    and not chan.recv_stderr_ready()
+                ):
                     exit_code = chan.recv_exit_status()
                     break
 
@@ -213,4 +261,13 @@ class SSHClient:
         out_txt = out_buf.decode("utf-8", errors="replace")
         err_txt = err_buf.decode("utf-8", errors="replace")
         combined = (out_txt + ("\n" if out_txt and err_txt else "") + err_txt).strip()
-        return exit_code, duration_ms, cancelled, timeout, len(out_buf), len(err_buf), combined, peer_ip
+        return (
+            exit_code,
+            duration_ms,
+            cancelled,
+            timeout,
+            len(out_buf),
+            len(err_buf),
+            combined,
+            peer_ip,
+        )

@@ -1,8 +1,8 @@
 import hashlib
-import threading
-import time
 import json
 import sys
+import threading
+import time
 
 
 def hash_command(command: str) -> str:
