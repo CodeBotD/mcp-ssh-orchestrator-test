@@ -79,11 +79,15 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: mcp-ssh-orchestrator:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
       - name: Test Docker image
         run: |
-          docker run --rm mcp-ssh-orchestrator:test python -c "import mcp_ssh; print('OK')"
+          echo "Testing Docker image..."
+          docker images | grep mcp-ssh-orchestrator
+          docker run --rm mcp-ssh-orchestrator:test python -c "import mcp_ssh; print('✅ MCP SSH module imported successfully')"
+          echo "✅ Docker image test passed!"
 
