@@ -1,0 +1,37 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────
+# 🧩 mcp-ssh-orchestrator (STDIO MCP Server)
+# Purpose: Local test or integration with Claude / Docker MCP
+# ─────────────────────────────────────────────────────────────
+
+services:
+  mcp-ssh:
+    container_name: mcp-ssh-orchestrator
+    image: ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0
+    restart: "no"
+    stdin_open: true
+    tty: true
+    user: "1000:1000"               # Run as non-root user
+    environment:
+      MCP_SSH_CONFIG_DIR: /app/config
+      MCP_SSH_MAX_CONCURRENCY: ${MCP_SSH_MAX_CONCURRENCY:-5}
+      MCP_SSH_TIMEOUT_SEC: ${MCP_SSH_TIMEOUT_SEC:-45}
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ../config:/app/config:ro     # Main YAML configs
+      - ../keys:/app/keys:ro         # Optional private keys
+      - ../secrets:/app/secrets:ro   # Docker Desktop secrets or passwords
+    entrypoint: ["python", "-m", "mcp_ssh.mcp_server", "stdio"]
+    working_dir: /app
+    networks:
+      - mcpnet
+    healthcheck:
+      test: ["CMD", "python", "-c", "print('mcp-ssh health ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  mcpnet:
+    driver: bridge

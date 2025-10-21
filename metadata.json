@@ -1,0 +1,96 @@
+{
+  "name": "mcp-ssh-orchestrator",
+  "displayName": "MCP SSH Orchestrator",
+  "description": "A Model Context Protocol (MCP) server for orchestrating SSH operations across multiple servers with security policies and parallel execution capabilities.",
+  "version": "0.1.0",
+  "author": "samerfarida",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samerfarida/mcp-ssh-orchestrator.git"
+  },
+  "homepage": "https://github.com/samerfarida/mcp-ssh-orchestrator",
+  "keywords": [
+    "mcp",
+    "ssh",
+    "orchestration",
+    "automation",
+    "devops",
+    "infrastructure"
+  ],
+  "capabilities": {
+    "tools": [
+      "ssh_execute",
+      "ssh_upload",
+      "ssh_download",
+      "ssh_list_files",
+      "ssh_get_system_info",
+      "ssh_batch_operations"
+    ],
+    "resources": [
+      "server_status",
+      "connection_health"
+    ]
+  },
+  "configuration": {
+    "servers": {
+      "type": "object",
+      "description": "Server definitions with connection details",
+      "required": true
+    },
+    "credentials": {
+      "type": "object", 
+      "description": "Authentication credentials for servers",
+      "required": true
+    },
+    "policy": {
+      "type": "object",
+      "description": "Security policies and access controls",
+      "required": true
+    }
+  },
+  "docker": {
+    "image": "ghcr.io/samerfarida/mcp-ssh-orchestrator",
+    "tag": "latest",
+    "platforms": ["linux/amd64", "linux/arm64"],
+    "ports": [],
+    "volumes": [
+      {
+        "name": "config",
+        "path": "/app/config",
+        "description": "Configuration files directory"
+      },
+      {
+        "name": "keys", 
+        "path": "/app/keys",
+        "description": "SSH private keys directory"
+      },
+      {
+        "name": "secrets",
+        "path": "/app/secrets", 
+        "description": "Secrets and passwords directory"
+      }
+    ],
+    "environment": {
+      "MCP_SSH_CONFIG_DIR": "/app/config",
+      "MCP_SSH_MAX_CONCURRENCY": "5",
+      "MCP_SSH_TIMEOUT_SEC": "45"
+    }
+  },
+  "mcp": {
+    "transport": "stdio",
+    "entrypoint": "python -m mcp_ssh.mcp_server stdio"
+  },
+  "security": {
+    "nonRoot": true,
+    "readOnlyRootFilesystem": false,
+    "capabilities": [],
+    "seccompProfile": "runtime/default"
+  },
+  "documentation": {
+    "setup": "https://github.com/samerfarida/mcp-ssh-orchestrator#setup",
+    "configuration": "https://github.com/samerfarida/mcp-ssh-orchestrator#configuration", 
+    "examples": "https://github.com/samerfarida/mcp-ssh-orchestrator#examples",
+    "troubleshooting": "https://github.com/samerfarida/mcp-ssh-orchestrator#troubleshooting"
+  }
+}

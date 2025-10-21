@@ -1,0 +1,39 @@
+{
+  "name": "mcp-ssh-orchestrator",
+  "version": "0.1.0",
+  "description": "A secure SSH fleet orchestrator exposing list/plan/run tools with policy enforcement over STDIO.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/samerfarida/mcp-ssh-orchestrator",
+  "keywords": ["mcp", "ssh", "orchestration", "security", "policy"],
+  "publisher": "io.github.samerfarida",
+  "containers": [
+    {
+      "image": "ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0",
+      "transport": "stdio",
+      "entrypoint": ["python", "-m", "mcp_ssh.mcp_server", "stdio"],
+      "env": [
+        { "name": "MCP_SSH_CONFIG_DIR", "description": "Path to config directory", "default": "/app/config" },
+        { "name": "MCP_SSH_KEYS_DIR", "description": "Path to SSH private keys", "default": "/app/keys" },
+        { "name": "MCP_SSH_SECRETS_DIR", "description": "Path to Docker secrets", "default": "/app/secrets" }
+      ],
+      "mounts": [
+        { "type": "bind", "source": "/app/config", "target": "/app/config", "required": false, "description": "Configuration (servers, credentials, policy)" },
+        { "type": "bind", "source": "/app/keys", "target": "/app/keys", "required": false, "description": "SSH private keys" },
+        { "type": "bind", "source": "/app/secrets", "target": "/app/secrets", "required": false, "description": "Docker secrets" }
+      ],
+      "secrets": [
+        { "name": "ssh_key_passphrase", "description": "Passphrase for private key", "required": false }
+      ]
+    }
+  ],
+  "tools": [
+    { "name": "ssh_ping", "description": "Health check - returns 'pong' if server is responsive." },
+    { "name": "ssh_list_hosts", "description": "List all configured host aliases." },
+    { "name": "ssh_describe_host", "description": "Get detailed configuration for a specific host alias." },
+    { "name": "ssh_plan", "description": "Dry-run a command and show policy verdict without execution." },
+    { "name": "ssh_run", "description": "Execute a command on a single host with policy enforcement." },
+    { "name": "ssh_run_on_tag", "description": "Execute a command on all hosts matching a tag." },
+    { "name": "ssh_cancel", "description": "Cancel a running command by task ID." },
+    { "name": "ssh_reload_config", "description": "Hot-reload configuration files from disk." }
+  ]
+}

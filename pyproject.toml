@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-ssh-orchestrator"
+version = "0.1.0"
+description = "A secure SSH fleet orchestrator for MCP (STDIO transport)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Sammy Farida" }]
+dependencies = [
+  "mcp>=1.1.0,<2.0.0",
+  "PyYAML>=6.0.2,<7.0.0",
+  "paramiko>=3.5.0,<4.0.0",
+]
+
+[project.scripts]
+mcp-ssh-orchestrator = "mcp_ssh.mcp_server:main"
+
+[tool.setuptools.package-data]
+mcp_ssh = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

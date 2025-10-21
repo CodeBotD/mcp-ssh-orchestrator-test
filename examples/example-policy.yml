@@ -1,0 +1,146 @@
+# example-policy.yml
+#
+# Example security policy configuration for mcp-ssh-orchestrator.
+# Copy this to config/policy.yml and customize for your security requirements.
+#
+# This file defines:
+#   - Command allow/deny rules with glob patterns
+#   - Execution limits (timeouts, output caps)
+#   - Network controls (IP allowlists/blocklists)
+#   - Per-host and per-tag overrides
+
+# Strict host-key validation file (mount read-only)
+known_hosts_path: "/app/keys/known_hosts"
+
+# Global execution limits (can be overridden per host/tag)
+limits:
+  max_seconds: 60
+  max_output_bytes: 1048576
+  host_key_auto_add: false
+  require_known_host: true
+  
+  # Hard-blocked command substrings (checked before rules)
+  deny_substrings:
+    # Destructive commands
+    - "rm -rf /"
+    - ":(){ :|:& };:"
+    - "mkfs "
+    - "dd if=/dev/zero"
+    - "shutdown -h"
+    - "reboot"
+    - "userdel "
+    - "passwd "
+    # Lateral movement / egress tools
+    - "ssh "
+    - "scp "
+    - "rsync -e ssh"
+    - "curl "
+    - "wget "
+    - "nc "
+    - "nmap "
+    - "telnet "
+
+# Network egress controls
+network:
+  # Allow only these IPs/CIDRs (empty = allow all)
+  allow_ips: []
+  allow_cidrs: []
+  
+  # Block these IPs/CIDRs
+  block_ips: []
+  block_cidrs: []
+  
+  # Require known_hosts entry before connection
+  require_known_host: true
+
+# Command allow/deny rules (deny-by-default)
+rules:
+  # Safe read-only commands on all hosts
+  - action: "allow"
+    aliases: ["*"]
+    tags: []
+    commands:
+      - "uname*"
+      - "uptime*"
+      - "whoami"
+      - "df -h*"
+      - "cat /etc/os-release*"
+      - "ls*"
+      - "echo*"
+      - "id*"
+      - "hostname*"
+      - "date*"
+
+  # Package inventory on Linux hosts
+  - action: "allow"
+    aliases: ["*"]
+    tags: ["linux"]
+    commands:
+      - "dpkg -l*"
+      - "rpm -qa*"
+      - "apt list --installed*"
+
+  # Service status checks (read-only)
+  - action: "allow"
+    aliases: ["*"]
+    tags: []
+    commands:
+      - "systemctl status *"
+      - "docker ps*"
+      - "docker inspect*"
+
+  # Network diagnostics on non-production
+  - action: "allow"
+    aliases: ["stg-*", "dev-*", "lab-*"]
+    tags: ["staging", "dev", "lab"]
+    commands:
+      - "ping*"
+      - "traceroute*"
+      - "ss -tulpn*"
+      - "netstat*"
+
+  # Service restarts on staging only
+  - action: "allow"
+    aliases: ["stg-*"]
+    tags: ["staging"]
+    commands:
+      - "sudo systemctl restart *"
+
+  # Explicit denies (redundant with deny_substrings but clear)
+  - action: "deny"
+    aliases: ["*"]
+    tags: []
+    commands:
+      - "rm *"
+      - "chmod 777*"
+      - "chown -R *"
+      - "shutdown*"
+      - "reboot*"
+
+# Per-alias and per-tag limit overrides
+overrides:
+  aliases:
+    # Production hosts: stricter limits
+    prod-web-1:
+      max_seconds: 30
+      max_output_bytes: 524288
+    
+    prod-db-1:
+      max_seconds: 20
+      max_output_bytes: 262144
+
+  tags:
+    # Production: strict
+    production:
+      max_seconds: 30
+      max_output_bytes: 524288
+    
+    # Lab: relaxed for experimentation
+    lab:
+      host_key_auto_add: true
+      require_known_host: false
+      max_seconds: 90
+    
+    # Long-running maintenance
+    longrun:
+      max_seconds: 180

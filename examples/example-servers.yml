@@ -1,0 +1,30 @@
+# example-servers.yml
+#
+# Example SSH host inventory for mcp-ssh-orchestrator.
+# Copy this to config/servers.yml and customize for your fleet.
+#
+# Fields:
+#   alias: unique identifier for the host (required)
+#   host: hostname or IP address (required)
+#   port: SSH port number (default: 22)
+#   credentials: reference to credentials.yml entry name (required)
+#   tags: list of labels for policy rules and tag-based execution
+
+hosts:
+  - alias: "web1"
+    host: "10.0.0.11"
+    port: 22
+    credentials: "default"
+    tags: ["web", "prod", "linux"]
+
+  - alias: "db1"
+    host: "10.0.0.21"
+    port: 22
+    credentials: "staging"
+    tags: ["db", "staging", "linux"]
+
+  - alias: "app1"
+    host: "192.168.1.100"
+    port: 2222
+    credentials: "default"
+    tags: ["app", "dev"]
