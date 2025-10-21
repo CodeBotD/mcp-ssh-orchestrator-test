@@ -1,6 +1,10 @@
 # mcp-ssh-orchestrator
 
-A secure SSH fleet orchestrator built as a Model Context Protocol (MCP) server. Execute commands across your server fleet with policy-based access control, network filtering, and comprehensive audit logging.
+<div align="center">
+  <img src="assets/logo/logo.svg" alt="MCP SSH Orchestrator Logo" width="200" height="200">
+  <h3>A secure SSH fleet orchestrator built as a Model Context Protocol (MCP) server</h3>
+  <p>Execute commands across your server fleet with policy-based access control, network filtering, and comprehensive audit logging.</p>
+</div>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-1.2+-green.svg)](https://modelcontextprotocol.io)

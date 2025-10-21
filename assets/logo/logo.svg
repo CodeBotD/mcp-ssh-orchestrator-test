@@ -1,0 +1,50 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#f8fafc" rx="64"/>
+  
+  <!-- Terminal Window -->
+  <rect x="64" y="64" width="384" height="256" fill="#1e293b" rx="8"/>
+  <rect x="64" y="64" width="384" height="32" fill="#374151" rx="8"/>
+  
+  <!-- Terminal Buttons -->
+  <circle cx="80" cy="80" r="6" fill="#ef4444"/>
+  <circle cx="100" cy="80" r="6" fill="#f59e0b"/>
+  <circle cx="120" cy="80" r="6" fill="#10b981"/>
+  
+  <!-- Terminal Content -->
+  <text x="80" y="120" font-family="JetBrains Mono, monospace" font-size="16" fill="#10b981">$ ssh server1.example.com</text>
+  <text x="80" y="150" font-family="JetBrains Mono, monospace" font-size="16" fill="#10b981">$ ssh server2.example.com</text>
+  <text x="80" y="180" font-family="JetBrains Mono, monospace" font-size="16" fill="#10b981">$ ssh server3.example.com</text>
+  <text x="80" y="210" font-family="JetBrains Mono, monospace" font-size="16" fill="#3b82f6">$ mcp-ssh-orchestrator --execute "uptime" --all</text>
+  <text x="80" y="240" font-family="JetBrains Mono, monospace" font-size="16" fill="#10b981">$</text>
+  <rect x="95" y="235" width="8" height="16" fill="#10b981"/>
+  
+  <!-- Network Connections -->
+  <g stroke="#2563eb" stroke-width="3" fill="none">
+    <line x1="200" y1="200" x2="250" y2="150"/>
+    <line x1="250" y1="150" x2="300" y2="200"/>
+    <line x1="300" y1="200" x2="350" y2="150"/>
+    <line x1="350" y1="150" x2="400" y2="200"/>
+  </g>
+  
+  <!-- Server Nodes -->
+  <circle cx="200" cy="200" r="8" fill="#2563eb"/>
+  <circle cx="250" cy="150" r="8" fill="#059669"/>
+  <circle cx="300" cy="200" r="8" fill="#2563eb"/>
+  <circle cx="350" cy="150" r="8" fill="#059669"/>
+  <circle cx="400" cy="200" r="8" fill="#2563eb"/>
+  
+  <!-- Security Shield -->
+  <g transform="translate(256, 350)">
+    <path d="M-32,-16 L-16,-32 L16,-32 L32,-16 L32,16 L16,32 L-16,32 L-32,16 Z" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+    <path d="M-16,-8 L-8,-16 L8,-16 L16,-8 L16,8 L8,16 L-8,16 L-16,8 Z" fill="#fef2f2"/>
+    <path d="M-8,0 L-4,-4 L4,-4 L8,0 L8,8 L4,12 L-4,12 L-8,8 Z" fill="#dc2626"/>
+  </g>
+  
+  <!-- Title Text -->
+  <text x="256" y="420" font-family="JetBrains Mono, monospace" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e293b">MCP SSH</text>
+  <text x="256" y="450" font-family="JetBrains Mono, monospace" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e293b">ORCHESTRATOR</text>
+  
+  <!-- Tagline -->
+  <text x="256" y="480" font-family="JetBrains Mono, monospace" font-size="14" text-anchor="middle" fill="#64748b">🔒 Secure • ⚡ Fast • 🎯 Reliable</text>
+</svg>
