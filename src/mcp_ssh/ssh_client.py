@@ -8,7 +8,7 @@ import paramiko
 
 class AcceptPolicy(paramiko.MissingHostKeyPolicy):
     """Accept unknown host keys without saving them."""
-    
+
     def missing_host_key(self, client, hostname, key):
         # Accept the key but don't save it
         pass
