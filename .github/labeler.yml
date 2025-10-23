@@ -94,14 +94,3 @@ mcp-server:
 breaking:
   - CHANGELOG.md
   - pyproject.toml
-
-# Bug fixes (typically involve test files and specific bug-related patterns)
-bug:
-  - tests/**/*.py
-  - test_*.py
-  - *_test.py
-  - tests/**/test_*.py
-
-# New features (typically involve new functionality in source files)
-feature:
-  - src/**/*.py
