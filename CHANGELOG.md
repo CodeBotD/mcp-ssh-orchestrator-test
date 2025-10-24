@@ -5,7 +5,21 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - 2025-01-27
+## [0.1.2] - 2025-10-24
+
+### Fixed
+
+- Fixed SSH host key handling when `require_known_host` is set to false
+- Added `AcceptPolicy` class to handle unknown host keys without saving them
+- Resolved "Server not found in known_hosts" error when using permissive host key policies
+- Improved SSH connection reliability for environments with dynamic host keys
+
+### Changed
+
+- Enhanced SSH client logic to properly respect `require_known_host: false` setting
+- Updated host key policy handling to support three modes: strict, permissive, and auto-add
+
+## [0.1.1] - 2025-10-22
 
 ### Fixed
 
