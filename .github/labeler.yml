@@ -15,7 +15,7 @@ documentation:
   - CHANGELOG.md
   - CONTRIBUTING.md
   - SECURITY.md
-  - *.md
+  - "*.md"
 
 # Configuration changes
 configuration:
@@ -42,17 +42,17 @@ security:
 # Testing changes
 testing:
   - tests/**/*
-  - test_*.py
-  - *_test.py
+  - "test_*.py"
+  - "*_test.py"
 
 # Assets and branding
 assets:
   - assets/**/*
-  - *.svg
-  - *.png
-  - *.jpg
-  - *.jpeg
-  - *.gif
+  - "*.svg"
+  - "*.png"
+  - "*.jpg"
+  - "*.jpeg"
+  - "*.gif"
 
 # CI/CD and GitHub workflows
 ci:
