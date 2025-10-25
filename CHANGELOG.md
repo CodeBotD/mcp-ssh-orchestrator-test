@@ -5,6 +5,27 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-01-27
+
+### Added
+
+- Comprehensive policy configuration documentation
+  - `docs/POLICY_REFERENCE.md` - Complete technical reference with all configuration options, types, defaults, and examples
+  - `docs/POLICY_EXAMPLES.md` - 10+ practical configuration examples for different environments and use cases
+  - `docs/POLICY_SECURITY.md` - Security best practices, troubleshooting guide, and incident response procedures
+- Policy documentation links in main README.md
+- Cross-references between all policy documentation files
+- Comprehensive tables for all policy configuration sections (limits, network, rules, overrides)
+- Real-world examples for production, development, staging, Proxmox, and network-restricted environments
+- Security checklists and troubleshooting guides
+- Glob pattern matching syntax documentation
+- Rule evaluation order and precedence explanations
+
+### Changed
+
+- Updated README.md to include dedicated "Policy Configuration" section with links to comprehensive documentation
+- Enhanced documentation structure with consistent cross-references between policy docs
+
 ## [0.1.2] - 2025-10-24
 
 ### Fixed

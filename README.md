@@ -88,6 +88,14 @@ mcp-ssh-orchestrator/
 └── secrets/              # Docker secrets (passwords, passphrases)
 ```
 
+### Policy Configuration
+
+The `policy.yml` file controls security policies, command allow/deny rules, and execution limits. For comprehensive documentation:
+
+- **[Policy Reference](docs/POLICY_REFERENCE.md)** - Complete configuration reference with all options and defaults
+- **[Policy Examples](docs/POLICY_EXAMPLES.md)** - Practical examples for different environments and use cases  
+- **[Policy Security](docs/POLICY_SECURITY.md)** - Security best practices and troubleshooting guide
+
 ### servers.yml
 
 Define your SSH hosts:
