@@ -176,8 +176,12 @@ rules:
 
   # Development-specific commands
   - action: "allow"
-    aliases: ["dev-*", "stg-*"]
-    tags: ["development", "staging"]
+    aliases:
+      - "dev-*"
+      - "stg-*"
+    tags:
+      - "development"
+      - "staging"
     commands:
       - "systemctl restart *"
       - "systemctl stop *"
@@ -189,8 +193,12 @@ rules:
 
   # Network diagnostics for dev/staging
   - action: "allow"
-    aliases: ["dev-*", "stg-*"]
-    tags: ["development", "staging"]
+    aliases:
+      - "dev-*"
+      - "stg-*"
+    tags:
+      - "development"
+      - "staging"
     commands:
       - "ping*"
       - "traceroute*"
@@ -423,8 +431,12 @@ rules:
 
   # Network diagnostics (restricted to specific hosts)
   - action: "allow"
-    aliases: ["monitor-*", "net-*"]
-    tags: ["monitoring", "network"]
+    aliases:
+      - "monitor-*"
+      - "net-*"
+    tags:
+      - "monitoring"
+      - "network"
     commands:
       - "ss -tulpn*"
       - "netstat*"

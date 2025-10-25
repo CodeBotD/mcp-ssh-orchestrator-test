@@ -5,6 +5,31 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-01-28
+
+### Added
+- YAML Style Guide in `docs/POLICY_REFERENCE.md` with consistent formatting guidelines
+- Standardized array formatting rules for improved readability
+
+### Changed
+- Enforced consistent YAML array formatting across all configuration files:
+  - Empty arrays: inline format `[]`
+  - Single items: inline format `["item"]`
+  - Multiple items: multi-line format with dash syntax
+- Updated all documentation examples to follow consistent style guide
+- Standardized `aliases` and `tags` arrays in policy rules (multi-line for 2+ items)
+- Updated all `servers.yml` tag arrays to multi-line format for consistency
+- Refactored all YAML configuration files to follow unified style guidelines
+
+### Files Modified
+- `config/policy.yml`
+- `config/servers.yml`
+- `examples/example-policy.yml`
+- `examples/example-servers.yml`
+- `docs/POLICY_EXAMPLES.md`
+- `docs/POLICY_REFERENCE.md`
+- `README.md`
+
 ## [0.1.3] - 2025-01-27
 
 ### Added

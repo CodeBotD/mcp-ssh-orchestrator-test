@@ -106,13 +106,19 @@ hosts:
     host: "10.0.0.11"
     port: 22
     credentials: "prod_admin"
-    tags: ["web", "prod", "linux"]
+    tags:
+      - "web"
+      - "prod"
+      - "linux"
 
   - alias: "db1"
     host: "10.0.0.21"
     port: 22
     credentials: "prod_admin"
-    tags: ["db", "prod", "linux"]
+    tags:
+      - "db"
+      - "prod"
+      - "linux"
 ```
 
 ### credentials.yml
@@ -150,7 +156,8 @@ limits:
 
 # Network controls
 network:
-  allow_cidrs: ["10.0.0.0/8"]
+  allow_cidrs:
+    - "10.0.0.0/8"
   block_ips: []
 
 # Command rules

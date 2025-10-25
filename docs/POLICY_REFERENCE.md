@@ -26,6 +26,43 @@ The policy engine provides multiple layers of security controls:
 4. **Execution Limits** - Timeouts, output size caps, and host key requirements
 5. **Per-host/Tag Overrides** - Granular control for specific hosts or host groups
 
+## YAML Style Guide
+
+For consistency and readability, we follow these YAML array formatting guidelines:
+
+### When to Use Inline Arrays `[]`
+- **Empty arrays**: `allow_ips: []`
+- **Single-item lists**: `aliases: ["*"]`, `tags: ["production"]`
+
+### When to Use Multi-line Dash Syntax
+- **Two or more items** (always use multi-line for readability):
+  ```yaml
+  deny_substrings:
+    - "rm -rf /"
+    - "shutdown -h"
+    - "reboot"
+  ```
+- **Commands in rules** (always multi-line for readability):
+  ```yaml
+  commands:
+    - "systemctl status *"
+    - "docker ps*"
+  ```
+- **Network blocks/lists with comments**:
+  ```yaml
+  block_ips:
+    - "0.0.0.0"           # Block all zeros
+    - "255.255.255.255"   # Block broadcast
+  ```
+
+### General Principles
+- **Empty arrays** → Inline: `tags: []`
+- **Single item** → Inline: `aliases: ["*"]`
+- **Two or more items** → Multi-line for readability
+- **Commands** → Always multi-line
+- **Network blocks/lists** → Multi-line (allows comments)
+- **Consistency** → When in doubt, use multi-line for clarity
+
 ## Configuration Sections
 
 | Section | Purpose | Required |

@@ -91,8 +91,14 @@ rules:
 
   # Network diagnostics on non-production
   - action: "allow"
-    aliases: ["stg-*", "dev-*", "lab-*"]
-    tags: ["staging", "dev", "lab"]
+    aliases:
+      - "stg-*"
+      - "dev-*"
+      - "lab-*"
+    tags:
+      - "staging"
+      - "dev"
+      - "lab"
     commands:
       - "ping*"
       - "traceroute*"

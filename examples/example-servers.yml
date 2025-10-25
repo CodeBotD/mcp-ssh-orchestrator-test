@@ -15,16 +15,24 @@ hosts:
     host: "10.0.0.11"
     port: 22
     credentials: "default"
-    tags: ["web", "prod", "linux"]
+    tags:
+      - "web"
+      - "prod"
+      - "linux"
 
   - alias: "db1"
     host: "10.0.0.21"
     port: 22
     credentials: "staging"
-    tags: ["db", "staging", "linux"]
+    tags:
+      - "db"
+      - "staging"
+      - "linux"
 
   - alias: "app1"
     host: "192.168.1.100"
     port: 2222
     credentials: "default"
-    tags: ["app", "dev"]
+    tags:
+      - "app"
+      - "dev"
