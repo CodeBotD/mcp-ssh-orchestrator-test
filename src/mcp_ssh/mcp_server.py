@@ -6,7 +6,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp_ssh.config import Config
 from mcp_ssh.policy import Policy
 from mcp_ssh.ssh_client import SSHClient
-from mcp_ssh.tools.utilities import TASKS, ASYNC_TASKS, hash_command, log_json
+from mcp_ssh.tools.utilities import ASYNC_TASKS, TASKS, hash_command, log_json
 
 mcp = FastMCP()
 config = Config()
@@ -424,8 +424,8 @@ def ssh_reload_config() -> str:
 @mcp.tool()
 def ssh_run_async(alias: str = "", command: str = "") -> str:
     """Start SSH command asynchronously (SEP-1686 compliant).
-    
-    Returns immediately with task_id for polling. Use ssh_get_task_status 
+
+    Returns immediately with task_id for polling. Use ssh_get_task_status
     and ssh_get_task_result to monitor and retrieve results.
     """
     try:
@@ -439,7 +439,7 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
         command = command.strip()
         if len(command) > 10000:  # Reasonable limit
             return "Error: command too long (max 10000 characters)"
-        
+
         host = config.get_host(alias)
         hostname = host.get("host", "")
         cmd_hash = hash_command(command)
@@ -458,8 +458,6 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
             return f"Denied by network policy: {reason}"
 
         limits = pol.limits_for(alias, tags)
-        max_seconds = int(limits.get("max_seconds", 60))
-        max_output_bytes = int(limits.get("max_output_bytes", 1024 * 1024))
         require_known_host = bool(
             limits.get("require_known_host", pol.require_known_host())
         )
@@ -491,7 +489,7 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
             "hash": cmd_hash,
         }
         return json.dumps(result, indent=2)
-        
+
     except Exception as e:
         log_json({"level": "error", "msg": "async_run_exception", "error": str(e)})
         return f"Async run error: {e}"
@@ -500,19 +498,19 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
 @mcp.tool()
 def ssh_get_task_status(task_id: str = "") -> str:
     """Get current status of an async task (SEP-1686 compliant).
-    
+
     Returns task state, progress, elapsed time, and output summary.
     """
     try:
         if not task_id.strip():
             return "Error: task_id is required"
-        
+
         status = ASYNC_TASKS.get_task_status(task_id)
         if not status:
             return f"Error: Task not found: {task_id}"
-        
+
         return json.dumps(status, indent=2)
-        
+
     except Exception as e:
         return f"Status error: {e}"
 
@@ -520,19 +518,19 @@ def ssh_get_task_status(task_id: str = "") -> str:
 @mcp.tool()
 def ssh_get_task_result(task_id: str = "") -> str:
     """Get final result of completed task (SEP-1686 compliant).
-    
+
     Returns complete output, exit code, and execution metadata.
     """
     try:
         if not task_id.strip():
             return "Error: task_id is required"
-        
+
         result = ASYNC_TASKS.get_task_result(task_id)
         if not result:
             return f"Error: Task not found or expired: {task_id}"
-        
+
         return json.dumps(result, indent=2)
-        
+
     except Exception as e:
         return f"Result error: {e}"
 
@@ -540,22 +538,22 @@ def ssh_get_task_result(task_id: str = "") -> str:
 @mcp.tool()
 def ssh_get_task_output(task_id: str = "", max_lines: int = 50) -> str:
     """Get recent output lines from running or completed task.
-    
+
     Enhanced beyond SEP-1686: enables streaming output visibility.
     """
     try:
         if not task_id.strip():
             return "Error: task_id is required"
-        
+
         if max_lines < 1 or max_lines > 1000:
             return "Error: max_lines must be between 1 and 1000"
-        
+
         output = ASYNC_TASKS.get_task_output(task_id, max_lines)
         if not output:
             return f"Error: Task not found or no output available: {task_id}"
-        
+
         return json.dumps(output, indent=2)
-        
+
     except Exception as e:
         return f"Output error: {e}"
 
@@ -566,13 +564,13 @@ def ssh_cancel_async_task(task_id: str = "") -> str:
     try:
         if not task_id.strip():
             return "Error: task_id is required"
-        
+
         success = ASYNC_TASKS.cancel_task(task_id)
         if success:
             return f"Cancellation signaled for async task: {task_id}"
         else:
             return f"Task not found or not cancellable: {task_id}"
-            
+
     except Exception as e:
         return f"Cancel error: {e}"
 

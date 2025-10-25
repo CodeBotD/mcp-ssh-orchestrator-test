@@ -1,11 +1,7 @@
 """Tests for AsyncTaskManager."""
 
-import json
-import threading
 import time
 from unittest.mock import Mock, patch
-
-import pytest
 
 from mcp_ssh.tools.utilities import AsyncTaskManager
 
@@ -17,6 +13,8 @@ class TestAsyncTaskManager:
         """Set up test fixtures."""
         self.task_manager = AsyncTaskManager()
         self.mock_ssh_client = Mock()
+        # Mock the run_streaming method to avoid actual SSH execution
+        self.mock_ssh_client.run_streaming.return_value = (0, 1000, False, False, 50, 0, "test output", "127.0.0.1")
         self.mock_limits = {
             "max_seconds": 60,
             "max_output_bytes": 1024,
@@ -44,7 +42,7 @@ class TestAsyncTaskManager:
 
     def test_start_async_task(self):
         """Test starting an async task."""
-        with patch.object(self.task_manager, '_execute_task_in_thread') as mock_execute:
+        with patch.object(self.task_manager, '_execute_task_in_thread'):
             task_id = self.task_manager.start_async_task(
                 alias="test1",
                 command="uptime",
@@ -66,24 +64,27 @@ class TestAsyncTaskManager:
 
     def test_get_task_status_pending(self):
         """Test getting status of pending task."""
-        task_id = self.task_manager.start_async_task(
-            alias="test1",
-            command="uptime",
-            ssh_client=self.mock_ssh_client,
-            limits=self.mock_limits,
-            progress_cb=None
-        )
+        with patch.object(self.task_manager, '_execute_task_in_thread'):
+            task_id = self.task_manager.start_async_task(
+                alias="test1",
+                command="uptime",
+                ssh_client=self.mock_ssh_client,
+                limits=self.mock_limits,
+                progress_cb=None
+            )
 
-        status = self.task_manager.get_task_status(task_id)
-        status_data = json.loads(status)
+            status = self.task_manager.get_task_status(task_id)
+            assert status is not None
 
-        assert status_data["task_id"] == task_id
-        assert status_data["status"] == "pending"
-        assert status_data["keepAlive"] == 300
-        assert status_data["pollFrequency"] == 5
-        assert "elapsed_ms" in status_data
-        assert "bytes_read" in status_data
-        assert "output_lines_available" in status_data
+            # Status should be a dictionary, not JSON string
+            assert isinstance(status, dict)
+            assert status["task_id"] == task_id
+            assert status["status"] == "pending"
+            assert status["keepAlive"] == 300
+            assert status["pollFrequency"] == 5
+            assert "elapsed_ms" in status
+            assert "bytes_read" in status
+            assert "output_lines_available" in status
 
     def test_get_task_status_running(self):
         """Test getting status of running task."""
@@ -102,10 +103,9 @@ class TestAsyncTaskManager:
             self.task_manager._tasks[task_id]["bytes_out"] = 100
 
         status = self.task_manager.get_task_status(task_id)
-        status_data = json.loads(status)
-
-        assert status_data["status"] == "running"
-        assert status_data["bytes_read"] == 100
+        assert isinstance(status, dict)
+        assert status["status"] == "running"
+        assert status["bytes_read"] == 100
 
     def test_get_task_status_completed(self):
         """Test getting status of completed task."""
@@ -126,10 +126,9 @@ class TestAsyncTaskManager:
             self.task_manager._tasks[task_id]["bytes_out"] = 50
 
         status = self.task_manager.get_task_status(task_id)
-        status_data = json.loads(status)
-
-        assert status_data["status"] == "completed"
-        assert status_data["bytes_read"] == 50
+        assert isinstance(status, dict)
+        assert status["status"] == "completed"
+        assert status["bytes_read"] == 50
 
     def test_get_task_result_completed(self):
         """Test getting result of completed task."""
@@ -160,29 +159,27 @@ class TestAsyncTaskManager:
             "cancelled": False,
             "timeout": False,
             "target_ip": "10.0.0.1",
-            "created": time.time()
+            "created": time.time(),
+            "expires": time.time() + 300  # 5 minutes from now
         }
 
         result = self.task_manager.get_task_result(task_id)
-        result_data = json.loads(result)
-
-        assert result_data["task_id"] == task_id
-        assert result_data["status"] == "completed"
-        assert result_data["exit_code"] == 0
-        assert result_data["output"] == "up 1 day, 2:30"
-        assert result_data["target_ip"] == "10.0.0.1"
+        assert isinstance(result, dict)
+        assert result["task_id"] == task_id
+        assert result["status"] == "completed"
+        assert result["exit_code"] == 0
+        assert result["output"] == "up 1 day, 2:30"
+        assert result["target_ip"] == "10.0.0.1"
 
     def test_get_task_result_not_found(self):
         """Test getting result of non-existent task."""
         result = self.task_manager.get_task_result("nonexistent:task:id")
-        assert "Error" in result
-        assert "not found" in result.lower()
+        assert result is None
 
     def test_get_task_output_not_found(self):
         """Test getting output of non-existent task."""
         result = self.task_manager.get_task_output("nonexistent:task:id")
-        assert "Error" in result
-        assert "not found" in result.lower()
+        assert result is None
 
     def test_cancel_task(self):
         """Test cancelling a task."""
@@ -199,7 +196,7 @@ class TestAsyncTaskManager:
             self.task_manager._tasks[task_id]["status"] = "running"
 
         result = self.task_manager.cancel_task(task_id)
-        assert "cancelled" in result.lower()
+        assert result is True
 
         # Check that cancel event is set
         with self.task_manager._lock:
@@ -208,8 +205,7 @@ class TestAsyncTaskManager:
     def test_cancel_task_not_found(self):
         """Test cancelling non-existent task."""
         result = self.task_manager.cancel_task("nonexistent:task:id")
-        assert "Error" in result
-        assert "not found" in result.lower()
+        assert result is False
 
     def test_cleanup_expired_tasks(self):
         """Test cleanup of expired tasks."""
@@ -225,7 +221,8 @@ class TestAsyncTaskManager:
         self.task_manager._results[task_id] = {
             "task_id": task_id,
             "status": "completed",
-            "created": time.time() - 400  # 400 seconds ago (expired)
+            "created": time.time() - 400,  # 400 seconds ago (expired)
+            "expires": time.time() - 100  # Expired 100 seconds ago
         }
 
         # Cleanup should remove expired results
@@ -252,29 +249,30 @@ class TestAsyncTaskManager:
 
     def test_concurrent_task_management(self):
         """Test thread safety of task management."""
-        task_ids = []
-        
-        # Start multiple tasks concurrently
-        for i in range(5):
-            task_id = self.task_manager.start_async_task(
-                alias=f"test{i}",
-                command="uptime",
-                ssh_client=self.mock_ssh_client,
-                limits=self.mock_limits,
-                progress_cb=None
-            )
-            task_ids.append(task_id)
+        with patch.object(self.task_manager, '_execute_task_in_thread'):
+            task_ids = []
 
-        # All tasks should be created
-        assert len(self.task_manager._tasks) == 5
-        assert len(self.task_manager._output_buffers) == 5
+            # Start multiple tasks concurrently
+            for i in range(5):
+                task_id = self.task_manager.start_async_task(
+                    alias=f"test{i}",
+                    command="uptime",
+                    ssh_client=self.mock_ssh_client,
+                    limits=self.mock_limits,
+                    progress_cb=None
+                )
+                task_ids.append(task_id)
 
-        # All task IDs should be unique
-        assert len(set(task_ids)) == 5
+            # All tasks should be created
+            assert len(self.task_manager._tasks) == 5
+            assert len(self.task_manager._output_buffers) == 5
 
-        # All tasks should be accessible
-        for task_id in task_ids:
-            status = self.task_manager.get_task_status(task_id)
-            status_data = json.loads(status)
-            assert status_data["task_id"] == task_id
-            assert status_data["status"] == "pending"
+            # All task IDs should be unique
+            assert len(set(task_ids)) == 5
+
+            # All tasks should be accessible
+            for task_id in task_ids:
+                status = self.task_manager.get_task_status(task_id)
+                assert isinstance(status, dict)
+                assert status["task_id"] == task_id
+                assert status["status"] == "pending"

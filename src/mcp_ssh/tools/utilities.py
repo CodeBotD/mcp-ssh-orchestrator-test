@@ -4,7 +4,8 @@ import sys
 import threading
 import time
 from collections import deque
-from typing import Optional, Callable, Dict, Any
+from collections.abc import Callable
+from typing import Any
 
 
 def hash_command(command: str) -> str:
@@ -61,10 +62,10 @@ class AsyncTaskManager:
 
     def __init__(self):
         self._lock = threading.Lock()
-        self._tasks: Dict[str, Dict[str, Any]] = {}  # task_id -> TaskInfo
-        self._results: Dict[str, Dict[str, Any]] = {}  # task_id -> TaskResult (TTL: 5min)
-        self._output_buffers: Dict[str, deque] = {}  # task_id -> deque of output lines
-        self._notification_callback: Optional[Callable] = None
+        self._tasks: dict[str, dict[str, Any]] = {}  # task_id -> TaskInfo
+        self._results: dict[str, dict[str, Any]] = {}  # task_id -> TaskResult (TTL: 5min)
+        self._output_buffers: dict[str, deque] = {}  # task_id -> deque of output lines
+        self._notification_callback: Callable | None = None
         self._cleanup_thread = None
         self._start_cleanup_thread()
 
@@ -87,13 +88,13 @@ class AsyncTaskManager:
         """Set callback for MCP notifications."""
         self._notification_callback = callback
 
-    def start_async_task(self, alias: str, command: str, ssh_client, limits: Dict[str, Any], 
-                        progress_cb: Optional[Callable] = None) -> str:
+    def start_async_task(self, alias: str, command: str, ssh_client, limits: dict[str, Any],
+                        progress_cb: Callable | None = None) -> str:
         """Start task in background thread, return task_id immediately."""
         cmd_hash = hash_command(command)
         timestamp = int(time.time() * 1000000)
         task_id = f"{alias}:{cmd_hash}:{timestamp}"
-        
+
         with self._lock:
             self._tasks[task_id] = {
                 "status": "pending",
@@ -127,7 +128,7 @@ class AsyncTaskManager:
             daemon=True
         )
         thread.start()
-        
+
         with self._lock:
             self._tasks[task_id]["thread"] = thread
 
@@ -147,12 +148,11 @@ class AsyncTaskManager:
                 task_info = self._tasks.get(task_id)
                 if not task_info:
                     return
-                
+
                 # Update status to running
                 task_info["status"] = "running"
                 task_info["started"] = time.time()
-                
-                alias = task_info["alias"]
+
                 command = task_info["command"]
                 ssh_client = task_info["ssh_client"]
                 limits = task_info["limits"]
@@ -163,7 +163,7 @@ class AsyncTaskManager:
             def enhanced_progress_cb(phase: str, bytes_read: int, elapsed_ms: int):
                 if progress_cb:
                     progress_cb(phase, bytes_read, elapsed_ms)
-                
+
                 # Send progress notification every 5 seconds
                 if phase == "running" and elapsed_ms % 5000 < 100:  # ~5 second intervals
                     self._send_notification("progress", task_id, {
@@ -247,7 +247,7 @@ class AsyncTaskManager:
                 "error": str(e)
             })
 
-    def get_task_status(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         """Get current status with SEP-1686 metadata."""
         with self._lock:
             task_info = self._tasks.get(task_id)
@@ -283,7 +283,7 @@ class AsyncTaskManager:
                 "output_lines_available": len(self._output_buffers.get(task_id, deque())),
             }
 
-    def get_task_result(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task_result(self, task_id: str) -> dict[str, Any] | None:
         """Get final result if completed."""
         with self._lock:
             result = self._results.get(task_id)
@@ -300,7 +300,7 @@ class AsyncTaskManager:
                 }
             return None
 
-    def get_task_output(self, task_id: str, max_lines: int = 50) -> Optional[Dict[str, Any]]:
+    def get_task_output(self, task_id: str, max_lines: int = 50) -> dict[str, Any] | None:
         """Get recent output lines."""
         with self._lock:
             output_buffer = self._output_buffers.get(task_id)
@@ -325,7 +325,7 @@ class AsyncTaskManager:
             if task_info and task_info["status"] in ["pending", "running"]:
                 task_info["cancel"].set()
                 task_info["status"] = "cancelled"
-                
+
                 # Send cancellation notification
                 self._send_notification("cancelled", task_id, {
                     "reason": "user_requested"
@@ -337,18 +337,18 @@ class AsyncTaskManager:
         """Remove results older than TTL."""
         current_time = time.time()
         expired_tasks = []
-        
+
         with self._lock:
             for task_id, result in self._results.items():
                 if result["expires"] <= current_time:
                     expired_tasks.append(task_id)
-            
+
             for task_id in expired_tasks:
                 del self._results[task_id]
                 if task_id in self._output_buffers:
                     del self._output_buffers[task_id]
 
-    def _send_notification(self, event_type: str, task_id: str, data: Dict[str, Any]):
+    def _send_notification(self, event_type: str, task_id: str, data: dict[str, Any]):
         """Send MCP notification for task events."""
         if self._notification_callback:
             try:
