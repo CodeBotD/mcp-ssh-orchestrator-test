@@ -38,6 +38,8 @@ docker run -i --rm \
 
 ### Using Docker Compose
 
+**End Users (Production):**
+
 ```bash
 # Clone the repository
 git clone https://github.com/samerfarida/mcp-ssh-orchestrator
@@ -51,10 +53,20 @@ cp examples/example-policy.yml config/policy.yml
 # Edit config files with your hosts and credentials
 # Place SSH keys in keys/ directory
 
-# Run with compose
+# Run with compose (default - pulls published image)
 cd compose
-docker-compose up
+docker compose up
 ```
+
+**Developers (Local Build):**
+
+```bash
+# Run with development compose (builds from source)
+cd compose
+docker compose -f docker-compose.dev.yml up --build
+```
+
+See the [Compose README](compose/README.md) for more details on both options.
 
 ### Local Development
 

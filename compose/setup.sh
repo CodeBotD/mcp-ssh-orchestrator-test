@@ -1,35 +1,93 @@
 #!/bin/bash
 # Setup script for mcp-ssh-orchestrator docker-compose environment
+# Usage: ./setup.sh [dev|enduser]
 
 set -e
 
-echo "🚀 Setting up mcp-ssh-orchestrator docker-compose environment..."
+# Detect mode (dev by default if in repo, enduser if standalone)
+MODE="${1:-auto}"
+
+# Auto-detect mode based on context
+if [ "$MODE" = "auto" ]; then
+    if [ -f "../examples/example-servers.yml" ]; then
+        MODE="dev"
+    else
+        MODE="enduser"
+    fi
+fi
+
+if [ "$MODE" = "dev" ]; then
+    echo "🧪 Setting up mcp-ssh-orchestrator (Development Mode)..."
+    BASE_DIR=".."
+elif [ "$MODE" = "enduser" ]; then
+    echo "🚀 Setting up mcp-ssh-orchestrator (End User Mode)..."
+    # For end users, assume they're running from their config location
+    BASE_DIR="."
+else
+    echo "❌ Invalid mode: $MODE. Use 'dev' or 'enduser'"
+    exit 1
+fi
 
 # Create required directories
 echo "📁 Creating directories..."
-mkdir -p ../config ../keys ../secrets
+mkdir -p "${BASE_DIR}/config" "${BASE_DIR}/keys" "${BASE_DIR}/secrets"
 
-# Copy example configuration files
-echo "📋 Copying example configuration files..."
-if [ -f "../examples/example-servers.yml" ]; then
-    cp ../examples/example-servers.yml ../config/servers.yml
-    echo "  ✓ servers.yml"
+if [ "$MODE" = "dev" ]; then
+    # Copy example configuration files
+    echo "📋 Copying example configuration files..."
+    if [ -f "../examples/example-servers.yml" ]; then
+        cp ../examples/example-servers.yml "${BASE_DIR}/config/servers.yml"
+        echo "  ✓ servers.yml"
+    else
+        echo "  ⚠️  example-servers.yml not found"
+    fi
+    
+    if [ -f "../examples/example-credentials.yml" ]; then
+        cp ../examples/example-credentials.yml "${BASE_DIR}/config/credentials.yml"
+        echo "  ✓ credentials.yml"
+    else
+        echo "  ⚠️  example-credentials.yml not found"
+    fi
+    
+    if [ -f "../examples/example-policy.yml" ]; then
+        cp ../examples/example-policy.yml "${BASE_DIR}/config/policy.yml"
+        echo "  ✓ policy.yml"
+    else
+        echo "  ⚠️  example-policy.yml not found"
+    fi
 else
-    echo "  ⚠️  example-servers.yml not found"
-fi
+    # For end users, just create empty config files with instructions
+    echo "📋 Creating configuration file templates..."
+    cat > "${BASE_DIR}/config/servers.yml" << 'EOF'
+# servers.yml - Add your SSH hosts here
+# See examples at: https://github.com/samerfarida/mcp-ssh-orchestrator/blob/main/examples/example-servers.yml
 
-if [ -f "../examples/example-credentials.yml" ]; then
-    cp ../examples/example-credentials.yml ../config/credentials.yml
-    echo "  ✓ credentials.yml"
-else
-    echo "  ⚠️  example-credentials.yml not found"
-fi
+hosts: []
+EOF
+    
+    cat > "${BASE_DIR}/config/credentials.yml" << 'EOF'
+# credentials.yml - Add your SSH credentials here
+# See examples at: https://github.com/samerfarida/mcp-ssh-orchestrator/blob/main/examples/example-credentials.yml
 
-if [ -f "../examples/example-policy.yml" ]; then
-    cp ../examples/example-policy.yml ../config/policy.yml
-    echo "  ✓ policy.yml"
-else
-    echo "  ⚠️  example-policy.yml not found"
+entries: []
+EOF
+    
+    cat > "${BASE_DIR}/config/policy.yml" << 'EOF'
+# policy.yml - Configure security policies
+# See examples at: https://github.com/samerfarida/mcp-ssh-orchestrator/blob/main/examples/example-policy.yml
+
+limits:
+  max_seconds: 60
+  max_output_bytes: 1048576
+
+network:
+  allow_cidrs: []
+  block_ips: []
+
+rules: []
+EOF
+    
+    echo "  ✓ Configuration templates created"
 fi
 
 # Copy environment file
@@ -45,10 +103,14 @@ echo ""
 echo "✅ Setup complete!"
 echo ""
 echo "Next steps:"
-echo "1. Edit ../config/servers.yml with your server details"
-echo "2. Edit ../config/credentials.yml with your credentials"
-echo "3. Edit ../config/policy.yml with your security policies"
-echo "4. Add SSH keys to ../keys/ directory"
-echo "5. Add any password files to ../secrets/ directory"
-echo "6. Run: docker compose up --build"
+echo "1. Edit ${BASE_DIR}/config/servers.yml with your server details"
+echo "2. Edit ${BASE_DIR}/config/credentials.yml with your credentials"
+echo "3. Edit ${BASE_DIR}/config/policy.yml with your security policies"
+echo "4. Add SSH keys to ${BASE_DIR}/keys/ directory"
+echo "5. Add any password files to ${BASE_DIR}/secrets/ directory"
+if [ "$MODE" = "dev" ]; then
+    echo "6. Run: docker compose -f docker-compose.dev.yml up --build"
+else
+    echo "6. Run: docker compose up"
+fi
 echo ""

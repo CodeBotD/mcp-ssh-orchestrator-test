@@ -1,13 +1,76 @@
 # 🐳 MCP-SSH-ORCHESTRATOR — Compose Environment
 
-This directory provides a **local development and test setup** for the  
+This directory provides Docker Compose configurations for the  
 [`mcp-ssh-orchestrator`](https://github.com/samerfarida/mcp-ssh-orchestrator)  
 MCP (Model Context Protocol) server.  
 
-It allows you to:
-- Run the container **locally** using Docker Compose
-- Mount configs, secrets, and SSH keys
-- Test STDIO connectivity with **Claude Desktop** or **Docker MCP Toolkit**
+## 📋 Choose Your Setup
+
+We provide two Docker Compose files depending on your use case:
+
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| `docker-compose.yml` | **Production/End User** - Pulls published image | For end users who want to use the published image (default) |
+| `docker-compose.dev.yml` | **Development/Testing** - Builds from local source | For developers and contributors working on the codebase |
+
+---
+
+## 🚀 Quick Start (End Users - Recommended)
+
+If you just want to use the tool and don't plan to modify the code:
+
+1. **Create configuration directories:**
+   ```bash
+   mkdir -p ~/mcp-ssh/{config,keys,secrets}
+   ```
+
+2. **Copy example configurations:**
+   ```bash
+   # If you've cloned the repo
+   cd mcp-ssh-orchestrator
+   cp examples/example-servers.yml ~/mcp-ssh/config/servers.yml
+   cp examples/example-credentials.yml ~/mcp-ssh/config/credentials.yml
+   cp examples/example-policy.yml ~/mcp-ssh/config/policy.yml
+   
+   # Edit these files with your actual hosts and credentials
+   ```
+
+3. **Add your SSH keys:**
+   ```bash
+   cp ~/.ssh/id_ed25519 ~/mcp-ssh/keys/
+   chmod 0400 ~/mcp-ssh/keys/id_ed25519
+   ```
+
+4. **Run with compose (default production setup):**
+   ```bash
+   cd mcp-ssh-orchestrator/compose
+   docker compose up
+   ```
+
+The production compose file automatically pulls the `ghcr.io/samerfarida/mcp-ssh-orchestrator:latest` image.
+
+---
+
+## 🧪 Development Setup (For Contributors)
+
+If you're developing or contributing to the project:
+
+1. **Use the setup script (auto-detects dev mode in repo):**
+   ```bash
+   cd compose
+   ./setup.sh dev
+   ```
+   Or just:
+   ```bash
+   ./setup.sh
+   ```
+
+2. **Run with development compose (builds from source):**
+   ```bash
+   docker compose -f docker-compose.dev.yml up --build
+   ```
+
+This will build the container from the local Dockerfile in the repository root.
 
 ---
 
@@ -15,8 +78,9 @@ It allows you to:
 
 | File | Purpose |
 |------|----------|
-| `docker-compose.yml` | Defines the MCP SSH service container |
-| `.env.example` | Example environment variable configuration |
+| `docker-compose.yml` | **Prod**: Pulls published image from ghcr.io (default) |
+| `docker-compose.dev.yml` | **Dev**: Builds container from local source |
+| `.env.example` | Template for environment variables (copy to `.env`) |
 | `setup.sh` | Automated setup script for directories and configs |
 | `README.md` | You're reading it! Usage guide and examples |
 
@@ -26,53 +90,100 @@ It allows you to:
 
 Before running the container:
 1. Ensure **Docker** and **Docker Compose v2+** are installed.
-2. Run the automated setup script:
+2. **For production use**: Clone the repo or copy example configs to your chosen location.
+3. **For development**: Use the automated setup script:
    ```bash
    cd compose
-   ./setup.sh
+   ./setup.sh dev
    ```
    This will:
    - Create required directories (`../config`, `../keys`, `../secrets`)
-   - Copy example configuration files
+   - Copy example configuration files from `../examples/`
    - Create `.env` from `.env.example`
-3. Add your SSH private keys and password files under:
+   
+   **Note**: The script auto-detects if you're in the repo, so just `./setup.sh` works too.
+
+**For end users**: You can also use the setup script:
+   ```bash
+   cd ~/mcp-ssh  # or wherever you want your config
+   wget https://raw.githubusercontent.com/samerfarida/mcp-ssh-orchestrator/main/compose/setup.sh
+   chmod +x setup.sh
+   ./setup.sh enduser
+   ```
+4. Add your SSH private keys and password files under:
    - `../keys` — SSH key files (e.g., id_ed25519)
    - `../secrets` — password or passphrase files
 
-## 🚀 Running the Server
+---
 
-1. Configure Environment (if not done by setup script)
+## 🎛️ Configuration
 
-The setup script already creates `.env` from `.env.example`, but you can modify it:
+### Environment Variables
+
+Create a `.env` file to customize settings (optional):
+
 ```bash
-# Edit the .env file to tune settings
+# Copy example if not exists
+cp .env.example .env
+
+# Edit to tune settings
 nano .env
 ```
 
-You can tune concurrency or timeout:
+Example `.env`:
 ```env
 MCP_SSH_MAX_CONCURRENCY=10
 MCP_SSH_TIMEOUT_SEC=60
 ```
 
-2. Start MCP-SSH Locally
+---
+
+## 🚀 Running the Server
+
+### Option A: Production Mode (End Users)
+
+Pull and run the published image (default):
 
 ```bash
-docker compose up --build
+# From the compose directory
+docker compose up
 ```
-This:
-	•	Builds (if needed) and starts the container
-	•	Mounts ../config, ../keys, and ../secrets as read-only volumes
-	•	Launches the MCP server in STDIO mode (ready for Claude / MCP clients)
 
-You’ll see logs like:
+This:
+- Pulls the `ghcr.io/samerfarida/mcp-ssh-orchestrator:latest` image
+- Mounts `../config`, `../keys`, and `../secrets` as read-only volumes
+- Launches the MCP server in STDIO mode
+
+### Option B: Development Mode (Contributors)
+
+Build from local source:
+
+```bash
+# From the compose directory
+docker compose -f docker-compose.dev.yml up --build
+```
+
+This:
+- Builds the container from the local Dockerfile
+- Mounts `../config`, `../keys`, and `../secrets` as read-only volumes
+- Launches the MCP server in STDIO mode
+
+**Note**: The `--build` flag ensures changes to the source code are included.
+
+### Verify It's Running
+
+You should see startup logs like:
 ```json
 {"evt": "server_start", "tool": "mcp-ssh-orchestrator", "mode": "stdio"}
 ```
 
-3. Test from Claude Desktop
+---
 
-Add this entry to your Claude Desktop config.json or claude_desktop_config.json:
+## Testing from Claude Desktop
+
+**For Production (using published image - default):**
+
+Add this to your Claude Desktop config.json:
 ```json
 {
   "mcpServers": {
@@ -85,32 +196,76 @@ Add this entry to your Claude Desktop config.json or claude_desktop_config.json:
         "run",
         "--rm",
         "mcp-ssh"
-      ],
-      "env": {
-        "MCP_SSH_CONFIG_DIR": "/app/config",
-        "PYTHONUNBUFFERED": "1",
-        "MCP_SSH_MAX_CONCURRENCY": "5",
-        "MCP_SSH_TIMEOUT_SEC": "45"
-      }
+      ]
     }
   }
 }
 ```
->Replace /ABS/PATH/mcp-ssh-orchestrator/ with your actual directory path.
 
-🧠 Useful Commands
-Action
-Command
-Check container logs
-docker compose logs -f
-Rebuild image
-docker compose build --no-cache
-Stop everything
-docker compose down -v
-Clean old images
-docker system prune -f
+**For Development (using local build):**
 
-🏗️ Developer Notes
+```json
+{
+  "mcpServers": {
+    "mcp-ssh-orchestrator": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "-f",
+        "/ABS/PATH/mcp-ssh-orchestrator/compose/docker-compose.dev.yml",
+        "run",
+        "--rm",
+        "mcp-ssh"
+      ]
+    }
+  }
+}
+```
+
+> **Important**: Replace `/ABS/PATH/mcp-ssh-orchestrator/` with your actual directory path.
+
+**Alternative**: You can also use the direct Docker run command (simpler, no compose needed):
+```json
+{
+  "mcpServers": {
+    "ssh-orchestrator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v", "/Users/YOUR_USERNAME/mcp-ssh/config:/app/config:ro",
+        "-v", "/Users/YOUR_USERNAME/mcp-ssh/keys:/app/keys:ro",
+        "-v", "/Users/YOUR_USERNAME/mcp-ssh/secrets:/app/secrets:ro",
+        "ghcr.io/samerfarida/mcp-ssh-orchestrator:latest"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## 🧠 Useful Commands
+
+### Production Mode (Default)
+| Action | Command |
+|--------|---------|
+| Check logs | `docker compose logs -f` |
+| Pull latest image | `docker compose pull` |
+| Stop everything | `docker compose down -v` |
+
+### Development Mode
+| Action | Command |
+|--------|---------|
+| Check logs | `docker compose -f docker-compose.dev.yml logs -f` |
+| Rebuild image | `docker compose -f docker-compose.dev.yml build --no-cache` |
+| Stop everything | `docker compose -f docker-compose.dev.yml down -v` |
+| Clean old images | `docker system prune -f` |
+
+---
+
+## 🏗️ Developer Notes
 •	The server uses STDIO transport only.
 •	Default config path: /app/config
 •	Default entrypoint: python -m mcp_ssh.mcp_server stdio

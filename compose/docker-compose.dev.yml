@@ -1,27 +1,28 @@
 # ─────────────────────────────────────────────────────────────
-# 🚀 mcp-ssh-orchestrator (Production Ready)
-# Purpose: For end users pulling the published image from ghcr.io
-# Usage: docker compose up
-# Note: For development, use docker-compose.dev.yml instead
+# 🧩 mcp-ssh-orchestrator (STDIO MCP Server)
+# Purpose: Local test or integration with Claude / Docker MCP
 # ─────────────────────────────────────────────────────────────
 
 services:
   mcp-ssh:
     container_name: mcp-ssh-orchestrator
-    image: ghcr.io/samerfarida/mcp-ssh-orchestrator:latest
+    build:
+      context: ..
+      dockerfile: Dockerfile
     restart: "no"
     stdin_open: true
     tty: true
+    user: "1000:1000"               # Run as non-root user
     environment:
       MCP_SSH_CONFIG_DIR: /app/config
       MCP_SSH_MAX_CONCURRENCY: ${MCP_SSH_MAX_CONCURRENCY:-5}
       MCP_SSH_TIMEOUT_SEC: ${MCP_SSH_TIMEOUT_SEC:-45}
       PYTHONUNBUFFERED: "1"
     volumes:
-      # Mount your local config directory (create it first!)
       - ../config:/app/config:ro     # Main YAML configs
       - ../keys:/app/keys:ro         # Optional private keys
       - ../secrets:/app/secrets:ro   # Docker Desktop secrets or passwords
+    entrypoint: ["python", "-m", "mcp_ssh.mcp_server", "stdio"]
     working_dir: /app
     networks:
       - mcpnet

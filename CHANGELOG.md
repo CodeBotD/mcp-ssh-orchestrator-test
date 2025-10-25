@@ -8,10 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2025-01-28
 
 ### Added
+- Production-ready Docker Compose configuration (`docker-compose.yml`) that pulls published image from ghcr.io
+- Development Docker Compose configuration (`docker-compose.dev.yml`) for local builds
+- Smart setup script with auto-detection for dev vs end-user modes
+- Enhanced compose documentation with clear production vs development workflows
 - YAML Style Guide in `docs/POLICY_REFERENCE.md` with consistent formatting guidelines
 - Standardized array formatting rules for improved readability
 
 ### Changed
+- Renamed docker-compose files to follow convention: `docker-compose.yml` for production (default), `docker-compose.dev.yml` for development
+- Updated `compose/setup.sh` to support both dev and end-user workflows with auto-detection
+- Refactored compose README to clearly distinguish production and development setup paths
+- Updated main README with separate instructions for end users vs developers
 - Enforced consistent YAML array formatting across all configuration files:
   - Empty arrays: inline format `[]`
   - Single items: inline format `["item"]`
@@ -21,14 +29,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated all `servers.yml` tag arrays to multi-line format for consistency
 - Refactored all YAML configuration files to follow unified style guidelines
 
+### Removed
+- Old `docker-compose.prod.yml` file (consolidated into default `docker-compose.yml`)
+
 ### Files Modified
+- `compose/docker-compose.yml` (now default production)
+- `compose/docker-compose.dev.yml` (new development file)
+- `compose/setup.sh` (enhanced with dev/enduser modes)
+- `compose/README.md` (completely restructured)
+- `README.md` (updated Docker Compose instructions)
 - `config/policy.yml`
 - `config/servers.yml`
 - `examples/example-policy.yml`
 - `examples/example-servers.yml`
 - `docs/POLICY_EXAMPLES.md`
 - `docs/POLICY_REFERENCE.md`
-- `README.md`
 
 ## [0.1.3] - 2025-01-27
 
