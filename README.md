@@ -17,6 +17,7 @@
 - **Credential Management**: Support for SSH keys and passwords via Docker secrets or environment variables
 - **Fleet Management**: Tag-based host grouping for bulk operations
 - **Real-Time Streaming**: Live command output with progress tracking
+- **Async Task Support**: SEP-1686 compliant asynchronous execution with real-time progress monitoring
 - **Cancellation Support**: Cancel long-running commands mid-execution
 - **Audit Logging**: JSON audit trail to stderr for all operations
 - **Docker-Ready**: Runs in containers with non-root user and health checks
@@ -311,6 +312,127 @@ Reload configuration files without restarting.
   "arguments": {}
 }
 ```
+
+## Async Task Support (SEP-1686)
+
+For long-running operations, use the async task tools that provide non-blocking execution with real-time progress monitoring:
+
+### ssh_run_async
+
+Start SSH command asynchronously (SEP-1686 compliant).
+
+```json
+{
+  "name": "ssh_run_async",
+  "arguments": {
+    "alias": "web1",
+    "command": "apt update && apt upgrade -y"
+  }
+}
+```
+
+Returns immediately with task metadata:
+```json
+{
+  "task_id": "web1:a1b2c3d4:1234567890",
+  "status": "pending",
+  "keepAlive": 300,
+  "pollFrequency": 5,
+  "alias": "web1",
+  "command": "apt update && apt upgrade -y",
+  "hash": "a1b2c3d4"
+}
+```
+
+### ssh_get_task_status
+
+Get current status of an async task.
+
+```json
+{
+  "name": "ssh_get_task_status",
+  "arguments": {
+    "task_id": "web1:a1b2c3d4:1234567890"
+  }
+}
+```
+
+Returns:
+```json
+{
+  "task_id": "web1:a1b2c3d4:1234567890",
+  "status": "running",
+  "keepAlive": 300,
+  "pollFrequency": 5,
+  "progress_percent": 45,
+  "elapsed_ms": 12000,
+  "bytes_read": 2048,
+  "output_lines_available": 12
+}
+```
+
+### ssh_get_task_result
+
+Get final result of completed task.
+
+```json
+{
+  "name": "ssh_get_task_result",
+  "arguments": {
+    "task_id": "web1:a1b2c3d4:1234567890"
+  }
+}
+```
+
+Returns:
+```json
+{
+  "task_id": "web1:a1b2c3d4:1234567890",
+  "status": "completed",
+  "exit_code": 0,
+  "duration_ms": 45000,
+  "output": "Reading package lists... Done\nBuilding dependency tree... Done",
+  "cancelled": false,
+  "timeout": false,
+  "target_ip": "10.0.0.11"
+}
+```
+
+### ssh_get_task_output
+
+Get recent output lines from running or completed task.
+
+```json
+{
+  "name": "ssh_get_task_output",
+  "arguments": {
+    "task_id": "web1:a1b2c3d4:1234567890",
+    "max_lines": 50
+  }
+}
+```
+
+### ssh_cancel_async_task
+
+Cancel a running async task.
+
+```json
+{
+  "name": "ssh_cancel_async_task",
+  "arguments": {
+    "task_id": "web1:a1b2c3d4:1234567890"
+  }
+}
+```
+
+### Async Task Benefits
+
+- **Non-blocking execution**: Start commands and continue with other tasks
+- **Real-time progress**: Monitor progress without repeated SSH connections
+- **Efficient resource usage**: Single background connection per task
+- **SEP-1686 compliance**: Standardized task lifecycle management
+- **Configurable TTL**: Task results kept for 5 minutes (configurable per host/tag)
+- **MCP notifications**: Server-initiated updates for task state changes
 
 ## Docker Desktop Integration
 

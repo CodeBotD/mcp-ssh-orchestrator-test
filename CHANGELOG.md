@@ -5,9 +5,30 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-01-28
+## [0.2.0] - 2025-01-28
 
 ### Added
+- **Async Task Support (SEP-1686)**: Complete implementation of asynchronous task execution with real-time progress monitoring
+  - `ssh_run_async`: Start SSH commands asynchronously with immediate task ID return
+  - `ssh_get_task_status`: Poll task status with progress percentage and elapsed time
+  - `ssh_get_task_result`: Retrieve final results with complete output and metadata
+  - `ssh_get_task_output`: Stream recent output lines from running tasks
+  - `ssh_cancel_async_task`: Cancel running async tasks mid-execution
+- **AsyncTaskManager**: Thread-safe task management with background execution
+  - Task lifecycle states: pending → running → completed/failed/cancelled/timeout
+  - Output buffering with line-by-line streaming
+  - Result storage with configurable TTL (default 5 minutes)
+  - MCP notification support for task events
+- **Policy Configuration Enhancements**:
+  - `task_result_ttl`: Configurable task result retention (default 300 seconds)
+  - `task_progress_interval`: Progress update frequency (default 5 seconds)
+  - Per-host and per-tag overrides for async task settings
+- **MCP Notifications**: Server-initiated notifications for task state changes
+  - `tasks/created`: Task started
+  - `tasks/progress`: Periodic progress updates
+  - `tasks/completed`: Task finished successfully
+  - `tasks/failed`: Task finished with error
+  - `tasks/cancelled`: Task was cancelled
 - Production-ready Docker Compose configuration (`docker-compose.yml`) that pulls published image from ghcr.io
 - Development Docker Compose configuration (`docker-compose.dev.yml`) for local builds
 - Smart setup script with auto-detection for dev vs end-user modes

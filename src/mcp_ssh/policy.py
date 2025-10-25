@@ -29,6 +29,8 @@ class Policy:
             "max_output_bytes": 1024 * 1024,
             "host_key_auto_add": False,
             "require_known_host": True,  # new: fail if no known_hosts entry when strict
+            "task_result_ttl": 300,  # 5 minutes default (SEP-1686 keepAlive)
+            "task_progress_interval": 5,  # 5 seconds default
             # Expanded egress hardening defaults (can be overridden in policy.yml)
             "deny_substrings": [
                 "rm -rf /",

@@ -18,6 +18,8 @@ limits:
   max_output_bytes: 1048576
   host_key_auto_add: false
   require_known_host: true
+  task_result_ttl: 300  # 5 minutes (SEP-1686 keepAlive)
+  task_progress_interval: 5  # seconds
   
   # Hard-blocked command substrings (checked before rules)
   deny_substrings:
@@ -150,3 +152,4 @@ overrides:
     # Long-running maintenance
     longrun:
       max_seconds: 180
+      task_result_ttl: 1800  # 30 minutes for long-running workflows

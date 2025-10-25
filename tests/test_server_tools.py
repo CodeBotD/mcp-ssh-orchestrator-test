@@ -142,3 +142,96 @@ def test_default_parameters():
     # Per instructions: all params should default to empty strings
     assert mcp_server.ssh_describe_host() == "Error: Host alias not found: "
     assert mcp_server.ssh_plan() != ""  # Should return an error but not crash
+
+
+def test_ssh_run_async_invalid_alias():
+    """Test ssh_run_async with invalid alias."""
+    result = mcp_server.ssh_run_async(alias="nonexistent", command="uptime")
+    
+    assert "Error" in result
+    assert "not found" in result.lower()
+
+
+def test_ssh_run_async_no_alias():
+    """Test ssh_run_async without alias."""
+    result = mcp_server.ssh_run_async(alias="", command="uptime")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+def test_ssh_run_async_no_command():
+    """Test ssh_run_async without command."""
+    result = mcp_server.ssh_run_async(alias="test1", command="")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+def test_ssh_get_task_status_invalid_task():
+    """Test ssh_get_task_status with invalid task ID."""
+    result = mcp_server.ssh_get_task_status(task_id="invalid:task:id")
+    
+    assert "Error" in result
+    assert "not found" in result.lower()
+
+
+def test_ssh_get_task_status_no_task_id():
+    """Test ssh_get_task_status without task_id."""
+    result = mcp_server.ssh_get_task_status(task_id="")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+def test_ssh_get_task_result_invalid_task():
+    """Test ssh_get_task_result with invalid task ID."""
+    result = mcp_server.ssh_get_task_result(task_id="invalid:task:id")
+    
+    assert "Error" in result
+    assert "not found" in result.lower()
+
+
+def test_ssh_get_task_result_no_task_id():
+    """Test ssh_get_task_result without task_id."""
+    result = mcp_server.ssh_get_task_result(task_id="")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+def test_ssh_get_task_output_invalid_task():
+    """Test ssh_get_task_output with invalid task ID."""
+    result = mcp_server.ssh_get_task_output(task_id="invalid:task:id")
+    
+    assert "Error" in result
+    assert "not found" in result.lower()
+
+
+def test_ssh_get_task_output_no_task_id():
+    """Test ssh_get_task_output without task_id."""
+    result = mcp_server.ssh_get_task_output(task_id="")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+def test_ssh_cancel_async_task_invalid_task():
+    """Test ssh_cancel_async_task with invalid task ID."""
+    result = mcp_server.ssh_cancel_async_task(task_id="invalid:task:id")
+    
+    assert "Error" in result
+    assert "not found" in result.lower()
+
+
+def test_ssh_cancel_async_task_no_task_id():
+    """Test ssh_cancel_async_task without task_id."""
+    result = mcp_server.ssh_cancel_async_task(task_id="")
+    
+    assert "Error" in result
+    assert "required" in result.lower()
+
+
+# Note: Testing actual async task execution requires mocking SSH connections,
+# which is complex and better suited for integration tests with a real SSH server.
+# The core async task management logic is tested through the AsyncTaskManager tests.
