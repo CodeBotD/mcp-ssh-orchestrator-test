@@ -1,10 +1,10 @@
 # 7. Tools Reference
 
-**Purpose:** Complete documentation of all MCP tools provided by mcp-ssh-orchestrator, including parameters, return values, and usage examples.
+**Purpose:** Complete documentation of all MCP tools provided by MCP SSH Orchestrator, including parameters, return values, and usage examples.
 
 ## Overview
 
-mcp-ssh-orchestrator provides **8 MCP tools** that enable secure SSH command execution, host management, and policy testing. All tools follow the MCP specification and return structured JSON responses.
+MCP SSH Orchestrator provides **13 MCP tools** that enable secure SSH command execution, host management, and policy testing. All tools follow the MCP specification and return structured JSON responses.
 
 ## Tool Categories
 
@@ -13,10 +13,17 @@ mcp-ssh-orchestrator provides **8 MCP tools** that enable secure SSH command exe
 - `ssh_list_hosts` - List configured hosts
 - `ssh_describe_host` - Get host details
 
-### Execution Tools
-- `ssh_run` - Execute command on single host
-- `ssh_run_on_tag` - Execute command on multiple hosts
+### Synchronous Execution Tools
+- `ssh_run` - Execute command on single host (blocks until complete)
+- `ssh_run_on_tag` - Execute command on multiple hosts (blocks until all complete)
 - `ssh_cancel` - Cancel running command
+
+### Asynchronous Execution Tools
+- `ssh_run_async` - Start command execution asynchronously (returns immediately)
+- `ssh_get_task_status` - Get current status of async task
+- `ssh_get_task_result` - Get final result of completed task
+- `ssh_get_task_output` - Stream recent output from running task
+- `ssh_cancel_async_task` - Cancel async task
 
 ### Management Tools
 - `ssh_plan` - Dry-run command (policy testing)
@@ -436,6 +443,295 @@ ssh_cancel --task_id "web1:a1b2c3d4:1234567890"
 ssh_reload_config
 ```
 
+---
+
+### ssh_run_async
+
+**Purpose:** Start SSH command execution asynchronously. Returns immediately with a task ID for polling results.
+
+**Parameters:**
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `alias` | string | Yes | Target host alias | `"web1"` |
+| `command` | string | Yes | Command to execute | `"long-running-script.sh"` |
+
+**Request:**
+```json
+{
+  "name": "ssh_run_async",
+  "arguments": {
+    "alias": "web1",
+    "command": "long-running-script.sh"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "task_id": "async:web1:abc123def456",
+  "status": "pending",
+  "keepAlive": 300,
+  "pollFrequency": 5,
+  "alias": "web1",
+  "command": "long-running-script.sh",
+  "hash": "abc123def456"
+}
+```
+
+**Response Fields:**
+| Field | Type | Description |
+|-------|------|-------------|
+| `task_id` | string | Unique async task identifier |
+| `status` | string | Initial status (always "pending") |
+| `keepAlive` | integer | Result retention time in seconds |
+| `pollFrequency` | integer | Recommended polling interval in seconds |
+| `alias` | string | Target host alias |
+| `command` | string | Command being executed |
+| `hash` | string | SHA256 hash of the command |
+
+**Use Cases:**
+- Long-running commands (minutes to hours)
+- Background execution
+- Non-blocking operations
+- Progress monitoring
+
+**Example:**
+```bash
+# Start long-running backup
+ssh_run_async --alias "backup-server" --command "tar -czf /backup/full.tar.gz /data"
+
+# Start deployment script
+ssh_run_async --alias "prod-web" --command "./deploy.sh"
+```
+
+---
+
+### ssh_get_task_status
+
+**Purpose:** Get current status and progress of an async task without waiting for completion.
+
+**Parameters:**
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `task_id` | string | Yes | Async task ID | `"async:web1:abc123"` |
+
+**Request:**
+```json
+{
+  "name": "ssh_get_task_status",
+  "arguments": {
+    "task_id": "async:web1:abc123def456"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "task_id": "async:web1:abc123def456",
+  "status": "running",
+  "progress": {
+    "percentage": 45,
+    "elapsed_ms": 45000,
+    "bytes_read": 2048000
+  },
+  "alias": "web1",
+  "command": "long-running-script.sh"
+}
+```
+
+**Status Values:**
+- `pending` - Task not yet started
+- `running` - Task in progress
+- `completed` - Task finished successfully
+- `failed` - Task failed with error
+- `cancelled` - Task was cancelled
+- `timeout` - Task exceeded time limit
+- `not_found` - Task ID doesn't exist
+
+**Use Cases:**
+- Monitor long-running operations
+- Check task progress percentage
+- Verify task is still running
+- Track execution time
+
+**Example:**
+```bash
+# Check status
+ssh_get_task_status --task_id "async:web1:abc123def456"
+
+# Monitor every 5 seconds
+watch -n 5 ssh_get_task_status --task_id "async:web1:abc123def456"
+```
+
+---
+
+### ssh_get_task_result
+
+**Purpose:** Get final result of a completed async task (success or failure).
+
+**Parameters:**
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `task_id` | string | Yes | Async task ID | `"async:web1:abc123"` |
+
+**Request:**
+```json
+{
+  "name": "ssh_get_task_result",
+  "arguments": {
+    "task_id": "async:web1:abc123def456"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "task_id": "async:web1:abc123def456",
+  "status": "completed",
+  "result": {
+    "exit_code": 0,
+    "duration_ms": 125000,
+    "bytes_out": 4096000,
+    "bytes_err": 0,
+    "output": "Backup completed successfully...",
+    "error": ""
+  },
+  "alias": "web1",
+  "command": "long-running-script.sh"
+}
+```
+
+**Result Fields:**
+| Field | Type | Description |
+|-------|------|-------------|
+| `exit_code` | integer | Command exit status (0 = success) |
+| `duration_ms` | integer | Total execution time |
+| `bytes_out` | integer | Bytes of stdout captured |
+| `bytes_err` | integer | Bytes of stderr captured |
+| `output` | string | Complete stdout output |
+| `error` | string | Complete stderr output |
+
+**Use Cases:**
+- Retrieve final output of completed tasks
+- Check exit codes
+- Analyze execution results
+- Handle task outcomes
+
+**Example:**
+```bash
+# Get final result
+ssh_get_task_result --task_id "async:web1:abc123def456"
+
+# Check if successful
+if ssh_get_task_result --task_id "async:web1:abc123def456" | grep '"exit_code": 0'; then
+  echo "Task succeeded"
+fi
+```
+
+---
+
+### ssh_get_task_output
+
+**Purpose:** Stream recent output lines from a running or completed task.
+
+**Parameters:**
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `task_id` | string | Yes | Async task ID | `"async:web1:abc123"` |
+| `max_lines` | integer | No | Maximum lines to return (default: 50) | `100` |
+
+**Request:**
+```json
+{
+  "name": "ssh_get_task_output",
+  "arguments": {
+    "task_id": "async:web1:abc123def456",
+    "max_lines": 50
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "task_id": "async:web1:abc123def456",
+  "status": "running",
+  "output_lines": [
+    "Starting backup...",
+    "Processing directory /data/subdir1...",
+    "Processing directory /data/subdir2...",
+    "Current progress: 45%"
+  ],
+  "total_lines_available": 100
+}
+```
+
+**Use Cases:**
+- Stream output from long-running tasks
+- Monitor progress in real-time
+- Debug running commands
+- Check recent activity
+
+**Example:**
+```bash
+# Get last 50 lines of output
+ssh_get_task_output --task_id "async:web1:abc123def456"
+
+# Get last 100 lines
+ssh_get_task_output --task_id "async:web1:abc123def456" --max_lines 100
+
+# Stream in real-time
+while true; do
+  ssh_get_task_output --task_id "async:web1:abc123def456"
+  sleep 5
+done
+```
+
+---
+
+### ssh_cancel_async_task
+
+**Purpose:** Cancel a running async task.
+
+**Parameters:**
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `task_id` | string | Yes | Async task ID to cancel | `"async:web1:abc123"` |
+
+**Request:**
+```json
+{
+  "name": "ssh_cancel_async_task",
+  "arguments": {
+    "task_id": "async:web1:abc123def456"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "task_id": "async:web1:abc123def456",
+  "cancelled": true,
+  "message": "Cancellation signaled for async task"
+}
+```
+
+**Use Cases:**
+- Stop long-running commands
+- Abort stuck processes
+- Emergency termination
+- Resource management
+
+**Example:**
+```bash
+# Cancel async task
+ssh_cancel_async_task --task_id "async:web1:abc123def456"
+```
+
 ## Tool Usage Patterns
 
 ### Health Monitoring
@@ -497,7 +793,7 @@ ssh_run_on_tag --tag "monitoring" --command "systemctl status prometheus"
 ### Command Management
 
 ```bash
-# Start long-running command
+# Start long-running command (synchronous)
 ssh_run --alias "web1" --command "tail -f /var/log/nginx/access.log"
 
 # Cancel if needed
@@ -505,6 +801,46 @@ ssh_cancel --task_id "web1:a1b2c3d4:1234567890"
 
 # Reload configuration
 ssh_reload_config
+```
+
+### Async Task Management
+
+```bash
+# Start async backup
+TASK_ID=$(ssh_run_async --alias "backup-server" --command "tar -czf /backup/full.tar.gz /data")
+
+# Monitor progress
+ssh_get_task_status --task_id "$TASK_ID"
+
+# Stream output in real-time
+ssh_get_task_output --task_id "$TASK_ID" --max_lines 100
+
+# Get final result when complete
+ssh_get_task_result --task_id "$TASK_ID"
+
+# Cancel if needed
+ssh_cancel_async_task --task_id "$TASK_ID"
+```
+
+### Long-Running Operations
+
+```bash
+# Start deployment asynchronously
+TASK_ID=$(ssh_run_async --alias "prod-web" --command "./deploy.sh")
+
+# Poll until complete
+while true; do
+  STATUS=$(ssh_get_task_status --task_id "$TASK_ID" | jq -r '.status')
+  if [ "$STATUS" == "completed" ]; then
+    ssh_get_task_result --task_id "$TASK_ID"
+    break
+  elif [ "$STATUS" == "failed" ]; then
+    echo "Task failed"
+    ssh_get_task_result --task_id "$TASK_ID"
+    break
+  fi
+  sleep 5
+done
 ```
 
 ## Error Handling
@@ -569,9 +905,9 @@ ssh_reload_config
 ### Policy Enforcement
 
 All tools respect policy configuration:
-- **ssh_run** and **ssh_run_on_tag** check policy before execution
+- **ssh_run**, **ssh_run_on_tag**, and **ssh_run_async** check policy before execution
 - **ssh_plan** shows policy decision without executing
-- **ssh_cancel** respects cancellation policies
+- **ssh_cancel** and **ssh_cancel_async_task** respect cancellation policies
 - **ssh_reload_config** validates new configuration
 
 ### Audit Logging

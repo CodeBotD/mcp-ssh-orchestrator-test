@@ -45,11 +45,21 @@ docker run -i --rm \
 
 ## 🛠️ MCP Tools
 
-| Tool | Purpose | Example |
-|------|---------|---------|
-| `ssh_ping` | Health check | `{"name": "ssh_ping"}` |
-| `ssh_run` | Execute command | `{"name": "ssh_run", "arguments": {"alias": "web1", "command": "uptime"}}` |
-| `ssh_run_on_tag` | Bulk operations | `{"name": "ssh_run_on_tag", "arguments": {"tag": "prod", "command": "uptime"}}` |
+| Tool | Purpose | Execution Type |
+|------|---------|----------------|
+| `ssh_ping` | Health check | N/A |
+| `ssh_list_hosts` | List all hosts | N/A |
+| `ssh_describe_host` | Get host details | N/A |
+| `ssh_plan` | Policy dry-run | N/A |
+| `ssh_run` | Execute command | Synchronous |
+| `ssh_run_on_tag` | Execute on tagged hosts | Synchronous |
+| `ssh_run_async` | Start async task | Asynchronous |
+| `ssh_get_task_status` | Check task progress | Async monitoring |
+| `ssh_get_task_result` | Get task result | Async result |
+| `ssh_get_task_output` | Stream task output | Async monitoring |
+| `ssh_cancel` | Cancel sync task | Task control |
+| `ssh_cancel_async_task` | Cancel async task | Async control |
+| `ssh_reload_config` | Reload configuration | Management |
 
 [See complete Tools Reference](https://github.com/samerfarida/mcp-ssh-orchestrator/wiki/07-Tools-Reference)
 

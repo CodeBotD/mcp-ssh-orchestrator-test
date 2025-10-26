@@ -141,16 +141,21 @@ This wiki is organized into 16 comprehensive sections:
 
 ## 🔧 MCP Tools Quick Reference
 
-| Tool | Purpose | Example |
-|------|---------|---------|
-| `ssh_ping` | Health check | `{"name": "ssh_ping"}` |
-| `ssh_list_hosts` | List configured hosts | `{"name": "ssh_list_hosts"}` |
-| `ssh_describe_host` | Get host details | `{"name": "ssh_describe_host", "arguments": {"alias": "web1"}}` |
-| `ssh_plan` | Dry-run command | `{"name": "ssh_plan", "arguments": {"alias": "web1", "command": "uptime"}}` |
-| `ssh_run` | Execute command | `{"name": "ssh_run", "arguments": {"alias": "web1", "command": "uptime"}}` |
-| `ssh_run_on_tag` | Bulk operations | `{"name": "ssh_run_on_tag", "arguments": {"tag": "prod", "command": "uptime"}}` |
-| `ssh_cancel` | Cancel running command | `{"name": "ssh_cancel", "arguments": {"task_id": "web1:a1b2c3d4:1234567890"}}` |
-| `ssh_reload_config` | Reload configuration | `{"name": "ssh_reload_config"}` |
+| Tool | Purpose | Type |
+|------|---------|------|
+| `ssh_ping` | Health check | Info |
+| `ssh_list_hosts` | List all hosts | Info |
+| `ssh_describe_host` | Get host details | Info |
+| `ssh_plan` | Policy dry-run | Test |
+| `ssh_run` | Execute command | Sync |
+| `ssh_run_on_tag` | Execute on tagged hosts | Sync |
+| `ssh_run_async` | Start async task | Async |
+| `ssh_get_task_status` | Check task progress | Async |
+| `ssh_get_task_result` | Get final result | Async |
+| `ssh_get_task_output` | Stream output | Async |
+| `ssh_cancel` | Cancel task | Control |
+| `ssh_cancel_async_task` | Cancel async task | Control |
+| `ssh_reload_config` | Reload config | Management |
 
 [See complete Tools Reference](07-Tools-Reference) for detailed documentation.
 
