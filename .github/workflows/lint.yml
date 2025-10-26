@@ -34,7 +34,6 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install --require-hashes -r requirements-dev.txt
           pip install -e ".[dev]"
       
       - name: Run ruff check
@@ -55,7 +54,6 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install --require-hashes -r requirements-dev.txt
           pip install -e ".[dev]"
       
       - name: Run black
@@ -76,7 +74,6 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install --require-hashes -r requirements-dev.txt
           pip install -e ".[dev]"
       
       - name: Run mypy
