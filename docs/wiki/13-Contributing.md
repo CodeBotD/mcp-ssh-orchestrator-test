@@ -588,6 +588,6 @@ version = "0.2.0"
 ## Next Steps
 
 - **[FAQ](15-FAQ)** - Common development questions
-- **[Roadmap](14-Roadmap)** - Upcoming features and improvements
+- **[CHANGELOG](../CHANGELOG.md)** - Version history and releases
 - **[Security Model](05-Security-Model)** - Security considerations for contributors
 - **[Troubleshooting](12-Troubleshooting)** - Development environment issues

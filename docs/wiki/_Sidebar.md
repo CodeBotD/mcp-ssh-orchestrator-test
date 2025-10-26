@@ -15,6 +15,5 @@
 * [11. Observability & Audit](11-Observability-Audit)
 * [12. Troubleshooting](12-Troubleshooting)
 * [13. Contributing](13-Contributing)
-* [14. Roadmap](14-Roadmap)
 * [15. FAQ](15-FAQ)
 * [16. Glossary](16-Glossary)

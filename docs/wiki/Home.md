@@ -135,7 +135,7 @@ This wiki is organized into 16 comprehensive sections:
 - **[Contributing](13-Contributing)** - Development workflow and guidelines
 
 ### **Project Information**
-- **[Roadmap](14-Roadmap)** - Future features and milestones
+- **[CHANGELOG](../CHANGELOG.md)** - Version history and releases
 - **[FAQ](15-FAQ)** - Frequently asked questions
 - **[Glossary](16-Glossary)** - Terms and definitions
 

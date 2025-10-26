@@ -535,5 +535,5 @@ Any other relevant information
 
 - **[Troubleshooting](12-Troubleshooting)** - Comprehensive troubleshooting guide
 - **[Contributing](13-Contributing)** - How to contribute to the project
-- **[Roadmap](14-Roadmap)** - Upcoming features and improvements
+- **[CHANGELOG](../CHANGELOG.md)** - Version history and releases
 - **[Security Model](05-Security-Model)** - Security architecture details
