@@ -220,61 +220,34 @@ docker run -i --rm \
   ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0
 ```
 
-## Scaling and High Availability
+## Resource Management
 
-### Horizontal Scaling
+### Container Optimization
 
-**Load Balancer Configuration:**
+MCP SSH Orchestrator is designed to run efficiently as a single container instance per MCP client connection.
+
+**Resource Limits:**
 ```yaml
-version: '3.8'
-
+# docker-compose.yml
 services:
-  mcp-ssh-1:
+  mcp-ssh:
     image: ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0
-    volumes:
-      - ./config:/app/config:ro
-      - ./keys:/app/keys:ro
-      - ./secrets:/app/secrets:ro
     deploy:
-      replicas: 3
       resources:
         limits:
           memory: 512M
           cpus: '1'
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - mcp-ssh-1
 ```
 
-**Nginx Configuration:**
-```nginx
-events {
-    worker_connections 1024;
-}
+**Current Architecture:**
+- One container instance per MCP client (Claude Desktop, Cursor, etc.)
+- Stateless design allows horizontal scaling at the client level
+- Each MCP client connects to its own orchestrator instance
+- No load balancer required for single-client scenarios
 
-http {
-    upstream mcp_ssh {
-        server mcp-ssh-1:8000;
-        server mcp-ssh-2:8000;
-        server mcp-ssh-3:8000;
-    }
-
-    server {
-        listen 80;
-        location / {
-            proxy_pass http://mcp_ssh;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-    }
-}
-```
+**Future Scaling Considerations:**
+- Horizontal scaling would require additional infrastructure (load balancer, shared state)
+- Currently not implemented - one orchestrator per MCP client is the recommended approach
 
 ### Health Monitoring
 

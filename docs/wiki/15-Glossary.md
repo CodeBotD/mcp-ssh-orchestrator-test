@@ -140,7 +140,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Load Balancer**
 - **Definition**: A device that distributes network traffic across multiple servers
-- **Context**: Used for horizontal scaling of mcp-ssh-orchestrator deployments
+- **Context**: Not currently implemented in MCP SSH Orchestrator. The tool is designed for one container per MCP client, with scaling handled at the client level.
 
 ## M
 

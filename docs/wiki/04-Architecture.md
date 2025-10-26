@@ -360,47 +360,39 @@ graph TB
     EXEC_LIMITS --> AUDIT_LOG
 ```
 
-## Scalability Architecture
+## Resource Management
 
-### Horizontal Scaling
+### Current Architecture
+
+MCP SSH Orchestrator is designed for single-container deployment per MCP client. Each client (Claude Desktop, Cursor, etc.) connects to its own orchestrator instance.
 
 ```mermaid
 graph TB
-    subgraph "Load Balancer"
-        LB[Load Balancer]
+    subgraph "MCP Client (Claude Desktop / Cursor)"
+        CLIENT[MCP Client]
     end
     
-    subgraph "MCP Server Instances"
-        INSTANCE1[mcp-ssh-orchestrator<br/>Instance 1]
-        INSTANCE2[mcp-ssh-orchestrator<br/>Instance 2]
-        INSTANCE3[mcp-ssh-orchestrator<br/>Instance 3]
-    end
-    
-    subgraph "Shared Configuration"
-        CONFIG_STORE[Configuration Store]
-        KEY_STORE[SSH Keys Store]
+    subgraph "MCP SSH Orchestrator Instance"
+        INSTANCE[mcp-ssh-orchestrator<br/>Container]
+        CONFIG[Configuration<br/>servers.yml, policy.yml]
+        KEYS[SSH Keys<br/>known_hosts]
     end
     
     subgraph "Target Infrastructure"
-        HOSTS[SSH Hosts]
+        HOSTS[SSH Hosts<br/>Server Fleet]
     end
     
-    LB --> INSTANCE1
-    LB --> INSTANCE2
-    LB --> INSTANCE3
-    
-    INSTANCE1 --> CONFIG_STORE
-    INSTANCE2 --> CONFIG_STORE
-    INSTANCE3 --> CONFIG_STORE
-    
-    INSTANCE1 --> KEY_STORE
-    INSTANCE2 --> KEY_STORE
-    INSTANCE3 --> KEY_STORE
-    
-    INSTANCE1 --> HOSTS
-    INSTANCE2 --> HOSTS
-    INSTANCE3 --> HOSTS
+    CLIENT --> INSTANCE
+    INSTANCE --> CONFIG
+    INSTANCE --> KEYS
+    INSTANCE --> HOSTS
 ```
+
+**Design Principles:**
+- One container per MCP client
+- Stateless design (no shared state between instances)
+- Resource limits: 512MB memory, 1 CPU
+- No load balancer required (scaling at client level)
 
 ## Monitoring Architecture
 

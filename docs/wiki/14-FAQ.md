@@ -437,11 +437,11 @@ print('Config valid:', config.validate())
 - 1MB output per command
 - 30-second timeout per command
 
-**Scaling Options:**
-- Horizontal scaling with load balancer
-- Connection pooling
-- Resource optimization
-- Performance monitoring
+**Resource Optimization:**
+- Container resource limits (memory, CPU)
+- Connection timeout configuration
+- Output size limits
+- Performance monitoring via audit logs
 
 ### How do I optimize performance?
 

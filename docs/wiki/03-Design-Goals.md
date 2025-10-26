@@ -290,7 +290,7 @@ services:
 
 - **Reliability:** Graceful error handling, proper exit codes, timeout management
 - **Maintainability:** Clear code structure, comprehensive tests, documentation
-- **Scalability:** Stateless design, resource limits, horizontal scaling support
+- **Scalability:** Stateless design, resource limits, efficient resource usage
 
 ### Usability Attributes
 
