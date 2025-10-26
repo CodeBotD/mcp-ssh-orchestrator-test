@@ -25,35 +25,21 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       
-      - name: Create Wiki Sync Script
+      - name: Sync Wiki Content
         run: |
-          cat > sync-wiki.sh << 'EOF'
-          #!/bin/bash
-          set -e
-          
           echo "🔄 Starting wiki sync process..."
           
           # Create wiki directory
           mkdir -p wiki-sync
           cd wiki-sync
           
-          # Initialize git repo for wiki
-          git init
-          git remote add origin https://github.com/${{ github.repository }}.wiki.git
+          # Clone the existing wiki repository
+          echo "📥 Cloning wiki repository..."
+          git clone https://github.com/${{ github.repository }}.wiki.git .
           
-          # Try to fetch existing wiki content
-          echo "📥 Fetching existing wiki content..."
-          if git fetch origin master 2>/dev/null; then
-            echo "✅ Found existing wiki, checking out master branch"
-            git checkout -b master origin/master
-          else
-            echo "ℹ️ No existing wiki found, creating new master branch"
-            git checkout -b master
-          fi
-          
-          # Copy wiki content
+          # Copy new content from main repository
           echo "📋 Copying wiki content..."
-          rsync -av --delete ../docs/wiki/ ./
+          rsync -av --delete --exclude='.git' ../docs/wiki/ ./
           
           # Add .gitkeep to preserve empty directories
           find . -type d -empty -exec touch {}/.gitkeep \;
@@ -79,33 +65,14 @@ jobs:
             
             # Push to wiki repository
             echo "🚀 Pushing to wiki repository..."
-            if git push origin master; then
-              echo "✅ Wiki synced successfully"
-            else
-              echo "❌ Failed to push to wiki repository"
-              echo "This might be due to:"
-              echo "1. Wiki repository not existing yet"
-              echo "2. Insufficient permissions"
-              echo "3. Network issues"
-              echo ""
-              echo "To fix this:"
-              echo "1. Go to your repository settings"
-              echo "2. Enable the Wiki feature"
-              echo "3. Create at least one wiki page manually"
-              echo "4. Re-run this workflow"
-              exit 1
-            fi
+            git push origin master
+            
+            echo "✅ Wiki synced successfully"
           else
             echo "ℹ️ No changes to sync"
           fi
           
           echo "🎉 Wiki sync process completed"
-          EOF
-          
-          chmod +x sync-wiki.sh
-      
-      - name: Run Wiki Sync
-        run: ./sync-wiki.sh
       
       - name: Validate Wiki Content
         run: |
@@ -138,6 +105,44 @@ jobs:
               echo "⚠️ Home.md not found"
             fi
             
+            # Check for all 16 sections
+            required_sections=(
+              "01-MCP-Overview.md"
+              "02-Risks.md"
+              "03-Design-Goals.md"
+              "04-Architecture.md"
+              "05-Security-Model.md"
+              "06-Configuration.md"
+              "07-Tools-Reference.md"
+              "08-Usage-Cookbook.md"
+              "09-Deployment.md"
+              "10-Integrations.md"
+              "11-Observability-Audit.md"
+              "12-Troubleshooting.md"
+              "13-Contributing.md"
+              "14-Roadmap.md"
+              "15-FAQ.md"
+              "16-Glossary.md"
+            )
+            
+            echo "🔍 Checking required sections:"
+            missing_sections=()
+            for section in "${required_sections[@]}"; do
+              if [ -f "wiki-sync/$section" ]; then
+                echo "  ✅ $section"
+              else
+                echo "  ❌ $section"
+                missing_sections+=("$section")
+              fi
+            done
+            
+            if [ ${#missing_sections[@]} -gt 0 ]; then
+              echo "❌ Missing sections: ${missing_sections[*]}"
+              exit 1
+            else
+              echo "✅ All required sections present"
+            fi
+            
           else
             echo "❌ Wiki content directory is empty or doesn't exist"
             exit 1
@@ -156,11 +161,7 @@ jobs:
       
       - name: Install validation tools
         run: |
-          # Install basic tools
           pip install pyyaml
-          
-          # Install markdown link checker if available
-          npm install -g markdown-link-check || echo "markdown-link-check not available"
       
       - name: Validate YAML examples
         run: |
