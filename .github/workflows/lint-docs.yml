@@ -18,11 +18,13 @@ jobs:
   markdown-lint:
     name: Markdown Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@0c77cd4579477706d09f1ae81d5f39e5198d9c3e # v4.1.0
         with:
           node-version: '20'
       

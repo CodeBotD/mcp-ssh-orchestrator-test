@@ -13,11 +13,14 @@ jobs:
   verify-tests:
     name: Verify Tests Passed
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Wait for CI to complete
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@7e94d97e67e08f4d9c348c5d9f2e8e7d0c93a3ec # v1.3.4
         with:
           ref: ${{ github.sha }}
           check-name: 'Test Python 3.11'
@@ -33,17 +36,17 @@ jobs:
       packages: write
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@d6eb11a8320518a2b32b42ef445e8332351aba2e # v3.3.0
       
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@343f7c434450d945f3ac5e79d73fca92ec450bc0 # v3.3.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -51,7 +54,7 @@ jobs:
       
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@38a4cf8e87a742b3b44f08f3e7d8b4c7e3f7a5e3 # v5.5.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -61,7 +64,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@5ccc0f5fea4c39795065b8b48188c3bdca4b53e6 # v5.4.0
         with:
           context: .
           push: true
@@ -83,11 +86,10 @@ jobs:
           fi
       
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6938f8725bf5c028dc608e99a31a94fea8fbbc6d # v2.2.3
         with:
           body: ${{ steps.changelog.outputs.CHANGELOG }}
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

@@ -28,17 +28,20 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@c3d2d0c3d0079a795c17a7f3fd8adf2e4b1c8125 # v5.5.1
         with:
           python-version: "3.11"
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements-dev.txt
           pip install -e ".[dev]"
       
       - name: Run ruff
@@ -55,21 +58,25 @@ jobs:
     needs: [lint]
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@c3d2d0c3d0079a795c17a7f3fd8adf2e4b1c8125 # v5.5.1
         with:
           python-version: ${{ matrix.python-version }}
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements.txt
+          pip install --require-hashes -r requirements-test.txt
           pip install -e ".[test]"
       
       - name: Run tests
@@ -77,7 +84,7 @@ jobs:
           pytest --cov=mcp_ssh --cov-report=xml --cov-report=term
       
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@4f11fb3a1632a5e794ac52697fa5b1f9a07e3fdf3 # v5.0.5
         if: matrix.python-version == '3.11'
         with:
           files: ./coverage.xml
@@ -88,14 +95,17 @@ jobs:
     needs: [lint]
     name: Docker Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
       
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@d6eb11a8320518a2b32b42ef445e8332351aba2e # v3.3.0
       
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@5ccc0f5fea4c39795065b8b48188c3bdca4b53e6 # v5.4.0
         with:
           context: .
           push: false

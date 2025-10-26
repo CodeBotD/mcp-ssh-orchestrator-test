@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.14-slim AS base
+FROM python:3.14-slim@sha256:4ed33101ee7ec299041cc41dd268dae17031184be94384b1ce7936dc4e5dead3 AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -19,7 +19,7 @@ RUN useradd -u 10001 -m appuser
 WORKDIR /app
 
 # Copy project
-COPY pyproject.toml README.md LICENSE /app/
+COPY pyproject.toml README.md LICENSE requirements.txt /app/
 COPY src /app/src
 COPY examples /app/examples
 
@@ -31,6 +31,7 @@ COPY examples/example-policy.yml /app/config/policy.yml.example
 ENV PATH="/home/appuser/.local/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --require-hashes -r requirements.txt && \
     pip install --no-cache-dir -e .
 
 # Minimal directories for mounts (binds overwrite these at runtime)
