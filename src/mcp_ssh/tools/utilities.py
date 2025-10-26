@@ -63,7 +63,9 @@ class AsyncTaskManager:
     def __init__(self):
         self._lock = threading.Lock()
         self._tasks: dict[str, dict[str, Any]] = {}  # task_id -> TaskInfo
-        self._results: dict[str, dict[str, Any]] = {}  # task_id -> TaskResult (TTL: 5min)
+        self._results: dict[
+            str, dict[str, Any]
+        ] = {}  # task_id -> TaskResult (TTL: 5min)
         self._output_buffers: dict[str, deque] = {}  # task_id -> deque of output lines
         self._notification_callback: Callable | None = None
         self._cleanup_thread = None
@@ -72,7 +74,9 @@ class AsyncTaskManager:
     def _start_cleanup_thread(self):
         """Start background thread for TTL cleanup."""
         if self._cleanup_thread is None or not self._cleanup_thread.is_alive():
-            self._cleanup_thread = threading.Thread(target=self._cleanup_worker, daemon=True)
+            self._cleanup_thread = threading.Thread(
+                target=self._cleanup_worker, daemon=True
+            )
             self._cleanup_thread.start()
 
     def _cleanup_worker(self):
@@ -88,8 +92,14 @@ class AsyncTaskManager:
         """Set callback for MCP notifications."""
         self._notification_callback = callback
 
-    def start_async_task(self, alias: str, command: str, ssh_client, limits: dict[str, Any],
-                        progress_cb: Callable | None = None) -> str:
+    def start_async_task(
+        self,
+        alias: str,
+        command: str,
+        ssh_client,
+        limits: dict[str, Any],
+        progress_cb: Callable | None = None,
+    ) -> str:
         """Start task in background thread, return task_id immediately."""
         cmd_hash = hash_command(command)
         timestamp = int(time.time() * 1000000)
@@ -123,9 +133,7 @@ class AsyncTaskManager:
 
         # Start background execution
         thread = threading.Thread(
-            target=self._execute_task_in_thread,
-            args=(task_id,),
-            daemon=True
+            target=self._execute_task_in_thread, args=(task_id,), daemon=True
         )
         thread.start()
 
@@ -133,11 +141,11 @@ class AsyncTaskManager:
             self._tasks[task_id]["thread"] = thread
 
         # Send creation notification
-        self._send_notification("created", task_id, {
-            "alias": alias,
-            "command": command,
-            "status": "pending"
-        })
+        self._send_notification(
+            "created",
+            task_id,
+            {"alias": alias, "command": command, "status": "pending"},
+        )
 
         return task_id
 
@@ -165,13 +173,21 @@ class AsyncTaskManager:
                     progress_cb(phase, bytes_read, elapsed_ms)
 
                 # Send progress notification every 5 seconds
-                if phase == "running" and elapsed_ms % 5000 < 100:  # ~5 second intervals
-                    self._send_notification("progress", task_id, {
-                        "phase": phase,
-                        "bytes_read": bytes_read,
-                        "elapsed_ms": elapsed_ms,
-                        "output_lines": len(self._output_buffers.get(task_id, deque()))
-                    })
+                if (
+                    phase == "running" and elapsed_ms % 5000 < 100
+                ):  # ~5 second intervals
+                    self._send_notification(
+                        "progress",
+                        task_id,
+                        {
+                            "phase": phase,
+                            "bytes_read": bytes_read,
+                            "elapsed_ms": elapsed_ms,
+                            "output_lines": len(
+                                self._output_buffers.get(task_id, deque())
+                            ),
+                        },
+                    )
 
             # Execute SSH command
             (
@@ -226,13 +242,17 @@ class AsyncTaskManager:
 
             # Send completion notification
             event_type = "completed" if exit_code == 0 else "failed"
-            self._send_notification(event_type, task_id, {
-                "exit_code": exit_code,
-                "duration_ms": duration_ms,
-                "cancelled": cancelled,
-                "timeout": timeout,
-                "target_ip": peer_ip
-            })
+            self._send_notification(
+                event_type,
+                task_id,
+                {
+                    "exit_code": exit_code,
+                    "duration_ms": duration_ms,
+                    "cancelled": cancelled,
+                    "timeout": timeout,
+                    "target_ip": peer_ip,
+                },
+            )
 
         except Exception as e:
             # Mark as failed
@@ -243,9 +263,7 @@ class AsyncTaskManager:
                     self._tasks[task_id]["completed"] = time.time()
 
             # Send failure notification
-            self._send_notification("failed", task_id, {
-                "error": str(e)
-            })
+            self._send_notification("failed", task_id, {"error": str(e)})
 
     def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         """Get current status with SEP-1686 metadata."""
@@ -263,7 +281,9 @@ class AsyncTaskManager:
                         "progress_percent": 100,
                         "elapsed_ms": result["duration_ms"],
                         "bytes_read": len(result["output"]),
-                        "output_lines_available": len(self._output_buffers.get(task_id, deque())),
+                        "output_lines_available": len(
+                            self._output_buffers.get(task_id, deque())
+                        ),
                     }
                 return None
 
@@ -280,7 +300,9 @@ class AsyncTaskManager:
                 "progress_percent": progress_percent,
                 "elapsed_ms": elapsed_ms,
                 "bytes_read": task_info["bytes_out"] + task_info["bytes_err"],
-                "output_lines_available": len(self._output_buffers.get(task_id, deque())),
+                "output_lines_available": len(
+                    self._output_buffers.get(task_id, deque())
+                ),
             }
 
     def get_task_result(self, task_id: str) -> dict[str, Any] | None:
@@ -300,7 +322,9 @@ class AsyncTaskManager:
                 }
             return None
 
-    def get_task_output(self, task_id: str, max_lines: int = 50) -> dict[str, Any] | None:
+    def get_task_output(
+        self, task_id: str, max_lines: int = 50
+    ) -> dict[str, Any] | None:
         """Get recent output lines."""
         with self._lock:
             # First check if task is still running and has output buffer
@@ -308,7 +332,9 @@ class AsyncTaskManager:
             if output_buffer and len(output_buffer) > 0:
                 # Convert deque to list and get recent lines
                 all_lines = list(output_buffer)
-                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                recent_lines = (
+                    all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                )
 
                 return {
                     "task_id": task_id,
@@ -322,8 +348,10 @@ class AsyncTaskManager:
             if result and result["expires"] > time.time():
                 # Split the output into lines and return recent ones
                 output_text = result.get("output", "")
-                all_lines = output_text.split('\n') if output_text else []
-                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                all_lines = output_text.split("\n") if output_text else []
+                recent_lines = (
+                    all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                )
 
                 return {
                     "task_id": task_id,
@@ -337,8 +365,10 @@ class AsyncTaskManager:
             if task_info and task_info.get("output"):
                 # Split the output into lines and return recent ones
                 output_text = task_info.get("output", "")
-                all_lines = output_text.split('\n') if output_text else []
-                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                all_lines = output_text.split("\n") if output_text else []
+                recent_lines = (
+                    all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                )
 
                 return {
                     "task_id": task_id,
@@ -358,9 +388,9 @@ class AsyncTaskManager:
                 task_info["status"] = "cancelled"
 
                 # Send cancellation notification
-                self._send_notification("cancelled", task_id, {
-                    "reason": "user_requested"
-                })
+                self._send_notification(
+                    "cancelled", task_id, {"reason": "user_requested"}
+                )
                 return True
             return False
 
@@ -383,12 +413,13 @@ class AsyncTaskManager:
         """Send MCP notification for task events."""
         if self._notification_callback:
             try:
-                self._notification_callback(f"tasks/{event_type}", {
-                    "task_id": task_id,
-                    **data
-                })
+                self._notification_callback(
+                    f"tasks/{event_type}", {"task_id": task_id, **data}
+                )
             except Exception as e:
-                log_json({"level": "warn", "msg": "notification_failed", "error": str(e)})
+                log_json(
+                    {"level": "warn", "msg": "notification_failed", "error": str(e)}
+                )
 
 
 # Legacy TaskManager for backward compatibility

@@ -11,16 +11,15 @@ from mcp_ssh.tools.utilities import ASYNC_TASKS, TASKS, hash_command, log_json
 mcp = FastMCP()
 config = Config()
 
+
 # Set up notification callback for async tasks
 def _send_task_notification(event_type: str, task_id: str, data: dict):
     """Send MCP notification for task events."""
     try:
-        mcp.send_notification(f"tasks/{event_type}", {
-            "task_id": task_id,
-            **data
-        })
+        mcp.send_notification(f"tasks/{event_type}", {"task_id": task_id, **data})
     except Exception as e:
         log_json({"level": "warn", "msg": "notification_failed", "error": str(e)})
+
 
 # Configure async task manager with notification callback
 ASYNC_TASKS.set_notification_callback(_send_task_notification)
@@ -467,7 +466,9 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
 
         # Enhanced progress callback for async tasks
         def progress_cb(phase, bytes_read, elapsed_ms):
-            pol.log_progress(f"async:{alias}:{cmd_hash}", phase, int(bytes_read), int(elapsed_ms))
+            pol.log_progress(
+                f"async:{alias}:{cmd_hash}", phase, int(bytes_read), int(elapsed_ms)
+            )
 
         # Start async task
         task_id = ASYNC_TASKS.start_async_task(
@@ -475,7 +476,7 @@ def ssh_run_async(alias: str = "", command: str = "") -> str:
             command=command,
             ssh_client=client,
             limits=limits,
-            progress_cb=progress_cb
+            progress_cb=progress_cb,
         )
 
         # Return SEP-1686 compliant response

@@ -14,7 +14,16 @@ class TestAsyncTaskManager:
         self.task_manager = AsyncTaskManager()
         self.mock_ssh_client = Mock()
         # Mock the run_streaming method to avoid actual SSH execution
-        self.mock_ssh_client.run_streaming.return_value = (0, 1000, False, False, 50, 0, "test output", "127.0.0.1")
+        self.mock_ssh_client.run_streaming.return_value = (
+            0,
+            1000,
+            False,
+            False,
+            50,
+            0,
+            "test output",
+            "127.0.0.1",
+        )
         self.mock_limits = {
             "max_seconds": 60,
             "max_output_bytes": 1024,
@@ -42,13 +51,13 @@ class TestAsyncTaskManager:
 
     def test_start_async_task(self):
         """Test starting an async task."""
-        with patch.object(self.task_manager, '_execute_task_in_thread'):
+        with patch.object(self.task_manager, "_execute_task_in_thread"):
             task_id = self.task_manager.start_async_task(
                 alias="test1",
                 command="uptime",
                 ssh_client=self.mock_ssh_client,
                 limits=self.mock_limits,
-                progress_cb=None
+                progress_cb=None,
             )
 
             assert task_id.startswith("test1:")
@@ -64,13 +73,13 @@ class TestAsyncTaskManager:
 
     def test_get_task_status_pending(self):
         """Test getting status of pending task."""
-        with patch.object(self.task_manager, '_execute_task_in_thread'):
+        with patch.object(self.task_manager, "_execute_task_in_thread"):
             task_id = self.task_manager.start_async_task(
                 alias="test1",
                 command="uptime",
                 ssh_client=self.mock_ssh_client,
                 limits=self.mock_limits,
-                progress_cb=None
+                progress_cb=None,
             )
 
             status = self.task_manager.get_task_status(task_id)
@@ -93,7 +102,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Simulate task running
@@ -114,7 +123,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Simulate task completion
@@ -137,7 +146,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Simulate task completion and store result
@@ -160,7 +169,7 @@ class TestAsyncTaskManager:
             "timeout": False,
             "target_ip": "10.0.0.1",
             "created": time.time(),
-            "expires": time.time() + 300  # 5 minutes from now
+            "expires": time.time() + 300,  # 5 minutes from now
         }
 
         result = self.task_manager.get_task_result(task_id)
@@ -188,7 +197,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Simulate task running
@@ -214,7 +223,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Store an expired result
@@ -222,7 +231,7 @@ class TestAsyncTaskManager:
             "task_id": task_id,
             "status": "completed",
             "created": time.time() - 400,  # 400 seconds ago (expired)
-            "expires": time.time() - 100  # Expired 100 seconds ago
+            "expires": time.time() - 100,  # Expired 100 seconds ago
         }
 
         # Cleanup should remove expired results
@@ -237,7 +246,7 @@ class TestAsyncTaskManager:
             command="uptime",
             ssh_client=self.mock_ssh_client,
             limits=self.mock_limits,
-            progress_cb=None
+            progress_cb=None,
         )
 
         # Task ID should be in format: alias:hash:timestamp
@@ -249,7 +258,7 @@ class TestAsyncTaskManager:
 
     def test_concurrent_task_management(self):
         """Test thread safety of task management."""
-        with patch.object(self.task_manager, '_execute_task_in_thread'):
+        with patch.object(self.task_manager, "_execute_task_in_thread"):
             task_ids = []
 
             # Start multiple tasks concurrently
@@ -259,7 +268,7 @@ class TestAsyncTaskManager:
                     command="uptime",
                     ssh_client=self.mock_ssh_client,
                     limits=self.mock_limits,
-                    progress_cb=None
+                    progress_cb=None,
                 )
                 task_ids.append(task_id)
 
