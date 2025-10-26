@@ -196,6 +196,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 - Handle configuration reloading
 
 **Configuration Sources:**
+
 - `servers.yml` - Host inventory
 - `credentials.yml` - SSH authentication
 - `policy.yml` - Security policies
@@ -232,6 +233,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 - Stream command output
 
 **Security Features:**
+
 - Host key verification
 - Connection timeout management
 - Output size limiting
@@ -395,6 +397,7 @@ graph TB
 ```
 
 **Design Principles:**
+
 - One container per MCP client
 - Stateless design (no shared state between instances)
 - Resource limits: 512MB memory, 1 CPU

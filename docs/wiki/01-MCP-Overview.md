@@ -105,6 +105,7 @@ MCP supports multiple transport mechanisms:
 ```
 
 **Use Cases:**
+
 - Local development
 - Docker containers
 - Process-to-process communication
@@ -122,6 +123,7 @@ eventSource.onmessage = function(event) {
 ```
 
 **Use Cases:**
+
 - Web applications
 - Real-time streaming
 - Cross-origin communication
@@ -135,6 +137,7 @@ curl -X POST https://api.example.com/mcp \
 ```
 
 **Use Cases:**
+
 - REST APIs
 - WebSocket connections
 - Cloud deployments

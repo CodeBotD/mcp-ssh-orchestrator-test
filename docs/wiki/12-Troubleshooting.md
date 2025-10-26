@@ -13,11 +13,13 @@ This section covers common issues, their symptoms, root causes, and solutions fo
 #### Invalid Configuration Files
 
 **Symptoms:**
+
 - Container fails to start
 - Error: "Configuration validation failed"
 - MCP server not responding
 
 **Root Causes:**
+
 - Malformed YAML syntax
 - Missing required fields
 - Invalid field values
@@ -46,11 +48,13 @@ print('Config valid:', config.validate())
 #### Missing SSH Keys
 
 **Symptoms:**
+
 - SSH connection failures
 - Error: "No such file or directory: '/app/keys/id_ed25519'"
 - Authentication failures
 
 **Root Causes:**
+
 - SSH keys not mounted
 - Incorrect key paths
 - Wrong file permissions
@@ -74,11 +78,13 @@ ssh -i ~/mcp-ssh/keys/id_ed25519 ubuntu@10.0.0.11
 #### Policy Configuration Errors
 
 **Symptoms:**
+
 - All commands denied
 - Error: "Policy evaluation failed"
 - Unexpected command blocking
 
 **Root Causes:**
+
 - Invalid policy syntax
 - Conflicting rules
 - Missing policy sections
@@ -110,11 +116,13 @@ print('Policy result:', result)
 #### SSH Connection Failures
 
 **Symptoms:**
+
 - "Connection refused" errors
 - "Host key verification failed"
 - Timeout errors
 
 **Root Causes:**
+
 - Network connectivity issues
 - SSH service not running
 - Host key verification failures
@@ -141,11 +149,13 @@ ssh -i ~/mcp-ssh/keys/id_ed25519 ubuntu@10.0.0.11 "uptime"
 #### Host Key Verification Issues
 
 **Symptoms:**
+
 - "Host key verification failed"
 - "Unknown host" errors
 - Policy violations for host key checks
 
 **Root Causes:**
+
 - Missing host keys in known_hosts
 - Changed host keys
 - Host key verification disabled
@@ -169,11 +179,13 @@ require_known_host: false
 #### Container Won't Start
 
 **Symptoms:**
+
 - Container exits immediately
 - "Permission denied" errors
 - Resource limit exceeded
 
 **Root Causes:**
+
 - Insufficient resources
 - Permission issues
 - Configuration errors
@@ -202,11 +214,13 @@ docker run -i --rm \
 #### Permission Issues
 
 **Symptoms:**
+
 - "Permission denied" errors
 - "Read-only file system" errors
 - Container runs as root
 
 **Root Causes:**
+
 - Incorrect file permissions
 - Container running as root
 - Read-only filesystem issues
@@ -233,11 +247,13 @@ docker run --rm ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0 whoami
 #### Claude Desktop Integration Problems
 
 **Symptoms:**
+
 - MCP server not appearing in Claude Desktop
 - "Connection failed" errors
 - Tools not available
 
 **Root Causes:**
+
 - Incorrect configuration
 - Container not running
 - Network issues
@@ -263,11 +279,13 @@ open -a "Claude Desktop"
 #### Tool Execution Failures
 
 **Symptoms:**
+
 - Tools not responding
 - "Tool not found" errors
 - Command execution failures
 
 **Root Causes:**
+
 - Tool registration issues
 - Policy blocking commands
 - SSH connection problems
@@ -387,11 +405,13 @@ print('Limits:', policy.limits)
 ### Slow Command Execution
 
 **Symptoms:**
+
 - Commands taking >30 seconds
 - Timeout errors
 - High resource usage
 
 **Root Causes:**
+
 - Network latency
 - Target system performance
 - Resource limits
@@ -415,11 +435,13 @@ limits:
 ### High Memory Usage
 
 **Symptoms:**
+
 - Container memory limit exceeded
 - OOMKilled errors
 - Slow performance
 
 **Root Causes:**
+
 - Large command outputs
 - Memory leaks
 - Insufficient limits
@@ -448,11 +470,13 @@ limits:
 ### Authentication Failures
 
 **Symptoms:**
+
 - "Permission denied" errors
 - "Authentication failed" errors
 - Policy violations
 
 **Root Causes:**
+
 - Wrong SSH keys
 - Incorrect credentials
 - Key passphrase issues
@@ -476,11 +500,13 @@ ssh -i ~/mcp-ssh/keys/id_ed25519 ubuntu@10.0.0.11 "whoami"
 ### Policy Violations
 
 **Symptoms:**
+
 - Commands denied unexpectedly
 - "Policy violation" errors
 - Security alerts
 
 **Root Causes:**
+
 - Incorrect policy rules
 - Missing permissions
 - Tag mismatches
@@ -585,12 +611,14 @@ echo "Debug package created: $DEBUG_DIR.tar.gz"
 ### Community Support
 
 **GitHub Issues:**
+
 - Create detailed issue reports
 - Include debug information
 - Provide reproduction steps
 - Attach relevant logs
 
 **Documentation:**
+
 - Check this wiki for solutions
 - Review configuration examples
 - Consult security best practices

@@ -240,12 +240,14 @@ services:
 ```
 
 **Current Architecture:**
+
 - One container instance per MCP client (Claude Desktop, Cursor, etc.)
 - Stateless design allows horizontal scaling at the client level
 - Each MCP client connects to its own orchestrator instance
 - No load balancer required for single-client scenarios
 
 **Future Scaling Considerations:**
+
 - Horizontal scaling would require additional infrastructure (load balancer, shared state)
 - Currently not implemented - one orchestrator per MCP client is the recommended approach
 

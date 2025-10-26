@@ -19,6 +19,7 @@ AI agents interacting with external systems introduce significant security risks
 ### How does it differ from direct SSH access?
 
 **Direct SSH Access:**
+
 - No policy enforcement
 - No audit logging
 - No network filtering
@@ -26,6 +27,7 @@ AI agents interacting with external systems introduce significant security risks
 - No compliance reporting
 
 **mcp-ssh-orchestrator:**
+
 - Policy-based access control
 - Comprehensive audit logging
 - Network security filtering
@@ -66,12 +68,14 @@ pip install -e .
 ### What are the system requirements?
 
 **Minimum Requirements:**
+
 - Docker 20.10+ or Python 3.11+
 - 512MB RAM
 - 1GB disk space
 - SSH client
 
 **Recommended Requirements:**
+
 - Docker 24.0+
 - 2GB RAM
 - 10GB disk space
@@ -208,18 +212,21 @@ ssh -i ~/mcp-ssh/keys/id_ed25519 ubuntu@10.0.0.11
 Yes, mcp-ssh-orchestrator implements multiple security layers:
 
 **Policy Enforcement:**
+
 - Command allow/deny rules
 - Network filtering (CIDR allowlists/blocklists)
 - Rate limiting and timeouts
 - Host key verification
 
 **Audit & Compliance:**
+
 - Comprehensive audit logging
 - Policy violation tracking
 - Security event monitoring
 - Compliance reporting
 
 **Container Security:**
+
 - Non-root execution
 - Read-only filesystem
 - Resource limits
@@ -353,6 +360,7 @@ print('Policy valid:', policy.validate())
 ### Why is my command being denied?
 
 **Common Causes:**
+
 - Command not in allow list
 - Host not in allow list
 - Policy rule violation
@@ -382,6 +390,7 @@ echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"ssh_plan","argume
 ### Why is SSH connection failing?
 
 **Common Causes:**
+
 - Wrong SSH key
 - Host not reachable
 - SSH service not running
@@ -403,6 +412,7 @@ telnet 10.0.0.11 22
 ### Why is the container not starting?
 
 **Common Causes:**
+
 - Configuration errors
 - Permission issues
 - Resource limits
@@ -432,12 +442,14 @@ print('Config valid:', config.validate())
 ### How many concurrent connections are supported?
 
 **Current Limits:**
+
 - 100 concurrent SSH connections
 - 1000 commands per minute
 - 1MB output per command
 - 30-second timeout per command
 
 **Resource Optimization:**
+
 - Container resource limits (memory, CPU)
 - Connection timeout configuration
 - Output size limits
@@ -481,18 +493,21 @@ entries:
 ### Where can I get help?
 
 **Documentation:**
+
 - This wiki for comprehensive guides
 - GitHub README for quick start
 - Code examples and tutorials
 - Video demonstrations
 
 **Community:**
+
 - GitHub Discussions for questions
 - GitHub Issues for bugs
 - Discord server for real-time chat
 - Community forums for discussions
 
 **Professional Support:**
+
 - Enterprise support available
 - Professional services
 - Training and certification
@@ -526,6 +541,7 @@ Any other relevant information
 ```
 
 **Security Issues:**
+
 - Report security issues privately
 - Use GitHub security advisories
 - Follow responsible disclosure

@@ -13,6 +13,7 @@ mcp-ssh-orchestrator is built on the principle that **AI agents should have safe
 **Principle:** Security is not an afterthought—it's the foundation of every feature.
 
 **Implementation:**
+
 - **Deny-by-default** policy model
 - **Defense-in-depth** security architecture
 - **Containerized execution** with resource limits
@@ -36,6 +37,7 @@ rules:
 **Principle:** Reduce the potential for security vulnerabilities by minimizing exposed functionality.
 
 **Implementation:**
+
 - **Single-purpose design** (SSH command execution only)
 - **Minimal dependencies** (Python standard library + SSH)
 - **No persistent state** (stateless operation)
@@ -60,6 +62,7 @@ VOLUME ["/app/config:ro", "/app/keys:ro"]
 **Principle:** All access decisions are governed by explicit, auditable policies.
 
 **Implementation:**
+
 - **YAML-based policy configuration**
 - **Glob pattern matching** for flexible rules
 - **Per-host and per-tag overrides**
@@ -84,6 +87,7 @@ rules:
 **Principle:** Every operation must be observable, auditable, and traceable.
 
 **Implementation:**
+
 - **JSON audit logs** to stderr
 - **Structured logging** with timestamps
 - **Command hashing** for integrity
@@ -108,6 +112,7 @@ rules:
 **Principle:** Designed from the ground up for containerized deployment.
 
 **Implementation:**
+
 - **Docker-first** deployment model
 - **Health checks** for monitoring
 - **Resource limits** (CPU, memory)
@@ -137,6 +142,7 @@ services:
 **Principle:** Make secure operations easy and intuitive.
 
 **Implementation:**
+
 - **Clear error messages** with actionable guidance
 - **Comprehensive documentation** with examples
 - **Easy configuration** with sensible defaults
@@ -148,6 +154,7 @@ services:
 **Principle:** Reduce operational complexity while maintaining security.
 
 **Implementation:**
+
 - **Single binary** deployment (Docker image)
 - **Configuration-driven** behavior
 - **No external dependencies** (databases, queues)
@@ -159,6 +166,7 @@ services:
 **Principle:** Security features that can support compliance and audit requirements.
 
 **Implementation:**
+
 - **OWASP LLM07** mitigation (Insecure Plugin Design)
 - **MITRE ATT&CK** aligned logging and monitoring
 - **Complete audit trails** for all operations
@@ -221,6 +229,7 @@ services:
 **Trade-off:** Security checks add latency to command execution.
 
 **Resolution:**
+
 - Policy evaluation is fast (in-memory)
 - SSH connection reuse where possible
 - Minimal overhead logging
@@ -231,6 +240,7 @@ services:
 **Trade-off:** More configuration options increase complexity.
 
 **Resolution:**
+
 - Sensible defaults for common scenarios
 - Progressive disclosure of advanced features
 - Clear examples for different use cases
@@ -243,6 +253,7 @@ services:
 **Principle:** When in doubt, deny access.
 
 **Implementation:**
+
 - Default policy is deny-all
 - Invalid configurations fail closed
 - Network errors prevent execution
@@ -253,6 +264,7 @@ services:
 **Principle:** Nothing happens by accident.
 
 **Implementation:**
+
 - No implicit permissions
 - Explicit allow rules required
 - Clear policy documentation
@@ -263,6 +275,7 @@ services:
 **Principle:** Fewer dependencies = fewer vulnerabilities.
 
 **Implementation:**
+
 - Python standard library only
 - SSH via paramiko (minimal)
 - No external HTTP libraries
@@ -273,6 +286,7 @@ services:
 **Principle:** Configuration changes require restart or explicit reload.
 
 **Implementation:**
+
 - No runtime configuration changes
 - `ssh_reload_config` for updates
 - Validation before reload
@@ -305,6 +319,7 @@ services:
 **Principle:** Maintain compatibility across minor versions.
 
 **Implementation:**
+
 - Semantic versioning (SemVer)
 - Deprecation warnings for old features
 - Migration guides for breaking changes
@@ -315,6 +330,7 @@ services:
 **Principle:** Design for future MCP protocol evolution.
 
 **Implementation:**
+
 - MCP specification compliance
 - Extensible policy engine
 - Plugin-ready architecture (future)

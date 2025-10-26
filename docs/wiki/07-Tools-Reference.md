@@ -56,6 +56,7 @@ MCP SSH Orchestrator provides **13 MCP tools** that enable secure SSH command ex
 ```
 
 **Use Cases:**
+
 - Verify MCP server is running
 - Test connectivity to mcp-ssh-orchestrator
 - Health monitoring and alerting
@@ -93,6 +94,7 @@ ssh_ping
 ```
 
 **Use Cases:**
+
 - Discover available hosts
 - Verify host configuration
 - Build dynamic host lists
@@ -142,6 +144,7 @@ ssh_list_hosts
 ```
 
 **Use Cases:**
+
 - Get host connection details
 - Verify host configuration
 - Check policy limits for specific host
@@ -192,6 +195,7 @@ ssh_describe_host --alias "web1"
 ```
 
 **Use Cases:**
+
 - Test policy rules before execution
 - Debug policy configuration
 - Validate command authorization
@@ -262,6 +266,7 @@ ssh_plan --alias "prod-web-1" --command "systemctl restart nginx"
 | `rule_matched` | string | Policy rule that matched |
 
 **Use Cases:**
+
 - Execute single commands on hosts
 - Run system diagnostics
 - Perform maintenance tasks
@@ -342,6 +347,7 @@ ssh_run --alias "web1" --command "systemctl status nginx"
 ```
 
 **Use Cases:**
+
 - Bulk operations across host groups
 - Environment-wide maintenance
 - Tag-based host management
@@ -390,6 +396,7 @@ ssh_run_on_tag --tag "database" --command "systemctl status postgresql"
 ```
 
 **Use Cases:**
+
 - Stop long-running commands
 - Cancel stuck processes
 - Emergency command termination
@@ -432,6 +439,7 @@ ssh_cancel --task_id "web1:a1b2c3d4:1234567890"
 ```
 
 **Use Cases:**
+
 - Update configuration without restart
 - Apply policy changes
 - Add new hosts dynamically
@@ -491,6 +499,7 @@ ssh_reload_config
 | `hash` | string | SHA256 hash of the command |
 
 **Use Cases:**
+
 - Long-running commands (minutes to hours)
 - Background execution
 - Non-blocking operations
@@ -542,6 +551,7 @@ ssh_run_async --alias "prod-web" --command "./deploy.sh"
 ```
 
 **Status Values:**
+
 - `pending` - Task not yet started
 - `running` - Task in progress
 - `completed` - Task finished successfully
@@ -551,6 +561,7 @@ ssh_run_async --alias "prod-web" --command "./deploy.sh"
 - `not_found` - Task ID doesn't exist
 
 **Use Cases:**
+
 - Monitor long-running operations
 - Check task progress percentage
 - Verify task is still running
@@ -615,6 +626,7 @@ watch -n 5 ssh_get_task_status --task_id "async:web1:abc123def456"
 | `error` | string | Complete stderr output |
 
 **Use Cases:**
+
 - Retrieve final output of completed tasks
 - Check exit codes
 - Analyze execution results
@@ -670,6 +682,7 @@ fi
 ```
 
 **Use Cases:**
+
 - Stream output from long-running tasks
 - Monitor progress in real-time
 - Debug running commands
@@ -721,6 +734,7 @@ done
 ```
 
 **Use Cases:**
+
 - Stop long-running commands
 - Abort stuck processes
 - Emergency termination

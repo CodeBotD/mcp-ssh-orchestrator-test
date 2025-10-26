@@ -49,12 +49,14 @@ graph TB
 **Purpose:** Secure communication between MCP client and server.
 
 **Implementation:**
+
 - **Process isolation** via stdio transport
 - **No network exposure** of MCP server
 - **Structured JSON-RPC** communication
 - **Type-safe interfaces** for all tools
 
 **Security Benefits:**
+
 - No network attack surface
 - Process-level isolation
 - Structured data prevents injection
@@ -81,12 +83,14 @@ graph TB
 **Purpose:** Isolate the MCP server from the host system.
 
 **Implementation:**
+
 - **Non-root execution** (UID 10001)
 - **Read-only filesystem** mounts
 - **Resource limits** (CPU, memory)
 - **Minimal base image** (python:3.13-slim)
 
 **Security Benefits:**
+
 - Prevents host privilege escalation
 - Limits resource consumption
 - Reduces attack surface
@@ -112,12 +116,14 @@ CMD ["python", "-m", "mcp_ssh.mcp_server", "stdio"]
 **Purpose:** Restrict SSH connections to authorized networks only.
 
 **Implementation:**
+
 - **CIDR-based allowlists** for network ranges
 - **Specific IP allowlists** for individual hosts
 - **IP blocklists** for dangerous addresses
 - **DNS resolution verification** before connection
 
 **Security Benefits:**
+
 - Prevents connections to unauthorized hosts
 - Blocks access to public internet
 - Mitigates DNS poisoning attacks
@@ -144,12 +150,14 @@ network:
 **Purpose:** Prevent man-in-the-middle attacks on SSH connections.
 
 **Implementation:**
+
 - **known_hosts verification** before connection
 - **Host key fingerprinting** for identity verification
 - **Strict host checking** in production
 - **Auto-add option** for development only
 
 **Security Benefits:**
+
 - Prevents MITM attacks
 - Ensures host identity verification
 - Detects host key changes
@@ -171,12 +179,14 @@ network:
 **Purpose:** Ensure no unauthorized commands can execute.
 
 **Implementation:**
+
 - **Empty rules list** = deny all
 - **Explicit allow rules** required for access
 - **Rule precedence** with deny rules taking priority
 - **Pattern matching** with glob support
 
 **Security Benefits:**
+
 - Prevents accidental access
 - Requires explicit authorization
 - Reduces attack surface
@@ -198,12 +208,14 @@ rules:
 **Purpose:** Provide flexible yet secure command filtering.
 
 **Implementation:**
+
 - **Glob pattern matching** for commands
 - **Substring blocking** for dangerous commands
 - **Alias and tag matching** for host targeting
 - **Case-sensitive matching** for precision
 
 **Security Benefits:**
+
 - Flexible command authorization
 - Blocks dangerous command patterns
 - Enables environment-specific policies
@@ -231,12 +243,14 @@ rules:
 **Purpose:** Prevent resource exhaustion and runaway processes.
 
 **Implementation:**
+
 - **Command timeouts** (max_seconds)
 - **Output size limits** (max_output_bytes)
 - **Per-host overrides** for specific limits
 - **Per-tag overrides** for environment limits
 
 **Security Benefits:**
+
 - Prevents resource exhaustion
 - Limits data exfiltration
 - Enables DoS protection
@@ -262,12 +276,14 @@ overrides:
 **Purpose:** Limit damage if the application is compromised.
 
 **Implementation:**
+
 - **UID 10001** for application user
 - **No sudo privileges** or escalation
 - **Limited filesystem access** via volumes
 - **No system modification** capabilities
 
 **Security Benefits:**
+
 - Prevents privilege escalation
 - Limits system access
 - Reduces attack impact
@@ -278,12 +294,14 @@ overrides:
 **Purpose:** Prevent resource exhaustion attacks.
 
 **Implementation:**
+
 - **CPU limits** via container constraints
 - **Memory limits** via container constraints
 - **File descriptor limits** via ulimits
 - **Process limits** via container policies
 
 **Security Benefits:**
+
 - Prevents DoS attacks
 - Ensures fair resource usage
 - Enables monitoring
@@ -294,12 +312,14 @@ overrides:
 **Purpose:** Provide comprehensive audit trail for compliance and security.
 
 **Implementation:**
+
 - **JSON structured logs** to stderr
 - **Complete operation trail** for all commands
 - **Security-relevant metadata** in every log entry
 - **Immutable log format** for integrity
 
 **Security Benefits:**
+
 - Enables incident response
 - Supports compliance audits
 - Provides forensic evidence
@@ -342,12 +362,14 @@ overrides:
 **Purpose:** Ensure policy decisions are secure and auditable.
 
 **Implementation:**
+
 - **Deterministic evaluation** order
 - **Rule precedence** with deny rules first
 - **Pattern validation** before matching
 - **Decision logging** for audit
 
 **Security Benefits:**
+
 - Predictable policy behavior
 - Secure default decisions
 - Auditable policy evaluation
@@ -358,12 +380,14 @@ overrides:
 **Purpose:** Allow granular control while maintaining security.
 
 **Implementation:**
+
 - **Per-host overrides** for specific limits
 - **Per-tag overrides** for environment limits
 - **Override precedence** (alias > tag > global)
 - **Override validation** before application
 
 **Security Benefits:**
+
 - Granular security control
 - Environment-specific policies
 - Maintains security boundaries
@@ -405,6 +429,7 @@ overrides:
 ### Security Features Supporting Compliance
 
 **Features that can assist with:**
+
 - **Access Control:** Policy-based command authorization
 - **Audit Trail:** Complete JSON audit logs
 - **Encryption:** SSH transport encryption (Ed25519/RSA keys)
@@ -419,12 +444,14 @@ overrides:
 ### Real-Time Monitoring
 
 **Metrics Tracked:**
+
 - **Policy violations** (denied commands)
 - **Execution failures** (timeouts, errors)
 - **Resource usage** (CPU, memory, connections)
 - **Network access** (unauthorized IPs)
 
 **Alerting:**
+
 - **Repeated policy violations** from same source
 - **Unexpected target IPs** in connections
 - **Resource exhaustion** warnings
@@ -433,12 +460,14 @@ overrides:
 ### Incident Response
 
 **Detection:**
+
 - **Audit log analysis** for suspicious patterns
 - **Policy violation correlation** across hosts
 - **Resource usage anomalies** detection
 - **Network access violations** monitoring
 
 **Response:**
+
 - **Immediate policy updates** for new threats
 - **Host isolation** for compromised systems
 - **Credential rotation** for exposed keys

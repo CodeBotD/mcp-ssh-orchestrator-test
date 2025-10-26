@@ -11,6 +11,7 @@ We welcome contributions to MCP SSH Orchestrator! This guide covers how to set u
 ### Prerequisites
 
 **Required Software:**
+
 - Python 3.11+
 - Docker and Docker Compose
 - Git
@@ -18,6 +19,7 @@ We welcome contributions to MCP SSH Orchestrator! This guide covers how to set u
 - Code editor (VS Code recommended)
 
 **Optional Tools:**
+
 - Poetry (for dependency management)
 - Pre-commit hooks
 - Docker Desktop
@@ -108,24 +110,28 @@ tests/
 ### Key Components
 
 **MCP Server (`mcp_server.py`):**
+
 - Implements MCP protocol
 - Handles tool registration
 - Manages client sessions
 - Provides audit logging
 
 **Policy Engine (`policy.py`):**
+
 - Evaluates command policies
 - Manages security rules
 - Handles network filtering
 - Provides compliance reporting
 
 **SSH Client (`ssh_client.py`):**
+
 - Wraps SSH connections
 - Manages authentication
 - Handles command execution
 - Provides error handling
 
 **Configuration (`config.py`):**
+
 - Loads YAML configurations
 - Validates settings
 - Manages secrets
@@ -136,6 +142,7 @@ tests/
 ### Python Style
 
 **Code Formatting:**
+
 - Use Black for code formatting
 - Use isort for import sorting
 - Follow PEP 8 guidelines
@@ -360,6 +367,7 @@ git push origin feature/new-policy-rule --force-with-lease
 ### Unit Tests
 
 **Test Coverage:**
+
 - Aim for 90%+ code coverage
 - Test all public methods
 - Test error conditions
@@ -434,6 +442,7 @@ def test_concurrent_ssh_connections():
 ### Wiki Updates
 
 **Documentation Standards:**
+
 - Use clear, concise language
 - Include code examples
 - Provide practical use cases
@@ -514,6 +523,7 @@ def ssh_run(alias: str, command: str) -> Dict[str, Any]:
 ### Version Management
 
 **Semantic Versioning:**
+
 - MAJOR: Breaking changes
 - MINOR: New features
 - PATCH: Bug fixes
@@ -542,6 +552,7 @@ version = "0.2.0"
 ### Release Checklist
 
 **Pre-release:**
+
 - [ ] All tests passing
 - [ ] Documentation updated
 - [ ] CHANGELOG.md updated
@@ -549,6 +560,7 @@ version = "0.2.0"
 - [ ] Security review completed
 
 **Release:**
+
 - [ ] Create release tag
 - [ ] Build Docker image
 - [ ] Push to registry
@@ -560,12 +572,14 @@ version = "0.2.0"
 ### Code of Conduct
 
 **Our Pledge:**
+
 - Be respectful and inclusive
 - Welcome newcomers
 - Focus on constructive feedback
 - Respect different viewpoints
 
 **Reporting Issues:**
+
 - Use GitHub issues for bugs
 - Use discussions for questions
 - Be specific and provide context
@@ -574,12 +588,14 @@ version = "0.2.0"
 ### Getting Help
 
 **Resources:**
+
 - GitHub Discussions for questions
 - GitHub Issues for bugs
 - Wiki documentation
 - Code examples
 
 **Contributing:**
+
 - Start with small fixes
 - Ask questions early
 - Follow coding standards

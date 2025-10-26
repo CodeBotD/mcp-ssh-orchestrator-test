@@ -35,6 +35,7 @@ Based on [Docker's MCP Security Analysis](https://www.docker.com/blog/mcp-securi
 ### 1. Misconfigurations & Weak Defaults
 
 **Examples:**
+
 - Running servers directly on the host with broad privileges
 - Unrestricted network egress from tools to the public internet
 - Unvetted catalogs/registries in client configs
@@ -55,6 +56,7 @@ mcpServers:
 ### 2. Malicious or Compromised Servers
 
 **Examples:**
+
 - Typosquatting/poisoned images or unsigned builds
 - Hidden side effects or altered tool metadata
 - Command injection enabling arbitrary code execution (e.g., CVE-2025-6514)
@@ -72,6 +74,7 @@ pip install mcp-ssh-orchestrator-malicious  # Typosquatting
 ### 3. Secret Management Failures
 
 **Examples:**
+
 - Plaintext credentials in environment variables, prompts, or tool arguments
 - Leakage via tool outputs or model completions
 - Secrets stored in client configuration files
@@ -93,6 +96,7 @@ pip install mcp-ssh-orchestrator-malicious  # Typosquatting
 ### 4. Prompt Injection & Tool Poisoning
 
 **Examples:**
+
 - Hostile content instructs the model to exfiltrate data using available tools
 - Tool poisoning/shadowing with misleading descriptions
 - Unexpected defaults that steer the agent toward risky actions
@@ -191,6 +195,7 @@ USER appuser
 ```
 
 **Protection Against:**
+
 - Host privilege escalation
 - Resource exhaustion attacks
 - File system tampering
@@ -206,6 +211,7 @@ rules:
 ```
 
 **Protection Against:**
+
 - Unauthorized command execution
 - Privilege escalation
 - Lateral movement
@@ -223,6 +229,7 @@ network:
 ```
 
 **Protection Against:**
+
 - External network access
 - DNS poisoning attacks
 - Unauthorized host connections
@@ -241,6 +248,7 @@ network:
 ```
 
 **Protection Against:**
+
 - Unauthorized access attempts
 - Data exfiltration
 - Compliance violations
