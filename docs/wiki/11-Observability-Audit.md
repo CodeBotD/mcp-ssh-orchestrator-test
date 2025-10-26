@@ -395,6 +395,25 @@ docker run --log-driver journald \
   mcp-ssh-orchestrator:latest
 ```
 
+### Real Example Sequence
+
+Here's what gets logged for a simple `hostname` command on a Proxmox host:
+
+```json
+{"type": "policy_decision", "ts": 1761489054.1433952, "alias": "Proxmox Prod 01", "hash": "abc123", "allowed": true}
+{"type": "progress", "ts": 1761489054.2000000, "task_id": "task_xyz", "phase": "connecting", "bytes_read": 0, "elapsed_ms": 50}
+{"type": "progress", "ts": 1761489054.4500000, "task_id": "task_xyz", "phase": "connected", "bytes_read": 0, "elapsed_ms": 250}
+{"type": "progress", "ts": 1761489054.7000000, "task_id": "task_xyz", "phase": "running", "bytes_read": 0, "elapsed_ms": 500}
+{"type": "audit", "ts": 1761489054.6500000, "alias": "Proxmox Prod 01", "hash": "abc123", "exit_code": 0, "duration_ms": 650, "bytes_out": 25, "bytes_err": 0, "cancelled": false, "timeout": false, "target_ip": "10.0.0.50"}
+{"type": "trace", "op": "run_done", "elapsed_ms": 700}
+```
+
+This sequence shows:
+1. **Policy decision** (command allowed)
+2. **Progress logs** during connection and execution
+3. **Final audit log** with execution results
+4. **Trace log** marking completion
+
 ## Important Notes
 
 1. **All logs go to stderr** - This is intentional to separate audit logs from MCP protocol responses
