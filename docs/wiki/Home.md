@@ -1,7 +1,7 @@
 # mcp-ssh-orchestrator
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/samerfarida/mcp-ssh-orchestrator/main/assets/logo/logo.svg" alt="MCP SSH Orchestrator Logo" width="200" height="200">
+  <img src="https://raw.githubusercontent.com/samerfarida/mcp-ssh-orchestrator/main/assets/logo/logo-v1.png" alt="MCP SSH Orchestrator Logo" width="200" height="200">
   <h3>A secure SSH fleet orchestrator built as a Model Context Protocol (MCP) server</h3>
   <p>Execute commands across your server fleet with policy-based access control, network filtering, and comprehensive audit logging.</p>
 </div>

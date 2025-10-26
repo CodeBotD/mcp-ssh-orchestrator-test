@@ -4,97 +4,24 @@ This directory contains logo assets for the MCP SSH Orchestrator project.
 
 ## Current Logo
 
-**Primary Logo**: `logo-v1.png` - A minimalist icon featuring:
-- Split brain (left: human brain, right: AI prompt symbol `>`)
-- Security padlock
-- Hexagonal network structure (6 nodes)
+**Primary Logo**: `logo-v1.png`
+
+A minimalist icon featuring:
+- Split brain icon (left: human brain, right: AI prompt symbol `>/`)
+- Security padlock symbol
+- Hexagonal network structure (6 interconnected nodes)
 - Bright cyan color on black background with white circular outline
 
-## Logo Design Concept
+**Design Concept:**
+The logo represents AI-powered security orchestration with a modern, technical aesthetic.
 
-The logo represents:
-- **AI/Machine Learning**: Split brain icon with prompt symbol representing AI thinking
-- **Security**: Padlock symbol for security and protection
-- **Network Orchestration**: Hexagonal network structure connecting multiple nodes
-- **Modern Technology**: Clean, minimalist design suitable for technical applications
+## Logo Usage
 
-## Color Palette
-
-- **Primary**: `#2563eb` (Blue) - Trust, technology
-- **Secondary**: `#059669` (Green) - Success, security
-- **Accent**: `#dc2626` (Red) - Alert, important
-- **Neutral**: `#374151` (Gray) - Professional
-
-## Required Sizes
-
-- **Favicon**: 32x32px, 16x16px
-- **GitHub**: 128x128px (square)
-- **README**: 200x200px (square)
-- **Docker Hub**: 512x512px (square)
-- **High-res**: 1024x1024px (vector)
-
-## Formats Needed
-
-- **SVG** (vector, scalable)
-- **PNG** (with transparency)
-- **ICO** (for favicons)
-
-## Design Tools
-
-### Free Options
-1. **Figma** (web-based, professional)
-2. **Canva** (templates, easy)
-3. **GIMP** (free Photoshop alternative)
-4. **Inkscape** (vector graphics)
-
-### AI Tools
-1. **Midjourney** (high quality)
-2. **DALL-E** (via ChatGPT)
-3. **Stable Diffusion** (free)
-
-## AI Prompt
-
-```
-Create a modern, professional logo for 'MCP SSH Orchestrator' - a tool for managing multiple SSH servers. Include elements: terminal/command line, network connections, security shield, clean typography. Colors: blue (#2563eb), green (#059669), gray (#374151). Style: minimalist, technical, trustworthy. Square format, high contrast, suitable for GitHub and Docker Hub.
-```
-
-## Logo Concepts
-
-### Concept 1: Terminal + Network
-```
-┌─────────────────┐
-│  $ ssh server1  │
-│  $ ssh server2  │
-│  $ ssh server3  │
-└─────────────────┘
-    ↕️  ↕️  ↕️
-   [MCP] [SSH] [ORCH]
-```
-
-### Concept 2: Shield + Terminal
-```
-    🔒
-   ┌───┐
-   │ $ │  MCP-SSH
-   └───┘  ORCHESTRATOR
-```
-
-### Concept 3: Network Nodes
-```
-    ●───●───●
-   ╱   ╱   ╱
-  ●   ●   ●
-   ╲   ╲   ╲
-    ●───●───●
-```
-
-## Usage
-
-The primary logo `logo-v1.png` is currently used in:
+The primary logo `logo-v1.png` is used in:
 - Main README.md (200x200px)
 - Repository branding
+- Documentation
 
-Additional logo assets:
-- `logo.svg` - SVG version (for high-res needs)
-- `favicon.svg` - Browser favicon
-- ASCII logos for terminal usage
+## Additional Assets
+
+- `favicon.svg` - Browser favicon (32x32px)
