@@ -24,8 +24,8 @@ docs/wiki/
 ├── 11-Observability-Audit.md  # Monitoring and compliance
 ├── 12-Troubleshooting.md     # Common issues and solutions
 ├── 13-Contributing.md        # Development workflow
-├── 15-FAQ.md                 # Frequently asked questions
-├── 16-Glossary.md            # Terms and definitions
+├── 14-FAQ.md                 # Frequently asked questions
+├── 15-Glossary.md            # Terms and definitions
 └── assets/                   # Images, diagrams, examples
     ├── diagrams/
     │   ├── architecture.mmd

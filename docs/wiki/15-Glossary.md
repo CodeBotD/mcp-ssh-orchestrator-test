@@ -338,7 +338,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 ## Next Steps
 
-- **[FAQ](15-FAQ)** - Common questions and answers
+- **[FAQ](14-FAQ)** - Common questions and answers
 - **[Troubleshooting](12-Troubleshooting)** - Problem-solving guide
 - **[Security Model](05-Security-Model)** - Security architecture details
 - **[Architecture](04-Architecture)** - System design and components

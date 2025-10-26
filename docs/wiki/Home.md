@@ -136,8 +136,8 @@ This wiki is organized into 16 comprehensive sections:
 
 ### **Project Information**
 - **[CHANGELOG](../CHANGELOG.md)** - Version history and releases
-- **[FAQ](15-FAQ)** - Frequently asked questions
-- **[Glossary](16-Glossary)** - Terms and definitions
+- **[FAQ](14-FAQ)** - Frequently asked questions
+- **[Glossary](15-Glossary)** - Terms and definitions
 
 ## 🔧 MCP Tools Quick Reference
 

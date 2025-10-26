@@ -599,5 +599,5 @@ echo "Debug package created: $DEBUG_DIR.tar.gz"
 
 - **[Observability & Audit](11-Observability-Audit)** - Monitoring and logging setup
 - **[Security Model](05-Security-Model)** - Security architecture details
-- **[FAQ](15-FAQ)** - Common troubleshooting questions
+- **[FAQ](14-FAQ)** - Common troubleshooting questions
 - **[Contributing](13-Contributing)** - How to contribute fixes and improvements

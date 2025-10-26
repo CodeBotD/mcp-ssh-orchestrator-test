@@ -438,4 +438,4 @@ This sequence shows:
 - **[Security Model](05-Security-Model)** - Understanding the security architecture
 - **[Configuration](06-Configuration)** - Setting up hosts, credentials, and policies
 - **[Deployment](09-Deployment)** - Production deployment with logging
-- **[FAQ](15-FAQ)** - Common observability questions
+- **[FAQ](14-FAQ)** - Common observability questions
