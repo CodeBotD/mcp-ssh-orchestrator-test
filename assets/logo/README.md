@@ -2,13 +2,21 @@
 
 This directory contains logo assets for the MCP SSH Orchestrator project.
 
+## Current Logo
+
+**Primary Logo**: `logo-v1.png` - A minimalist icon featuring:
+- Split brain (left: human brain, right: AI prompt symbol `>`)
+- Security padlock
+- Hexagonal network structure (6 nodes)
+- Bright cyan color on black background with white circular outline
+
 ## Logo Design Concept
 
 The logo represents:
-- **SSH**: Terminal/command line interface
-- **Orchestration**: Multiple servers, coordination
-- **Security**: Shield, lock, or secure connection
-- **MCP**: Model Context Protocol integration
+- **AI/Machine Learning**: Split brain icon with prompt symbol representing AI thinking
+- **Security**: Padlock symbol for security and protection
+- **Network Orchestration**: Hexagonal network structure connecting multiple nodes
+- **Modern Technology**: Clean, minimalist design suitable for technical applications
 
 ## Color Palette
 
@@ -82,4 +90,11 @@ Create a modern, professional logo for 'MCP SSH Orchestrator' - a tool for manag
 
 ## Usage
 
-Once created, place the logo files in this directory and update the main README.md to reference them.
+The primary logo `logo-v1.png` is currently used in:
+- Main README.md (200x200px)
+- Repository branding
+
+Additional logo assets:
+- `logo.svg` - SVG version (for high-res needs)
+- `favicon.svg` - Browser favicon
+- ASCII logos for terminal usage
