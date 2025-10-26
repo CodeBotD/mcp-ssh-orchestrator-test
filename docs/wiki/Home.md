@@ -176,11 +176,12 @@ This project implements comprehensive security controls:
 - Per-host and per-tag overrides
 - Dangerous command substring blocking
 
-### **Audit & Compliance**
+### **Audit & Monitoring**
 - JSON audit logs to stderr
 - Complete operation trail
-- SOC 2 / ISO 27001 compatible
-- PCI-DSS and HIPAA ready
+- OWASP LLM07 (Insecure Plugin Design) mitigation
+- MITRE ATT&CK aligned logging
+- Security features support compliance efforts
 
 ## 🤝 Contributing
 

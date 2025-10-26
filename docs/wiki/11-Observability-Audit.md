@@ -230,12 +230,14 @@ groups:
           summary: "Authentication failure spike detected"
 ```
 
-### Compliance Reporting
+### Security Reporting for Compliance Efforts
 
-**SOC 2 Compliance:**
+*Note: This tool provides security features and audit capabilities that can support compliance efforts. Actual compliance certification is the responsibility of the deploying organization.*
+
+**Security Metrics for SOC 2 Support:**
 ```python
-# Generate compliance report
-def generate_soc2_report(start_date, end_date):
+# Security controls that can support SOC 2 requirements
+def generate_security_report(start_date, end_date):
     return {
         "access_controls": {
             "total_commands": ssh_commands_total.sum(),
@@ -256,22 +258,22 @@ def generate_soc2_report(start_date, end_date):
     }
 ```
 
-**PCI DSS Compliance:**
+**Security Metrics for PCI DSS Support:**
 ```python
-# PCI DSS requirements
-def generate_pci_report():
+# Security controls that can support PCI DSS requirements
+def generate_pci_metrics():
     return {
-        "requirement_1": {
+        "network_security": {
             "network_security": verify_network_policies(),
             "firewall_rules": get_firewall_rules(),
             "network_segmentation": verify_network_segmentation()
         },
-        "requirement_2": {
-            "default_passwords": check_default_passwords(),
+        "access_control": {
+            "authentication": verify_auth_controls(),
             "system_configuration": verify_system_configuration(),
             "security_patches": check_security_patches()
         },
-        "requirement_3": {
+        "data_protection": {
             "data_encryption": verify_data_encryption(),
             "key_management": verify_key_management(),
             "data_protection": verify_data_protection()

@@ -27,8 +27,11 @@ This project implements MCP security best practices:
 - **Comprehensive audit logging** for all operations
 - **Secret management** via Docker secrets or environment variables
 
-## Compliance
+## Security Framework Alignment
 
-- SOC 2 / ISO 27001 compatible
-- PCI-DSS compliant logging
-- HIPAA-ready audit trails
+- **OWASP LLM07** (Insecure Plugin Design) - Policy-based command validation
+- **OWASP LLM08** (Excessive Agency) - Role-based access restrictions
+- **MITRE ATT&CK** - SSH protocol monitoring and logging
+- Security features support compliance efforts (SOC 2, ISO 27001, PCI-DSS, HIPAA)
+
+*Note: Compliance is the responsibility of the deploying organization. This tool provides security controls that can support compliance frameworks.*

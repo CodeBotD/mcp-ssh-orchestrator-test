@@ -369,31 +369,50 @@ overrides:
 - Maintains security boundaries
 - Enables compliance requirements
 
-## Compliance & Standards
+## Security Framework Alignment
 
-### SOC 2 / ISO 27001
+### OWASP LLM Top 10
 
-**Controls Implemented:**
+**LLM07: Insecure Plugin Design** ✅
+- Policy-based command validation prevents unauthorized execution
+- Input sanitization and dangerous command blocking
+- Access control for AI plugin operations
+
+**LLM08: Excessive Agency** ✅
+- Role-based restrictions via host tags
+- Deny-by-default security model
+- Command pattern matching limits autonomous actions
+
+**LLM01: Prompt Injection Mitigation**
+- SSH command validation prevents injection attacks
+- Network egress controls block unauthorized connections
+- DNS verification prevents DNS rebinding attacks
+
+### MITRE ATT&CK Alignment
+
+**T1071: Application Layer Protocol**
+- SSH protocol monitoring and control
+- Command and response logging
+
+**T1071.004: DNS**
+- DNS resolution verification
+- Prevents DNS-based attack vectors
+
+**T1659: Content Injection**
+- Policy-based command filtering
+- Dangerous command substring blocking
+
+### Security Features Supporting Compliance
+
+**Features that can assist with:**
 - **Access Control:** Policy-based command authorization
 - **Audit Trail:** Complete JSON audit logs
-- **Encryption:** SSH transport encryption
+- **Encryption:** SSH transport encryption (Ed25519/RSA keys)
 - **Secrets Management:** Docker secrets or environment variables
-
-### PCI-DSS
-
-**Controls Implemented:**
-- **Logging:** All administrative access logged
 - **Network Segmentation:** IP allowlists enforce boundaries
-- **Strong Cryptography:** Ed25519/RSA keys, SSH protocol
-- **Access Control:** Deny-by-default policy model
+- **Role-Based Access:** Tag-based permission management
 
-### HIPAA
-
-**Controls Implemented:**
-- **Access Controls:** Policy-based restrictions
-- **Audit Logs:** Complete audit trail of PHI system access
-- **Encryption:** SSH transport encryption
-- **Access Management:** Role-based access via tags
+*Note: Compliance is ultimately the responsibility of the deploying organization. This tool provides security controls that can support compliance frameworks such as SOC 2, ISO 27001, PCI-DSS, HIPAA, etc., but is not itself certified to these standards.*
 
 ## Security Monitoring
 

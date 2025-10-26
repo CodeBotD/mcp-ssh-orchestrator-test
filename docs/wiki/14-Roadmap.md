@@ -24,7 +24,7 @@ This roadmap outlines our development priorities, upcoming features, and long-te
 - **Enhanced Policy Engine**: Support for complex policy rules including time-based restrictions, resource limits, and conditional logic
 - **Advanced Authentication**: Multi-factor authentication support, certificate-based authentication, and OAuth2 integration
 - **Network Security**: VPN integration, network segmentation, and advanced firewall rules
-- **Compliance Features**: SOC 2, PCI DSS, and HIPAA compliance reporting
+- **Security Reporting**: Enhanced audit reporting features to support compliance efforts (SOC 2, PCI DSS, HIPAA)
 
 **Operational Improvements:**
 - **High Availability**: Load balancing, failover, and cluster support

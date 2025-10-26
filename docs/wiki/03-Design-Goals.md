@@ -154,16 +154,19 @@ services:
 - **Graceful error handling** with proper exit codes
 - **Hot reload** of configuration (`ssh_reload_config`)
 
-### 8. Compliance Ready
+### 8. Security & Audit Ready
 
-**Principle:** Built-in support for common compliance requirements.
+**Principle:** Security features that can support compliance and audit requirements.
 
 **Implementation:**
-- **SOC 2 / ISO 27001** compatible audit trails
-- **PCI-DSS** compliant logging
-- **HIPAA** ready audit trails
+- **OWASP LLM07** mitigation (Insecure Plugin Design)
+- **MITRE ATT&CK** aligned logging and monitoring
+- **Complete audit trails** for all operations
 - **Immutable logs** (append-only)
-- **Retention policies** via log rotation
+- **Policy-based access control** for compliance
+- **Dangerous command blocking** for security
+
+**Note:** Compliance is the responsibility of the deploying organization. This tool provides security controls that can support frameworks like SOC 2, ISO 27001, PCI-DSS, and HIPAA.
 
 ## Design Constraints
 

@@ -46,7 +46,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Compliance**
 - **Definition**: Adherence to laws, regulations, and industry standards
-- **Context**: mcp-ssh-orchestrator supports SOC 2, PCI DSS, and other compliance frameworks
+- **Context**: mcp-ssh-orchestrator provides security features (audit logs, access control, encryption) that can support compliance efforts. Compliance is the responsibility of the deploying organization.
 
 **Container**
 - **Definition**: A lightweight, portable unit of software that packages code and dependencies
@@ -222,7 +222,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **SOC 2**
 - **Definition**: System and Organization Controls 2, a security framework for service organizations
-- **Context**: mcp-ssh-orchestrator supports SOC 2 compliance requirements
+- **Context**: mcp-ssh-orchestrator provides security controls (audit logs, access control, encryption) that can support SOC 2 requirements. SOC 2 compliance is achieved through organizational certification, not by the tool itself.
 
 **SSH**
 - **Definition**: Secure Shell, a cryptographic network protocol for secure remote access

@@ -488,26 +488,50 @@ docker logs -f mcp-ssh-orchestrator 2>&1 | \
 4. **Contain affected hosts**
 5. **Rotate credentials**
 
-## Compliance Considerations
+## Security Framework Alignment
 
-### SOC 2 / ISO 27001
+### OWASP LLM Top 10 Coverage
 
-- **Access Control**: Policy enforcement provides least-privilege access
-- **Audit Trail**: JSON logs provide non-repudiation
-- **Encryption**: SSH provides transport encryption
-- **Secrets Management**: Docker secrets or env vars (not hardcoded)
+**LLM07: Insecure Plugin Design** ✅
+- Policy-based command validation prevents unauthorized execution
+- Input sanitization and dangerous command blocking
+- Access control for AI plugin operations
 
-### PCI-DSS
+**LLM08: Excessive Agency** ✅
+- Role-based restrictions via host tags
+- Deny-by-default security model
+- Command pattern matching limits autonomous actions
 
-- **Logging**: All administrative access logged
-- **Network Segmentation**: IP allowlists enforce boundaries
-- **Strong Cryptography**: Ed25519/RSA keys, SSH protocol
+**LLM01: Prompt Injection Mitigation**
+- SSH command validation prevents injection attacks
+- Network egress controls block unauthorized connections
+- DNS verification prevents DNS rebinding attacks
 
-### HIPAA
+### MITRE ATT&CK Alignment
 
-- **Access Controls**: Policy-based restrictions
-- **Audit Logs**: Complete audit trail of PHI system access
-- **Encryption**: SSH transport encryption
+- **T1071**: Application Layer Protocol (SSH monitoring)
+- **T1071.004**: DNS (DNS resolution verification)
+- **T1659**: Content Injection (policy-based command filtering)
+
+### Security Features Supporting Compliance
+
+This tool provides security controls that can support organizations seeking compliance with frameworks like SOC 2, ISO 27001, PCI-DSS, and HIPAA:
+
+**Access Control & Audit**
+- Policy enforcement provides least-privilege access
+- JSON logs provide non-repudiation and complete audit trails
+- All administrative access logged
+
+**Encryption & Network Security**
+- SSH provides transport encryption
+- Ed25519/RSA keys for strong cryptography
+- IP allowlists enforce network segmentation
+
+**Secrets Management**
+- Docker secrets or environment variables (not hardcoded)
+- No persistent credential storage
+
+**Note**: Compliance is ultimately the responsibility of the deploying organization. This tool provides security features that can support compliance efforts but is not itself certified to these standards.
 
 ## Security Checklist
 
