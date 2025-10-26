@@ -50,6 +50,9 @@ htmlcov/
 .dmypy.json
 dmypy.json
 
+# ruff
+.ruff_cache/
+
 # Secrets and credentials
 config/servers.yml
 config/credentials.yml
