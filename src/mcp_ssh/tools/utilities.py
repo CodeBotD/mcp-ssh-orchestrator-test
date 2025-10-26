@@ -65,7 +65,7 @@ class AsyncTaskManager:
         self._tasks: dict[str, dict[str, Any]] = {}  # task_id -> TaskInfo
         self._results: dict[
             str, dict[str, Any]
-        ] = {}  # task_id -> TaskResult (TTL: 5min)
+        ] = {}  # task_id -> TaskResult (TTL: 5min) - Black formatted
         self._output_buffers: dict[str, deque] = {}  # task_id -> deque of output lines
         self._notification_callback: Callable | None = None
         self._cleanup_thread = None
