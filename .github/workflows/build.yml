@@ -61,7 +61,7 @@ jobs:
         uses: codecov/codecov-action@v5
         if: matrix.python-version == '3.11'
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
           flags: unittests
         continue-on-error: true
 
