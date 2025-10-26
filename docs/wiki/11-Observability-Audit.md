@@ -11,6 +11,7 @@ MCP SSH Orchestrator provides observability through structured JSON logging to s
 ### Log Output Destination
 
 **Log Separation:**
+
 - **stderr**: All audit, policy decision, and progress logs (structured JSON)
 - **stdout**: MCP protocol responses (JSON-RPC 2.0)
 
@@ -20,10 +21,10 @@ This separation allows Docker to capture audit logs separately from MCP response
 
 MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 
-1. **Policy Decision Log** - Before every command execution
-2. **Audit Log** - After command execution completes  
-3. **Progress Log** - During long-running commands (every 0.5s)
-4. **Error/Trace Log** - On exceptions or function completion
+- 1. **Policy Decision Log** - Before every command execution
+- 2. **Audit Log** - After command execution completes  
+- 3. **Progress Log** - During long-running commands (every 0.5s)
+- 4. **Error/Trace Log** - On exceptions or function completion
 
 ### 1. Policy Decision Log
 
@@ -41,6 +42,7 @@ MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 ```
 
 **Fields:**
+
 - `type`: Always `"policy_decision"`
 - `ts`: Unix timestamp (seconds since epoch)
 - `alias`: Host alias from servers.yml
@@ -80,6 +82,7 @@ MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 ```
 
 **Fields:**
+
 - `type`: Always `"audit"`
 - `ts`: Unix timestamp (seconds since epoch)
 - `alias`: Host alias from servers.yml
@@ -109,6 +112,7 @@ MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 ```
 
 **Fields:**
+
 - `type`: Always `"progress"`
 - `ts`: Unix timestamp
 - `task_id`: Unique task identifier
@@ -150,6 +154,7 @@ MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 ```
 
 **Fields:**
+
 - `level`: "error" | "warn"
 - `msg`: Error message identifier
 - `error`: Error details
