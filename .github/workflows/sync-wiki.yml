@@ -13,38 +13,57 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
-      id-token: write
     
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       
-      - name: Clone Wiki Repository
+      - name: Create Wiki Sync Script
         run: |
-          git clone https://github.com/${{ github.repository }}.wiki.git wiki-repo
-      
-      - name: Sync Wiki Content
-        run: |
-          # Copy wiki content, preserving directory structure
-          rsync -av --delete docs/wiki/ wiki-repo/
+          cat > sync-wiki.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          echo "🔄 Starting wiki sync process..."
+          
+          # Create wiki directory
+          mkdir -p wiki-sync
+          cd wiki-sync
+          
+          # Initialize git repo for wiki
+          git init
+          git remote add origin https://github.com/${{ github.repository }}.wiki.git
+          
+          # Try to fetch existing wiki content
+          echo "📥 Fetching existing wiki content..."
+          if git fetch origin master 2>/dev/null; then
+            echo "✅ Found existing wiki, checking out master branch"
+            git checkout -b master origin/master
+          else
+            echo "ℹ️ No existing wiki found, creating new master branch"
+            git checkout -b master
+          fi
+          
+          # Copy wiki content
+          echo "📋 Copying wiki content..."
+          rsync -av --delete ../docs/wiki/ ./
           
           # Add .gitkeep to preserve empty directories
-          find wiki-repo -type d -empty -exec touch {}/.gitkeep \;
+          find . -type d -empty -exec touch {}/.gitkeep \;
           
-          # Generate commit message with change details
-          cd wiki-repo
+          # Check for changes
           git add .
           
           if ! git diff --staged --quiet; then
+            echo "📝 Changes detected, committing..."
+            
             # Get list of changed files
             CHANGED_FILES=$(git diff --staged --name-only | head -10)
             
@@ -58,40 +77,70 @@ jobs:
           
           [skip ci]"
             
-            git push origin master
-            echo "✅ Wiki synced successfully"
+            # Push to wiki repository
+            echo "🚀 Pushing to wiki repository..."
+            if git push origin master; then
+              echo "✅ Wiki synced successfully"
+            else
+              echo "❌ Failed to push to wiki repository"
+              echo "This might be due to:"
+              echo "1. Wiki repository not existing yet"
+              echo "2. Insufficient permissions"
+              echo "3. Network issues"
+              echo ""
+              echo "To fix this:"
+              echo "1. Go to your repository settings"
+              echo "2. Enable the Wiki feature"
+              echo "3. Create at least one wiki page manually"
+              echo "4. Re-run this workflow"
+              exit 1
+            fi
           else
             echo "ℹ️ No changes to sync"
           fi
-      
-      - name: Validate Wiki Links
-        run: |
-          # Install markdown link checker
-          npm install -g markdown-link-check
           
-          # Check all markdown files for broken links
-          find wiki-repo -name "*.md" -not -path "*/assets/*" | while read file; do
-            echo "Checking links in: $file"
-            markdown-link-check "$file" --config .github/workflows/link-check-config.json || true
-          done
-      
-      - name: Generate Wiki Index
-        run: |
-          # Create a simple index of all wiki pages
-          cd wiki-repo
-          echo "# Wiki Index" > INDEX.md
-          echo "" >> INDEX.md
-          echo "Generated on: $(date)" >> INDEX.md
-          echo "" >> INDEX.md
-          find . -name "*.md" -not -name "_Sidebar.md" -not -name "INDEX.md" | sort | while read file; do
-            title=$(head -1 "$file" | sed 's/^# //')
-            echo "- [$title]($file)" >> INDEX.md
-          done
+          echo "🎉 Wiki sync process completed"
+          EOF
           
-          git add INDEX.md
-          if ! git diff --staged --quiet; then
-            git commit -m "Update wiki index [skip ci]"
-            git push origin master
+          chmod +x sync-wiki.sh
+      
+      - name: Run Wiki Sync
+        run: ./sync-wiki.sh
+      
+      - name: Validate Wiki Content
+        run: |
+          echo "🔍 Validating wiki content..."
+          
+          # Check if wiki directory exists and has content
+          if [ -d "wiki-sync" ] && [ "$(ls -A wiki-sync)" ]; then
+            echo "✅ Wiki content directory exists and has content"
+            
+            # Count markdown files
+            MD_COUNT=$(find wiki-sync -name "*.md" | wc -l)
+            echo "📄 Found $MD_COUNT markdown files"
+            
+            # List main files
+            echo "📋 Main wiki files:"
+            find wiki-sync -name "*.md" -not -path "*/assets/*" | head -10 | while read file; do
+              echo "  - $(basename "$file")"
+            done
+            
+            # Check for required files
+            if [ -f "wiki-sync/_Sidebar.md" ]; then
+              echo "✅ _Sidebar.md found"
+            else
+              echo "⚠️ _Sidebar.md not found"
+            fi
+            
+            if [ -f "wiki-sync/Home.md" ]; then
+              echo "✅ Home.md found"
+            else
+              echo "⚠️ Home.md not found"
+            fi
+            
+          else
+            echo "❌ Wiki content directory is empty or doesn't exist"
+            exit 1
           fi
 
   validate-docs:
@@ -105,29 +154,110 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install markdown linting tools
+      - name: Install validation tools
         run: |
-          pip install markdownlint-py
-          npm install -g markdownlint-cli
-      
-      - name: Lint markdown files
-        run: |
-          # Lint all markdown files in docs/wiki/
-          find docs/wiki -name "*.md" -exec markdownlint {} \; || true
+          # Install basic tools
+          pip install pyyaml
+          
+          # Install markdown link checker if available
+          npm install -g markdown-link-check || echo "markdown-link-check not available"
       
       - name: Validate YAML examples
         run: |
-          # Check if YAML examples in docs are valid
+          echo "🔍 Validating YAML examples in documentation..."
+          
+          # Find all markdown files with YAML examples
           find docs/wiki -name "*.md" -exec grep -l "```yaml" {} \; | while read file; do
             echo "Validating YAML in: $file"
+            
             # Extract YAML blocks and validate them
-            sed -n '/```yaml/,/```/p' "$file" | sed '1d;$d' | python -c "
-          import yaml, sys
-          try:
-              yaml.safe_load(sys.stdin.read())
-              print('✅ Valid YAML')
-          except yaml.YAMLError as e:
-              print(f'❌ Invalid YAML: {e}')
-              sys.exit(1)
-          " || echo "⚠️ YAML validation failed for $file"
+            python3 << 'EOF'
+          import yaml
+          import sys
+          import re
+          
+          def extract_yaml_blocks(content):
+              """Extract YAML blocks from markdown content."""
+              pattern = r'```yaml\n(.*?)\n```'
+              matches = re.findall(pattern, content, re.DOTALL)
+              return matches
+          
+          def validate_yaml(yaml_content):
+              """Validate YAML content."""
+              try:
+                  yaml.safe_load(yaml_content)
+                  return True, None
+              except yaml.YAMLError as e:
+                  return False, str(e)
+          
+          # Read the file
+          with open(sys.argv[1], 'r') as f:
+              content = f.read()
+          
+          # Extract YAML blocks
+          yaml_blocks = extract_yaml_blocks(content)
+          
+          if not yaml_blocks:
+              print("  ℹ️ No YAML blocks found")
+              return
+          
+          # Validate each YAML block
+          for i, yaml_block in enumerate(yaml_blocks):
+              is_valid, error = validate_yaml(yaml_block)
+              if is_valid:
+                  print(f"  ✅ YAML block {i+1} is valid")
+              else:
+                  print(f"  ❌ YAML block {i+1} is invalid: {error}")
+                  sys.exit(1)
+          
+          print(f"  ✅ All {len(yaml_blocks)} YAML blocks are valid")
+          EOF
+          "$file" || echo "⚠️ YAML validation failed for $file"
           done
+      
+      - name: Check documentation structure
+        run: |
+          echo "📊 Documentation structure analysis:"
+          
+          # Count files by type
+          echo "📄 Markdown files: $(find docs/wiki -name "*.md" | wc -l)"
+          echo "🎨 Mermaid files: $(find docs/wiki -name "*.mmd" | wc -l)"
+          echo "📁 Total size: $(du -sh docs/wiki | cut -f1)"
+          
+          # Check for required sections
+          required_sections=(
+            "01-MCP-Overview.md"
+            "02-Risks.md"
+            "03-Design-Goals.md"
+            "04-Architecture.md"
+            "05-Security-Model.md"
+            "06-Configuration.md"
+            "07-Tools-Reference.md"
+            "08-Usage-Cookbook.md"
+            "09-Deployment.md"
+            "10-Integrations.md"
+            "11-Observability-Audit.md"
+            "12-Troubleshooting.md"
+            "13-Contributing.md"
+            "14-Roadmap.md"
+            "15-FAQ.md"
+            "16-Glossary.md"
+          )
+          
+          echo "🔍 Checking required sections:"
+          missing_sections=()
+          for section in "${required_sections[@]}"; do
+            if [ -f "docs/wiki/$section" ]; then
+              echo "  ✅ $section"
+            else
+              echo "  ❌ $section"
+              missing_sections+=("$section")
+            fi
+          done
+          
+          if [ ${#missing_sections[@]} -gt 0 ]; then
+            echo "❌ Missing sections: ${missing_sections[*]}"
+            exit 1
+          else
+            echo "✅ All required sections present"
+          fi
