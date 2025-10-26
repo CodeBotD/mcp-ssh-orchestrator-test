@@ -44,9 +44,10 @@ That's exactly what MCP SSH Orchestrator provides: **the power of AI-driven serv
 - ❌ **No privilege escalation**: Runs as non-root in containers
 - ❌ **Resource limits**: CPU and memory caps prevent DOS
 
-### 📊 **Production-Ready Audit & Compliance**
+### 📊 **Production-Ready Audit & Security**
+- **OWASP LLM Top 10 protected**: Mitigates LLM07 (Insecure Plugin Design), LLM08 (Excessive Agency), LLM01 (Prompt Injection)
+- **MITRE ATT&CK aligned**: Prevents T1071 (Application Layer Protocol), T1659 (Content Injection)
 - **Structured JSON audit logs**: Complete audit trail with timestamps, hashes, and IPs
-- **Compliance-supporting logs**: Can support SOC 2, ISO 27001, PCI-DSS, HIPAA reporting (certification is organization's responsibility)
 - **Forensics ready**: Command hashing, IP tracking, detailed metadata
 - **Real-time monitoring**: Progress logs for long-running tasks
 
@@ -164,7 +165,15 @@ rules:
     tags: ["web", "db"]  # Only on specific servers
 ```
 
-**[📖 Full Security Model Documentation](https://github.com/samerfarida/mcp-ssh-orchestrator/wiki/05-Security-Model)**
+### 🎯 **Protection Against Real Threats**
+
+MCP SSH Orchestrator directly addresses documented vulnerabilities in the MCP ecosystem:
+
+- **CVE-2025-49596**: Localhost-exposed MCP services → Mitigated with stdio-only transport
+- **CVE-2025-6514**: Command injection in MCP servers → Mitigated with policy-based validation
+- **43% of MCP servers** have command injection flaws → Zero-trust security model
+
+**[📖 Full Security Model Documentation](https://github.com/samerfarida/mcp-ssh-orchestrator/wiki/05-Security-Model)** | **[🚨 Security Risks Analysis](https://github.com/samerfarida/mcp-ssh-orchestrator/wiki/02-Risks)**
 
 ## 📚 Documentation
 
@@ -211,8 +220,9 @@ Your AI assistant gets 12 powerful tools with built-in security:
 
 - ✅ **Production-Ready Security**: OpenSSF Scorecard 7.5+ score
 - ✅ **Zero-Trust Architecture**: Deny-by-default, allow-by-exception
-- ✅ **Compliance-Supporting**: Structured audit logs for SOC 2, ISO 27001, PCI-DSS, HIPAA (certification is organization's responsibility)
-- ✅ **Battle-Tested**: Built on security-first principles
+- ✅ **OWASP LLM Top 10 Protected**: Mitigates insecure plugin design, excessive agency, prompt injection
+- ✅ **MITRE ATT&CK Aligned**: Prevents content injection and unauthorized protocol usage
+- ✅ **Battle-Tested**: Built on security-first principles against real CVEs (CVE-2025-49596, CVE-2025-6514)
 - ✅ **Easy Integration**: Works with Claude, ChatGPT, and any MCP client
 - ✅ **Open Source**: Apache 2.0 licensed, community-driven
 
