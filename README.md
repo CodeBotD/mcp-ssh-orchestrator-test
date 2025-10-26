@@ -1,4 +1,4 @@
-# mcp-ssh-orchestrator
+# MCP SSH Orchestrator
 
 <div align="center">
   <img src="assets/logo/logo-v1.png" alt="MCP SSH Orchestrator Logo" width="200" height="200">
