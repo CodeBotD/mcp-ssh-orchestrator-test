@@ -316,7 +316,7 @@ class AsyncTaskManager:
                     "total_lines": len(all_lines),
                     "has_more": len(all_lines) > max_lines,
                 }
-            
+
             # If no output buffer or empty buffer, check if task is completed and has result
             result = self._results.get(task_id)
             if result and result["expires"] > time.time():
@@ -331,7 +331,7 @@ class AsyncTaskManager:
                     "total_lines": len(all_lines),
                     "has_more": len(all_lines) > max_lines,
                 }
-            
+
             # Also check if task is still in _tasks but completed (no output buffer)
             task_info = self._tasks.get(task_id)
             if task_info and task_info.get("output"):
@@ -346,7 +346,7 @@ class AsyncTaskManager:
                     "total_lines": len(all_lines),
                     "has_more": len(all_lines) > max_lines,
                 }
-            
+
             return None
 
     def cancel_task(self, task_id: str) -> bool:
