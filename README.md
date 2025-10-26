@@ -232,7 +232,7 @@ Your AI assistant gets 12 powerful tools with built-in security:
 
 > *"This is what infrastructure-as-code should have been. Declarative security for AI access."* - Platform Engineer
 
-> *"The audit logs saved my butt during our SOC 2 audit."* - Security Engineer
+> *"The structured audit logs make incident response so much easier."* - Security Engineer
 
 ## 🤝 Contributing
 
