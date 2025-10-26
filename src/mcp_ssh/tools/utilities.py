@@ -303,20 +303,51 @@ class AsyncTaskManager:
     def get_task_output(self, task_id: str, max_lines: int = 50) -> dict[str, Any] | None:
         """Get recent output lines."""
         with self._lock:
+            # First check if task is still running and has output buffer
             output_buffer = self._output_buffers.get(task_id)
-            if not output_buffer:
-                return None
+            if output_buffer and len(output_buffer) > 0:
+                # Convert deque to list and get recent lines
+                all_lines = list(output_buffer)
+                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
 
-            # Convert deque to list and get recent lines
-            all_lines = list(output_buffer)
-            recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+                return {
+                    "task_id": task_id,
+                    "output_lines": recent_lines,
+                    "total_lines": len(all_lines),
+                    "has_more": len(all_lines) > max_lines,
+                }
+            
+            # If no output buffer or empty buffer, check if task is completed and has result
+            result = self._results.get(task_id)
+            if result and result["expires"] > time.time():
+                # Split the output into lines and return recent ones
+                output_text = result.get("output", "")
+                all_lines = output_text.split('\n') if output_text else []
+                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
 
-            return {
-                "task_id": task_id,
-                "output_lines": recent_lines,
-                "total_lines": len(all_lines),
-                "has_more": len(all_lines) > max_lines,
-            }
+                return {
+                    "task_id": task_id,
+                    "output_lines": recent_lines,
+                    "total_lines": len(all_lines),
+                    "has_more": len(all_lines) > max_lines,
+                }
+            
+            # Also check if task is still in _tasks but completed (no output buffer)
+            task_info = self._tasks.get(task_id)
+            if task_info and task_info.get("output"):
+                # Split the output into lines and return recent ones
+                output_text = task_info.get("output", "")
+                all_lines = output_text.split('\n') if output_text else []
+                recent_lines = all_lines[-max_lines:] if len(all_lines) > max_lines else all_lines
+
+                return {
+                    "task_id": task_id,
+                    "output_lines": recent_lines,
+                    "total_lines": len(all_lines),
+                    "has_more": len(all_lines) > max_lines,
+                }
+            
+            return None
 
     def cancel_task(self, task_id: str) -> bool:
         """Cancel a running task."""

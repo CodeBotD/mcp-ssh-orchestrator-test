@@ -1,0 +1,133 @@
+name: Sync Wiki Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+      - '.github/workflows/sync-wiki.yml'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Clone Wiki Repository
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki-repo
+      
+      - name: Sync Wiki Content
+        run: |
+          # Copy wiki content, preserving directory structure
+          rsync -av --delete docs/wiki/ wiki-repo/
+          
+          # Add .gitkeep to preserve empty directories
+          find wiki-repo -type d -empty -exec touch {}/.gitkeep \;
+          
+          # Generate commit message with change details
+          cd wiki-repo
+          git add .
+          
+          if ! git diff --staged --quiet; then
+            # Get list of changed files
+            CHANGED_FILES=$(git diff --staged --name-only | head -10)
+            
+            git commit -m "Sync wiki from main repository
+
+          Updated from commit: ${{ github.sha }}
+          Triggered by: ${{ github.event.head_commit.message }}
+          
+          Changed files:
+          $CHANGED_FILES
+          
+          [skip ci]"
+            
+            git push origin master
+            echo "✅ Wiki synced successfully"
+          else
+            echo "ℹ️ No changes to sync"
+          fi
+      
+      - name: Validate Wiki Links
+        run: |
+          # Install markdown link checker
+          npm install -g markdown-link-check
+          
+          # Check all markdown files for broken links
+          find wiki-repo -name "*.md" -not -path "*/assets/*" | while read file; do
+            echo "Checking links in: $file"
+            markdown-link-check "$file" --config .github/workflows/link-check-config.json || true
+          done
+      
+      - name: Generate Wiki Index
+        run: |
+          # Create a simple index of all wiki pages
+          cd wiki-repo
+          echo "# Wiki Index" > INDEX.md
+          echo "" >> INDEX.md
+          echo "Generated on: $(date)" >> INDEX.md
+          echo "" >> INDEX.md
+          find . -name "*.md" -not -name "_Sidebar.md" -not -name "INDEX.md" | sort | while read file; do
+            title=$(head -1 "$file" | sed 's/^# //')
+            echo "- [$title]($file)" >> INDEX.md
+          done
+          
+          git add INDEX.md
+          if ! git diff --staged --quiet; then
+            git commit -m "Update wiki index [skip ci]"
+            git push origin master
+          fi
+
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install markdown linting tools
+        run: |
+          pip install markdownlint-py
+          npm install -g markdownlint-cli
+      
+      - name: Lint markdown files
+        run: |
+          # Lint all markdown files in docs/wiki/
+          find docs/wiki -name "*.md" -exec markdownlint {} \; || true
+      
+      - name: Validate YAML examples
+        run: |
+          # Check if YAML examples in docs are valid
+          find docs/wiki -name "*.md" -exec grep -l "```yaml" {} \; | while read file; do
+            echo "Validating YAML in: $file"
+            # Extract YAML blocks and validate them
+            sed -n '/```yaml/,/```/p' "$file" | sed '1d;$d' | python -c "
+          import yaml, sys
+          try:
+              yaml.safe_load(sys.stdin.read())
+              print('✅ Valid YAML')
+          except yaml.YAMLError as e:
+              print(f'❌ Invalid YAML: {e}')
+              sys.exit(1)
+          " || echo "⚠️ YAML validation failed for $file"
+          done
