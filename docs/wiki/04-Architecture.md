@@ -167,6 +167,7 @@ flowchart TD
 **Purpose:** Main entry point and MCP protocol implementation.
 
 **Responsibilities:**
+
 - Handle MCP protocol communication
 - Route tool calls to appropriate handlers
 - Manage request/response lifecycle
@@ -188,6 +189,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 **Purpose:** Load and validate configuration files.
 
 **Responsibilities:**
+
 - Parse YAML configuration files
 - Validate configuration syntax
 - Provide configuration to other components
@@ -203,6 +205,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 **Purpose:** Enforce security policies and access controls.
 
 **Responsibilities:**
+
 - Evaluate policy rules
 - Check network access controls
 - Validate command patterns
@@ -210,6 +213,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 - Generate policy decisions
 
 **Policy Components:**
+
 - **Rule Engine:** Pattern matching with glob support
 - **Network Controls:** IP allowlists/blocklists
 - **Execution Limits:** Timeouts, output size caps
@@ -220,6 +224,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 **Purpose:** Execute SSH commands on target hosts.
 
 **Responsibilities:**
+
 - Establish SSH connections
 - Execute commands remotely
 - Handle SSH authentication
@@ -237,6 +242,7 @@ def ssh_plan(alias: str = "", command: str = "") -> str:
 **Purpose:** Generate comprehensive audit logs.
 
 **Responsibilities:**
+
 - Log all operations to stderr
 - Generate structured JSON logs
 - Include security-relevant metadata
