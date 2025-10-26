@@ -1,16 +1,16 @@
 # 16. Glossary
 
-**Purpose:** Define key terms, concepts, and acronyms used throughout mcp-ssh-orchestrator documentation.
+**Purpose:** Define key terms, concepts, and acronyms used throughout MCP SSH Orchestrator documentation.
 
 ## Overview
 
-This glossary provides definitions for technical terms, concepts, and acronyms used in mcp-ssh-orchestrator documentation. Terms are organized alphabetically for easy reference.
+This glossary provides definitions for technical terms, concepts, and acronyms used in MCP SSH Orchestrator documentation. Terms are organized alphabetically for easy reference.
 
 ## A
 
 **Access Control**
 - **Definition**: Security mechanism that controls who can access what resources and under what conditions
-- **Context**: mcp-ssh-orchestrator implements policy-based access control for SSH command execution
+- **Context**: MCP SSH Orchestrator implements policy-based access control for SSH command execution
 
 **Agent**
 - **Definition**: An AI system that can perceive its environment and take actions to achieve goals
@@ -22,7 +22,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Audit Log**
 - **Definition**: A chronological record of events and activities for security and compliance purposes
-- **Context**: mcp-ssh-orchestrator maintains comprehensive audit logs of all command executions and policy decisions
+- **Context**: MCP SSH Orchestrator maintains comprehensive audit logs of all command executions and policy decisions
 
 **Authentication**
 - **Definition**: The process of verifying the identity of a user or system
@@ -42,25 +42,25 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Command Injection**
 - **Definition**: A security vulnerability where malicious commands are injected into legitimate commands
-- **Context**: mcp-ssh-orchestrator prevents command injection through policy enforcement and input validation
+- **Context**: MCP SSH Orchestrator prevents command injection through policy enforcement and input validation
 
 **Compliance**
 - **Definition**: Adherence to laws, regulations, and industry standards
-- **Context**: mcp-ssh-orchestrator provides security features (audit logs, access control, encryption) that can support compliance efforts. Compliance is the responsibility of the deploying organization.
+- **Context**: MCP SSH Orchestrator provides security features (audit logs, access control, encryption) that can support compliance efforts. Compliance is the responsibility of the deploying organization.
 
 **Container**
 - **Definition**: A lightweight, portable unit of software that packages code and dependencies
-- **Context**: mcp-ssh-orchestrator is distributed as a Docker container for easy deployment
+- **Context**: MCP SSH Orchestrator is distributed as a Docker container for easy deployment
 
 ## D
 
 **Defense in Depth**
 - **Definition**: A security strategy that implements multiple layers of security controls
-- **Context**: mcp-ssh-orchestrator implements policy enforcement, network filtering, audit logging, and container security
+- **Context**: MCP SSH Orchestrator implements policy enforcement, network filtering, audit logging, and container security
 
 **Docker**
 - **Definition**: A platform for developing, shipping, and running applications in containers
-- **Context**: mcp-ssh-orchestrator uses Docker for packaging and deployment
+- **Context**: MCP SSH Orchestrator uses Docker for packaging and deployment
 
 **Dry Run**
 - **Definition**: A test execution that simulates a command without actually executing it
@@ -80,11 +80,11 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Fleet**
 - **Definition**: A collection of servers or hosts managed as a group
-- **Context**: mcp-ssh-orchestrator manages SSH access to a fleet of servers
+- **Context**: MCP SSH Orchestrator manages SSH access to a fleet of servers
 
 **Firewall**
 - **Definition**: A network security device that monitors and controls network traffic
-- **Context**: mcp-ssh-orchestrator implements network filtering similar to firewall rules
+- **Context**: MCP SSH Orchestrator implements network filtering similar to firewall rules
 
 ## G
 
@@ -94,13 +94,13 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **GitHub Wiki**
 - **Definition**: A documentation platform for GitHub repositories
-- **Context**: mcp-ssh-orchestrator documentation is maintained in the GitHub wiki
+- **Context**: MCP SSH Orchestrator documentation is maintained in the GitHub wiki
 
 ## H
 
 **Host Key**
 - **Definition**: A cryptographic key used to verify the identity of an SSH server
-- **Context**: mcp-ssh-orchestrator verifies host keys to prevent man-in-the-middle attacks
+- **Context**: MCP SSH Orchestrator verifies host keys to prevent man-in-the-middle attacks
 
 **Hostname**
 - **Definition**: A human-readable name for a network device
@@ -114,7 +114,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Incident Response**
 - **Definition**: The process of responding to security incidents and breaches
-- **Context**: mcp-ssh-orchestrator provides audit logs and monitoring for incident response
+- **Context**: MCP SSH Orchestrator provides audit logs and monitoring for incident response
 
 ## J
 
@@ -130,7 +130,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Known Hosts**
 - **Definition**: A file containing the public keys of SSH servers
-- **Context**: mcp-ssh-orchestrator uses known_hosts for host key verification
+- **Context**: MCP SSH Orchestrator uses known_hosts for host key verification
 
 ## L
 
@@ -146,7 +146,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **MCP**
 - **Definition**: Model Context Protocol, a standardized interface for AI agents to interact with external tools
-- **Context**: mcp-ssh-orchestrator implements the MCP protocol for AI agent integration
+- **Context**: MCP SSH Orchestrator implements the MCP protocol for AI agent integration
 
 **Mermaid**
 - **Definition**: A markdown-like syntax for generating diagrams
@@ -160,31 +160,31 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Network Segmentation**
 - **Definition**: The practice of dividing a network into smaller, isolated segments
-- **Context**: mcp-ssh-orchestrator supports network filtering for segmentation
+- **Context**: MCP SSH Orchestrator supports network filtering for segmentation
 
 **Non-root**
 - **Definition**: Running processes with limited privileges instead of administrator/root privileges
-- **Context**: mcp-ssh-orchestrator containers run as non-root user for security
+- **Context**: MCP SSH Orchestrator containers run as non-root user for security
 
 ## O
 
 **OWASP**
 - **Definition**: Open Web Application Security Project, a nonprofit foundation focused on software security
-- **Context**: mcp-ssh-orchestrator addresses OWASP Top 10 for LLMs security risks
+- **Context**: MCP SSH Orchestrator addresses OWASP Top 10 for LLMs security risks
 
 **Orchestrator**
 - **Definition**: A system that manages and coordinates multiple components or services
-- **Context**: mcp-ssh-orchestrator orchestrates SSH access across a fleet of servers
+- **Context**: MCP SSH Orchestrator orchestrates SSH access across a fleet of servers
 
 ## P
 
 **PCI DSS**
 - **Definition**: Payment Card Industry Data Security Standard, a security standard for organizations handling credit card data
-- **Context**: mcp-ssh-orchestrator supports PCI DSS compliance requirements
+- **Context**: MCP SSH Orchestrator supports PCI DSS compliance requirements
 
 **Policy**
 - **Definition**: A set of rules that govern behavior or access control
-- **Context**: mcp-ssh-orchestrator uses policies to control SSH command execution
+- **Context**: MCP SSH Orchestrator uses policies to control SSH command execution
 
 **Policy Engine**
 - **Definition**: A system that evaluates policies and makes access control decisions
@@ -192,23 +192,23 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Prompt Injection**
 - **Definition**: A security vulnerability where malicious input manipulates AI system behavior
-- **Context**: mcp-ssh-orchestrator prevents prompt injection through policy enforcement
+- **Context**: MCP SSH Orchestrator prevents prompt injection through policy enforcement
 
 **Privilege Escalation**
 - **Definition**: The act of exploiting a bug or design flaw to gain elevated access
-- **Context**: mcp-ssh-orchestrator prevents privilege escalation through command restrictions
+- **Context**: MCP SSH Orchestrator prevents privilege escalation through command restrictions
 
 ## Q
 
 **QoS**
 - **Definition**: Quality of Service, the ability to provide different priority levels for different applications
-- **Context**: mcp-ssh-orchestrator implements QoS through resource limits and rate limiting
+- **Context**: MCP SSH Orchestrator implements QoS through resource limits and rate limiting
 
 ## R
 
 **Rate Limiting**
 - **Definition**: A technique to control the rate of requests or operations
-- **Context**: mcp-ssh-orchestrator implements rate limiting to prevent abuse
+- **Context**: MCP SSH Orchestrator implements rate limiting to prevent abuse
 
 **RBAC**
 - **Definition**: Role-Based Access Control, a method of restricting access based on user roles
@@ -216,25 +216,25 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Read-only**
 - **Definition**: A filesystem or volume that can only be read from, not written to
-- **Context**: mcp-ssh-orchestrator containers use read-only filesystems for security
+- **Context**: MCP SSH Orchestrator containers use read-only filesystems for security
 
 ## S
 
 **SOC 2**
 - **Definition**: System and Organization Controls 2, a security framework for service organizations
-- **Context**: mcp-ssh-orchestrator provides security controls (audit logs, access control, encryption) that can support SOC 2 requirements. SOC 2 compliance is achieved through organizational certification, not by the tool itself.
+- **Context**: MCP SSH Orchestrator provides security controls (audit logs, access control, encryption) that can support SOC 2 requirements. SOC 2 compliance is achieved through organizational certification, not by the tool itself.
 
 **SSH**
 - **Definition**: Secure Shell, a cryptographic network protocol for secure remote access
-- **Context**: mcp-ssh-orchestrator manages SSH access to remote servers
+- **Context**: MCP SSH Orchestrator manages SSH access to remote servers
 
 **SSH Key**
 - **Definition**: A cryptographic key used for SSH authentication
-- **Context**: mcp-ssh-orchestrator uses SSH keys for secure authentication
+- **Context**: MCP SSH Orchestrator uses SSH keys for secure authentication
 
 **Secret**
 - **Definition**: Sensitive information such as passwords, keys, or tokens
-- **Context**: mcp-ssh-orchestrator manages secrets through Docker secrets or environment variables
+- **Context**: MCP SSH Orchestrator manages secrets through Docker secrets or environment variables
 
 **stdio**
 - **Definition**: Standard input/output, a communication method using standard streams
@@ -248,17 +248,17 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **TLS**
 - **Definition**: Transport Layer Security, a cryptographic protocol for secure communication
-- **Context**: mcp-ssh-orchestrator may use TLS for secure communication in future versions
+- **Context**: MCP SSH Orchestrator may use TLS for secure communication in future versions
 
 **Timeout**
 - **Definition**: A maximum time limit for an operation before it is terminated
-- **Context**: mcp-ssh-orchestrator implements timeouts to prevent hanging commands
+- **Context**: MCP SSH Orchestrator implements timeouts to prevent hanging commands
 
 ## U
 
 **Uptime**
 - **Definition**: The amount of time a system has been running without interruption
-- **Context**: mcp-ssh-orchestrator monitors uptime and system health
+- **Context**: MCP SSH Orchestrator monitors uptime and system health
 
 **User**
 - **Definition**: An individual or system that interacts with mcp-ssh-orchestrator
@@ -268,7 +268,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Vulnerability**
 - **Definition**: A weakness in a system that can be exploited to cause harm
-- **Context**: mcp-ssh-orchestrator addresses common SSH and MCP vulnerabilities
+- **Context**: MCP SSH Orchestrator addresses common SSH and MCP vulnerabilities
 
 ## W
 
@@ -278,7 +278,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Wiki**
 - **Definition**: A collaborative website that allows users to create and edit content
-- **Context**: mcp-ssh-orchestrator documentation is maintained in the GitHub wiki
+- **Context**: MCP SSH Orchestrator documentation is maintained in the GitHub wiki
 
 ## X
 
@@ -290,7 +290,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **YAML**
 - **Definition**: YAML Ain't Markup Language, a human-readable data serialization format
-- **Context**: mcp-ssh-orchestrator configuration files use YAML format
+- **Context**: MCP SSH Orchestrator configuration files use YAML format
 
 ## Z
 
@@ -300,7 +300,7 @@ This glossary provides definitions for technical terms, concepts, and acronyms u
 
 **Zone**
 - **Definition**: A logical grouping of network resources
-- **Context**: mcp-ssh-orchestrator supports network zones for security segmentation
+- **Context**: MCP SSH Orchestrator supports network zones for security segmentation
 
 ## Acronyms
 

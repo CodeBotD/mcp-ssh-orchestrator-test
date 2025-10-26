@@ -1,10 +1,10 @@
 # 11. Observability & Audit
 
-**Purpose:** Comprehensive guide for monitoring, logging, and auditing mcp-ssh-orchestrator operations for security and compliance.
+**Purpose:** Comprehensive guide for monitoring, logging, and auditing MCP SSH Orchestrator operations for security and compliance.
 
 ## Overview
 
-mcp-ssh-orchestrator provides observability through structured JSON logging to stderr. All audit logs are written to stderr while MCP protocol responses use stdout, providing clean separation for log aggregation and analysis.
+MCP SSH Orchestrator provides observability through structured JSON logging to stderr. All audit logs are written to stderr while MCP protocol responses use stdout, providing clean separation for log aggregation and analysis.
 
 ## Logging Architecture
 
@@ -18,7 +18,7 @@ This separation allows Docker to capture audit logs separately from MCP response
 
 ### Audit Log Types
 
-mcp-ssh-orchestrator emits four types of structured JSON logs to stderr:
+MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 
 1. **Policy Decision Log** - Before every command execution
 2. **Audit Log** - After command execution completes  
@@ -34,7 +34,7 @@ mcp-ssh-orchestrator emits four types of structured JSON logs to stderr:
 {
   "type": "policy_decision",
   "ts": 1761489054.1433952,
-  "alias": "web1",
+    "alias": "web1",
   "hash": "7063dece7ccc",
   "allowed": true
 }
@@ -52,7 +52,7 @@ mcp-ssh-orchestrator emits four types of structured JSON logs to stderr:
 {
   "type": "policy_decision",
   "ts": 1761489054.1433952,
-  "alias": "web1",
+    "alias": "web1",
   "hash": "5c7923bd67b0",
   "allowed": false
 }
@@ -67,7 +67,7 @@ mcp-ssh-orchestrator emits four types of structured JSON logs to stderr:
 {
   "type": "audit",
   "ts": 1761489054.143448,
-  "alias": "web1",
+    "alias": "web1",
   "hash": "7063dece7ccc",
   "exit_code": 0,
   "duration_ms": 150,

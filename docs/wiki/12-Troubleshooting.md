@@ -1,10 +1,10 @@
 # 12. Troubleshooting
 
-**Purpose:** Comprehensive troubleshooting guide for common issues with mcp-ssh-orchestrator deployment, configuration, and operations.
+**Purpose:** Comprehensive troubleshooting guide for common issues with MCP SSH Orchestrator deployment, configuration, and operations.
 
 ## Overview
 
-This section covers common issues, their symptoms, root causes, and solutions for mcp-ssh-orchestrator deployments.
+This section covers common issues, their symptoms, root causes, and solutions for MCP SSH Orchestrator deployments.
 
 ## Common Issues
 

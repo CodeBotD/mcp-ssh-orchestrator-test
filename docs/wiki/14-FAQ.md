@@ -1,18 +1,18 @@
 # 15. FAQ
 
-**Purpose:** Answer common questions about mcp-ssh-orchestrator, its usage, configuration, and troubleshooting.
+**Purpose:** Answer common questions about MCP SSH Orchestrator, its usage, configuration, and troubleshooting.
 
 ## Overview
 
-This FAQ addresses the most frequently asked questions about mcp-ssh-orchestrator, covering installation, configuration, security, and troubleshooting.
+This FAQ addresses the most frequently asked questions about MCP SSH Orchestrator, covering installation, configuration, security, and troubleshooting.
 
 ## General Questions
 
-### What is mcp-ssh-orchestrator?
+### What is MCP SSH Orchestrator?
 
-mcp-ssh-orchestrator is a secure SSH fleet orchestrator built as a Model Context Protocol (MCP) server. It enables AI agents and other MCP clients to execute commands across a fleet of SSH targets with robust policy-based access control, network filtering, and comprehensive audit logging.
+MCP SSH Orchestrator is a secure SSH fleet orchestrator built as a Model Context Protocol (MCP) server. It enables AI agents and other MCP clients to execute commands across a fleet of SSH targets with robust policy-based access control, network filtering, and comprehensive audit logging.
 
-### Why do I need mcp-ssh-orchestrator?
+### Why do I need MCP SSH Orchestrator?
 
 AI agents interacting with external systems introduce significant security risks, including prompt injection, data exfiltration, and privilege escalation. mcp-ssh-orchestrator acts as a secure gateway, mediating all agent-to-SSH interactions through a hardened policy engine, ensuring only authorized and safe commands are executed.
 

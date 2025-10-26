@@ -6,9 +6,9 @@
   <p>Execute commands across your server fleet with policy-based access control, network filtering, and comprehensive audit logging.</p>
 </div>
 
-## 🚀 What is mcp-ssh-orchestrator?
+## 🚀 What is MCP SSH Orchestrator?
 
-**mcp-ssh-orchestrator** is a secure, policy-driven SSH command executor designed specifically for AI agents. It implements the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) to provide safe, auditable access to your server infrastructure.
+**MCP SSH Orchestrator** is a secure, policy-driven SSH command executor designed specifically for AI agents. It implements the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) to provide safe, auditable access to your server infrastructure.
 
 ### Key Capabilities
 

@@ -1,10 +1,10 @@
 # 13. Contributing
 
-**Purpose:** Guide for contributing to mcp-ssh-orchestrator development, including setup, coding standards, and submission process.
+**Purpose:** Guide for contributing to MCP SSH Orchestrator development, including setup, coding standards, and submission process.
 
 ## Overview
 
-We welcome contributions to mcp-ssh-orchestrator! This guide covers how to set up a development environment, understand the codebase, and submit contributions.
+We welcome contributions to MCP SSH Orchestrator! This guide covers how to set up a development environment, understand the codebase, and submit contributions.
 
 ## Development Setup
 
