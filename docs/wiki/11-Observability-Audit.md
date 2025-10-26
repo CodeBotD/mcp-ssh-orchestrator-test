@@ -4,539 +4,419 @@
 
 ## Overview
 
-mcp-ssh-orchestrator provides comprehensive observability through structured logging, metrics, and audit trails. This enables security monitoring, compliance reporting, and operational insights.
+mcp-ssh-orchestrator provides observability through structured JSON logging to stderr. All audit logs are written to stderr while MCP protocol responses use stdout, providing clean separation for log aggregation and analysis.
 
 ## Logging Architecture
 
-### Log Levels and Categories
+### Log Output Destination
 
-**Structured Logging:**
+**Log Separation:**
+- **stderr**: All audit, policy decision, and progress logs (structured JSON)
+- **stdout**: MCP protocol responses (JSON-RPC 2.0)
+
+This separation allows Docker to capture audit logs separately from MCP responses.
+
+### Audit Log Types
+
+mcp-ssh-orchestrator emits four types of structured JSON logs to stderr:
+
+1. **Policy Decision Log** - Before every command execution
+2. **Audit Log** - After command execution completes  
+3. **Progress Log** - During long-running commands (every 0.5s)
+4. **Error/Trace Log** - On exceptions or function completion
+
+### 1. Policy Decision Log
+
+**When:** Emitted before command execution to record policy evaluation.
+
+**Example:**
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45.123Z",
-  "level": "INFO",
-  "component": "policy",
-  "event": "command_allowed",
-  "details": {
-    "alias": "web1",
-    "command": "uptime",
-    "tags": ["production"],
-    "rule": "allow_production_readonly",
-    "execution_time_ms": 150
-  }
+  "type": "policy_decision",
+  "ts": 1761489054.1433952,
+  "alias": "web1",
+  "hash": "7063dece7ccc",
+  "allowed": true
 }
 ```
 
-**Log Categories:**
-- **AUDIT**: All command executions and policy decisions
-- **SECURITY**: Authentication failures, policy violations, suspicious activity
-- **OPERATIONAL**: System health, configuration changes, performance metrics
-- **ERROR**: Exceptions, failures, and error conditions
+**Fields:**
+- `type`: Always `"policy_decision"`
+- `ts`: Unix timestamp (seconds since epoch)
+- `alias`: Host alias from servers.yml
+- `hash`: SHA256 hash of the command
+- `allowed`: Boolean indicating policy decision
 
-### Audit Logging
-
-**Command Execution Audit:**
+**Denied Command Example:**
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45.123Z",
-  "event_type": "command_execution",
-  "user": "claude-desktop",
-  "session_id": "sess_123456789",
-  "command": {
-    "alias": "web1",
-    "command": "uptime",
-    "tags": ["production"],
-    "policy_result": "allowed",
-    "rule_applied": "allow_production_readonly"
-  },
-  "execution": {
-    "start_time": "2024-01-15T10:30:45.123Z",
-    "end_time": "2024-01-15T10:30:45.273Z",
-    "duration_ms": 150,
-    "exit_code": 0,
-    "output_bytes": 1024,
-    "error_bytes": 0
-  },
-  "network": {
-    "source_ip": "192.168.1.100",
-    "target_ip": "10.0.0.11",
-    "host_key_verified": true
-  }
+  "type": "policy_decision",
+  "ts": 1761489054.1433952,
+  "alias": "web1",
+  "hash": "5c7923bd67b0",
+  "allowed": false
 }
 ```
 
-**Policy Decision Audit:**
+### 2. Audit Log
+
+**When:** Emitted after command execution (success or failure).
+
+**Example:**
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45.123Z",
-  "event_type": "policy_decision",
-  "decision": "denied",
-  "reason": "command_not_allowed",
-  "details": {
-    "alias": "web1",
-    "command": "rm -rf /",
-    "tags": ["production"],
-    "violated_rules": ["deny_destructive_commands"],
-    "policy_version": "1.2.3"
-  }
+  "type": "audit",
+  "ts": 1761489054.143448,
+  "alias": "web1",
+  "hash": "7063dece7ccc",
+  "exit_code": 0,
+  "duration_ms": 150,
+  "bytes_out": 25,
+  "bytes_err": 0,
+  "cancelled": false,
+  "timeout": false,
+  "target_ip": "10.0.0.11"
 }
 ```
 
-## Monitoring Setup
+**Fields:**
+- `type`: Always `"audit"`
+- `ts`: Unix timestamp (seconds since epoch)
+- `alias`: Host alias from servers.yml
+- `hash`: SHA256 hash of the command
+- `exit_code`: Process exit code (0-255)
+- `duration_ms`: Execution time in milliseconds
+- `bytes_out`: Bytes of stdout output captured
+- `bytes_err`: Bytes of stderr output captured
+- `cancelled`: Boolean - was task cancelled?
+- `timeout`: Boolean - did task hit timeout limit?
+- `target_ip`: Actual IP address of SSH server
 
-### Prometheus Metrics
+### 3. Progress Log
 
-**Key Metrics:**
-```python
-# Command execution metrics
-ssh_commands_total = Counter('ssh_commands_total', 'Total SSH commands executed', ['alias', 'status'])
-ssh_command_duration = Histogram('ssh_command_duration_seconds', 'SSH command execution time', ['alias'])
-ssh_policy_decisions_total = Counter('ssh_policy_decisions_total', 'Policy decisions', ['decision', 'rule'])
+**When:** Emitted every 0.5 seconds during command execution (while reading output).
 
-# Security metrics
-ssh_auth_failures_total = Counter('ssh_auth_failures_total', 'SSH authentication failures', ['alias'])
-ssh_policy_violations_total = Counter('ssh_policy_violations_total', 'Policy violations', ['violation_type'])
-
-# System metrics
-ssh_active_sessions = Gauge('ssh_active_sessions', 'Active SSH sessions')
-ssh_config_reloads_total = Counter('ssh_config_reloads_total', 'Configuration reloads')
-```
-
-**Prometheus Configuration:**
-```yaml
-# prometheus.yml
-global:
-  scrape_interval: 15s
-
-scrape_configs:
-  - job_name: 'mcp-ssh-orchestrator'
-    static_configs:
-      - targets: ['mcp-ssh:8000']
-    metrics_path: '/metrics'
-    scrape_interval: 5s
-```
-
-### Grafana Dashboards
-
-**Security Dashboard:**
+**Example:**
 ```json
 {
-  "dashboard": {
-    "title": "MCP SSH Orchestrator - Security",
-    "panels": [
-      {
-        "title": "Policy Violations",
-        "type": "stat",
-        "targets": [
-          {
-            "expr": "rate(ssh_policy_violations_total[5m])",
-            "legendFormat": "Violations/sec"
-          }
-        ]
-      },
-      {
-        "title": "Authentication Failures",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(ssh_auth_failures_total[5m])",
-            "legendFormat": "{{alias}}"
-          }
-        ]
-      }
-    ]
-  }
+  "type": "progress",
+  "ts": 1761489054.143455,
+  "task_id": "task_abc123",
+  "phase": "running",
+  "bytes_read": 1024,
+  "elapsed_ms": 500
 }
 ```
 
-**Operational Dashboard:**
+**Fields:**
+- `type`: Always `"progress"`
+- `ts`: Unix timestamp
+- `task_id`: Unique task identifier
+- `phase`: Execution phase:
+  - `"connecting"`: Establishing SSH connection
+  - `"connected"`: SSH connection established
+  - `"running"`: Command executing (logged every 0.5s)
+- `bytes_read`: Total bytes read (stdout + stderr)
+- `elapsed_ms`: Elapsed time in milliseconds
+
+**Complete Progress Sequence:**
+```json
+{"type": "progress", "ts": 1761489054.200, "task_id": "task_123", "phase": "connecting", "bytes_read": 0, "elapsed_ms": 50}
+{"type": "progress", "ts": 1761489054.450, "task_id": "task_123", "phase": "connected", "bytes_read": 0, "elapsed_ms": 250}
+{"type": "progress", "ts": 1761489054.700, "task_id": "task_123", "phase": "running", "bytes_read": 0, "elapsed_ms": 500}
+{"type": "progress", "ts": 1761489055.000, "task_id": "task_123", "phase": "running", "bytes_read": 512, "elapsed_ms": 800}
+```
+
+### 4. Error/Trace Logs
+
+**When:** Exceptions occur or operations complete (trace).
+
+**Error Example:**
 ```json
 {
-  "dashboard": {
-    "title": "MCP SSH Orchestrator - Operations",
-    "panels": [
-      {
-        "title": "Command Execution Rate",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(ssh_commands_total[5m])",
-            "legendFormat": "{{alias}} - {{status}}"
-          }
-        ]
-      },
-      {
-        "title": "Command Duration",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "histogram_quantile(0.95, rate(ssh_command_duration_seconds_bucket[5m]))",
-            "legendFormat": "95th percentile"
-          }
-        ]
-      }
-    ]
-  }
+  "level": "error",
+  "msg": "run_exception",
+  "error": "Connection failed"
 }
 ```
 
-## Security Monitoring
-
-### Anomaly Detection
-
-**Suspicious Activity Patterns:**
-```python
-# Rate limiting alerts
-if ssh_commands_total.labels(alias=alias).rate(1m) > 100:
-    alert("HIGH_COMMAND_RATE", f"High command rate for {alias}")
-
-# Unusual command patterns
-if "rm" in command and alias not in ["backup-server"]:
-    alert("DESTRUCTIVE_COMMAND", f"Destructive command on {alias}")
-
-# Authentication failures
-if ssh_auth_failures_total.labels(alias=alias).rate(5m) > 5:
-    alert("AUTH_FAILURE_SPIKE", f"Auth failure spike for {alias}")
+**Trace Example:**
+```json
+{
+  "type": "trace",
+  "op": "run_done",
+  "elapsed_ms": 123
+}
 ```
 
-**Security Alerts:**
-```yaml
-# alertmanager.yml
-groups:
-  - name: mcp-ssh-security
-    rules:
-      - alert: HighCommandRate
-        expr: rate(ssh_commands_total[1m]) > 100
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High command execution rate detected"
-          
-      - alert: PolicyViolation
-        expr: increase(ssh_policy_violations_total[5m]) > 0
-        for: 0m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Policy violation detected"
-          
-      - alert: AuthFailureSpike
-        expr: rate(ssh_auth_failures_total[5m]) > 5
-        for: 1m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Authentication failure spike detected"
+**Fields:**
+- `level`: "error" | "warn"
+- `msg`: Error message identifier
+- `error`: Error details
+- `type`: "trace"
+- `op`: Operation name
+- `elapsed_ms`: Elapsed time (milliseconds)
+
+## Capturing and Analyzing Logs
+
+### Docker Logs
+
+All logs are written to stderr by the Docker container and can be captured using standard Docker logging.
+
+**Basic Commands:**
+
+```bash
+# View all logs (stdout + stderr mixed)
+docker logs mcp-ssh-container
+
+# Follow logs in real-time
+docker logs -f mcp-ssh-container
+
+# View only last 100 lines
+docker logs --tail 100 mcp-ssh-container
+
+# Extract only JSON audit logs
+docker logs mcp-ssh-container 2>&1 | grep '^{' | jq '.'
 ```
 
-### Security Reporting for Compliance Efforts
+### Docker Compose
+
+```bash
+# Follow logs
+docker-compose logs -f mcp-ssh
+
+# View specific service
+docker-compose logs mcp-ssh
+```
+
+### Log Parsing and Analysis
+
+**Extract Specific Log Types:**
+
+```bash
+# Extract only policy decision logs
+docker logs mcp-ssh-container 2>&1 | grep '{"type":"policy_decision"' | jq '.'
+
+# Extract only audit logs
+docker logs mcp-ssh-container 2>&1 | grep '{"type":"audit"' | jq '.'
+
+# Extract only progress logs
+docker logs mcp-ssh-container 2>&1 | grep '{"type":"progress"' | jq '.'
+```
+
+**Count Policy Violations:**
+
+```bash
+# Count denied commands
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "policy_decision" and .allowed == false)' | \
+  jq -r '.alias' | sort | uniq -c
+
+# Count policy violations per host
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "policy_decision" and .allowed == false) | .alias' | \
+  sort | uniq -c
+```
+
+**Analyze Execution Metrics:**
+
+```bash
+# Calculate average execution time
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | .duration_ms' | \
+  awk '{sum+=$1; count++} END {print "Average: " sum/count "ms"}'
+
+# Find slowest commands
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | [.duration_ms, .alias]' | \
+  sort -rn | head -10
+
+# Count commands per host
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | .alias' | \
+  sort | uniq -c
+```
+
+**Security Analysis:**
+
+```bash
+# List all target IPs accessed
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | .target_ip' | \
+  sort | uniq
+
+# Find timeout occurrences
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit" and .timeout == true)'
+
+# Find cancelled tasks
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit" and .cancelled == true)'
+```
+
+**Complete Audit Trail for a Host:**
+
+```bash
+# Show all operations for a specific host
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.alias == "Proxmox Prod 01")'
+```
+
+## Log Format Details
+
+### Timestamp Format
+
+All timestamps use Unix epoch time (seconds since January 1, 1970) as floating-point values with microsecond precision:
+
+```json
+{
+  "ts": 1761489054.143455
+}
+```
+
+Convert to readable format:
+```bash
+date -r 1761489054.143455
+```
+
+### Command Hashing
+
+Commands are hashed using SHA256 before logging for privacy and consistency:
+
+```bash
+echo -n "hostname" | sha256sum
+# Output: 7063dece7ccc...
+```
+
+### JSON Lines Format
+
+Each log entry is a complete JSON object on a single line. This format:
+- Is easy to parse with tools like `jq`
+- Can be streamed efficiently
+- Works well with log aggregators (ELK, Splunk, etc.)
+- Maintains structural integrity
+
+**Example of multi-line output:**
+```json
+{"type": "policy_decision", "ts": 1761489054.1433952, "alias": "web1", "hash": "abc123", "allowed": true}
+{"type": "progress", "ts": 1761489054.200, "task_id": "task_123", "phase": "connecting", "bytes_read": 0, "elapsed_ms": 50}
+{"type": "audit", "ts": 1761489054.650, "alias": "web1", "hash": "abc123", "exit_code": 0, "duration_ms": 150, "bytes_out": 25, "bytes_err": 0, "cancelled": false, "timeout": false, "target_ip": "10.0.0.11"}
+```
+
+## Security Reporting for Compliance
 
 *Note: This tool provides security features and audit capabilities that can support compliance efforts. Actual compliance certification is the responsibility of the deploying organization.*
 
-**Security Metrics for SOC 2 Support:**
-```python
-# Security controls that can support SOC 2 requirements
-def generate_security_report(start_date, end_date):
-    return {
-        "access_controls": {
-            "total_commands": ssh_commands_total.sum(),
-            "allowed_commands": ssh_commands_total.labels(status="allowed").sum(),
-            "denied_commands": ssh_commands_total.labels(status="denied").sum(),
-            "policy_violations": ssh_policy_violations_total.sum()
-        },
-        "audit_trail": {
-            "audit_logs": get_audit_logs(start_date, end_date),
-            "log_integrity": verify_log_integrity(),
-            "retention_compliance": check_log_retention()
-        },
-        "security_monitoring": {
-            "auth_failures": ssh_auth_failures_total.sum(),
-            "suspicious_activity": get_suspicious_activity(start_date, end_date),
-            "incident_response": get_incident_response_logs(start_date, end_date)
-        }
-    }
+The structured audit logs can support compliance reporting for frameworks like SOC 2, ISO 27001, PCI-DSS, and HIPAA.
+
+### Access Control Reporting
+
+```bash
+# Total commands executed
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | length'
+
+# Allowed vs denied command ratio
+docker logs mcp-ssh-container 2>&1 | \
+  jq -r 'select(.type == "policy_decision") | .allowed' | \
+  awk 'BEGIN{allow=0;deny=0} {if($1=="true") allow++; else deny++} END {print "Allowed:", allow, "Denied:", deny}'
 ```
 
-**Security Metrics for PCI DSS Support:**
-```python
-# Security controls that can support PCI DSS requirements
-def generate_pci_metrics():
-    return {
-        "network_security": {
-            "network_security": verify_network_policies(),
-            "firewall_rules": get_firewall_rules(),
-            "network_segmentation": verify_network_segmentation()
-        },
-        "access_control": {
-            "authentication": verify_auth_controls(),
-            "system_configuration": verify_system_configuration(),
-            "security_patches": check_security_patches()
-        },
-        "data_protection": {
-            "data_encryption": verify_data_encryption(),
-            "key_management": verify_key_management(),
-            "data_protection": verify_data_protection()
-        }
-    }
+### Audit Trail Reporting
+
+```bash
+# Complete audit trail with timestamps
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | {
+    timestamp: (.ts | todate),
+    alias,
+    exit_code,
+    duration_ms,
+    target_ip
+  }'
+
+# Failed command executions
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit" and .exit_code != 0)'
 ```
 
-## Log Management
+### Network Security Reporting
 
-### Centralized Logging
+```bash
+# List all target IPs accessed
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit") | .target_ip' | \
+  sort | uniq -c
 
-**ELK Stack Setup:**
+# Network policy violations (IP not allowed)
+docker logs mcp-ssh-container 2>&1 | \
+  jq 'select(.type == "audit" and .target_ip != null and .exit_code == 0) | .target_ip'
+```
+
+## Best Practices
+
+### Log Retention
+
+**Docker Log Drivers:**
+
+Use Docker's built-in log drivers for retention:
+
+```bash
+docker run --log-driver json-file \
+  --log-opt max-size=10m \
+  --log-opt max-file=3 \
+  mcp-ssh-orchestrator:latest
+```
+
+**docker-compose.yml:**
 ```yaml
-# docker-compose.yml
-version: '3.8'
-
 services:
   mcp-ssh:
-    image: ghcr.io/samerfarida/mcp-ssh-orchestrator:0.1.0
+    image: ghcr.io/samerfarida/mcp-ssh-orchestrator:latest
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    environment:
-      - LOG_LEVEL=INFO
-      - LOG_FORMAT=json
-      - LOG_OUTPUT=stdout
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.11.0
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-    depends_on:
-      - elasticsearch
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.0
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
 ```
 
-**Logstash Configuration:**
-```ruby
-# logstash.conf
-input {
-  docker {
-    type => "mcp-ssh"
-  }
-}
+### Log Aggregation
 
-filter {
-  if [type] == "mcp-ssh" {
-    json {
-      source => "message"
-    }
-    
-    date {
-      match => [ "timestamp", "ISO8601" ]
-    }
-    
-    mutate {
-      add_field => { "log_level" => "%{level}" }
-      add_field => { "component" => "%{component}" }
-      add_field => { "event_type" => "%{event}" }
-    }
-  }
-}
+Forward logs to external systems:
 
-output {
-  elasticsearch {
-    hosts => ["elasticsearch:9200"]
-    index => "mcp-ssh-%{+YYYY.MM.dd}"
-  }
-}
-```
-
-### Log Retention and Archival
-
-**Retention Policy:**
-```yaml
-# retention-policy.yml
-retention:
-  audit_logs:
-    hot_storage: 30_days
-    warm_storage: 90_days
-    cold_storage: 1_year
-    delete_after: 7_years
-  
-  security_logs:
-    hot_storage: 90_days
-    warm_storage: 1_year
-    cold_storage: 7_years
-    delete_after: never
-  
-  operational_logs:
-    hot_storage: 7_days
-    warm_storage: 30_days
-    cold_storage: 90_days
-    delete_after: 1_year
-```
-
-**Archival Script:**
 ```bash
-#!/bin/bash
-# archive-logs.sh
+# Forward to a syslog server
+docker run --log-driver syslog \
+  --log-opt syslog-address=udp://logserver:514 \
+  mcp-ssh-orchestrator:latest
 
-ARCHIVE_DIR="/opt/archives/mcp-ssh"
-DATE=$(date +%Y%m%d)
-
-# Archive audit logs older than 30 days
-find /var/log/mcp-ssh/audit -name "*.log" -mtime +30 -exec \
-  tar -czf "$ARCHIVE_DIR/audit_$DATE.tar.gz" {} +
-
-# Archive security logs older than 90 days
-find /var/log/mcp-ssh/security -name "*.log" -mtime +90 -exec \
-  tar -czf "$ARCHIVE_DIR/security_$DATE.tar.gz" {} +
-
-# Clean up archived files
-find "$ARCHIVE_DIR" -name "*.tar.gz" -mtime +365 -delete
+# Forward to journald
+docker run --log-driver journald \
+  mcp-ssh-orchestrator:latest
 ```
 
-## Incident Response
+## Important Notes
 
-### Automated Response
+1. **All logs go to stderr** - This is intentional to separate audit logs from MCP protocol responses
+2. **JSON Lines format** - Each log is a single JSON object on one line
+3. **Timestamps are Unix floats** - `ts` field is seconds since epoch with microsecond precision
+4. **Command hashes** - Commands are hashed (SHA256) for privacy and consistency
+5. **Progress logs emitted every 0.5 seconds** during long-running commands
+6. **No sensitive data** - Command output goes to stdout for LLM, not in audit logs
+7. **Logs are append-only** - Written to stderr stream for audit integrity
 
-**Incident Detection:**
-```python
-# incident_detection.py
-def detect_incidents():
-    incidents = []
-    
-    # Policy violation incident
-    if ssh_policy_violations_total.sum() > 0:
-        incidents.append({
-            "type": "policy_violation",
-            "severity": "high",
-            "description": "Policy violation detected",
-            "timestamp": datetime.now().isoformat()
-        })
-    
-    # Authentication failure incident
-    if ssh_auth_failures_total.sum() > 10:
-        incidents.append({
-            "type": "auth_failure_spike",
-            "severity": "medium",
-            "description": "Authentication failure spike",
-            "timestamp": datetime.now().isoformat()
-        })
-    
-    return incidents
-```
+## Security Implications
 
-**Automated Response Actions:**
-```python
-# automated_response.py
-def handle_incident(incident):
-    if incident["type"] == "policy_violation":
-        # Block suspicious IP
-        block_ip(incident["source_ip"])
-        
-        # Send alert
-        send_alert(incident)
-        
-        # Create incident ticket
-        create_incident_ticket(incident)
-    
-    elif incident["type"] == "auth_failure_spike":
-        # Rate limit the source
-        rate_limit_ip(incident["source_ip"])
-        
-        # Send warning
-        send_warning(incident)
-```
-
-### Forensic Analysis
-
-**Command Execution Forensics:**
-```python
-# forensic_analysis.py
-def analyze_command_execution(alias, command, timestamp):
-    return {
-        "command_analysis": {
-            "command": command,
-            "risk_score": calculate_risk_score(command),
-            "similar_commands": find_similar_commands(command),
-            "execution_pattern": analyze_execution_pattern(alias, command)
-        },
-        "context_analysis": {
-            "user_behavior": analyze_user_behavior(alias),
-            "session_context": get_session_context(timestamp),
-            "network_context": get_network_context(timestamp)
-        },
-        "threat_indicators": {
-            "iocs": extract_iocs(command),
-            "ttps": map_to_ttps(command),
-            "attribution": attempt_attribution(alias, command)
-        }
-    }
-```
-
-## Performance Monitoring
-
-### System Metrics
-
-**Resource Monitoring:**
-```python
-# system_metrics.py
-def collect_system_metrics():
-    return {
-        "cpu_usage": psutil.cpu_percent(),
-        "memory_usage": psutil.virtual_memory().percent,
-        "disk_usage": psutil.disk_usage('/').percent,
-        "network_io": psutil.net_io_counters(),
-        "active_connections": len(psutil.net_connections()),
-        "ssh_sessions": count_ssh_sessions()
-    }
-```
-
-**Performance Alerts:**
-```yaml
-# performance-alerts.yml
-groups:
-  - name: mcp-ssh-performance
-    rules:
-      - alert: HighCPUUsage
-        expr: cpu_usage_percent > 80
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High CPU usage detected"
-          
-      - alert: HighMemoryUsage
-        expr: memory_usage_percent > 85
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "High memory usage detected"
-          
-      - alert: SlowCommandExecution
-        expr: histogram_quantile(0.95, rate(ssh_command_duration_seconds_bucket[5m])) > 30
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Slow command execution detected"
-```
+- Audit logs contain **host aliases** and **command hashes** (not full commands)
+- IP addresses are logged for network compliance and tracking
+- No sensitive command output is in audit logs (output goes to stdout for the LLM)
+- Logs are append-only (written to stderr stream)
+- Commands are SHA256-hashed for privacy and consistency
+- Can support compliance reporting (SOC 2, ISO 27001, PCI-DSS, HIPAA)
 
 ## Next Steps
 
-- **[Troubleshooting](12-Troubleshooting)** - Common monitoring and logging issues
-- **[Security Model](05-Security-Model)** - Security architecture details
-- **[Deployment](09-Deployment)** - Production deployment with monitoring
+- **[Security Model](05-Security-Model)** - Understanding the security architecture
+- **[Configuration](06-Configuration)** - Setting up hosts, credentials, and policies
+- **[Deployment](09-Deployment)** - Production deployment with logging
 - **[FAQ](15-FAQ)** - Common observability questions
