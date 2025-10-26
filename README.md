@@ -10,7 +10,6 @@
 [![MCP](https://img.shields.io/badge/MCP-1.2+-green.svg)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/samerfarida/mcp-ssh-orchestrator/badge)](https://scorecard.dev/viewer/?uri=github.com/samerfarida/mcp-ssh-orchestrator)
-
 [![GitHub release](https://img.shields.io/github/v/release/samerfarida/mcp-ssh-orchestrator)](https://github.com/samerfarida/mcp-ssh-orchestrator/releases)
 [![GitHub stars](https://img.shields.io/github/stars/samerfarida/mcp-ssh-orchestrator)](https://github.com/samerfarida/mcp-ssh-orchestrator/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/samerfarida/mcp-ssh-orchestrator)](https://github.com/samerfarida/mcp-ssh-orchestrator/issues)
