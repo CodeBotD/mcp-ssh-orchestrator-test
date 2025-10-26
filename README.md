@@ -45,9 +45,9 @@ That's exactly what MCP SSH Orchestrator provides: **the power of AI-driven serv
 - ❌ **Resource limits**: CPU and memory caps prevent DOS
 
 ### 📊 **Production-Ready Audit & Compliance**
-- **SOC 2 ready**: Structured JSON audit logs
-- **HIPAA/PCI compliant**: Complete audit trail
-- **Forensics ready**: Logs include hashes, timestamps, IPs
+- **Structured JSON audit logs**: Complete audit trail with timestamps, hashes, and IPs
+- **Compliance-supporting logs**: Can support SOC 2, ISO 27001, PCI-DSS, HIPAA reporting (certification is organization's responsibility)
+- **Forensics ready**: Command hashing, IP tracking, detailed metadata
 - **Real-time monitoring**: Progress logs for long-running tasks
 
 ## 🎯 Who Is This For?
@@ -211,7 +211,7 @@ Your AI assistant gets 12 powerful tools with built-in security:
 
 - ✅ **Production-Ready Security**: OpenSSF Scorecard 7.5+ score
 - ✅ **Zero-Trust Architecture**: Deny-by-default, allow-by-exception
-- ✅ **Compliance Ready**: SOC 2, HIPAA, PCI audit logging
+- ✅ **Compliance-Supporting**: Structured audit logs for SOC 2, ISO 27001, PCI-DSS, HIPAA (certification is organization's responsibility)
 - ✅ **Battle-Tested**: Built on security-first principles
 - ✅ **Easy Integration**: Works with Claude, ChatGPT, and any MCP client
 - ✅ **Open Source**: Apache 2.0 licensed, community-driven
