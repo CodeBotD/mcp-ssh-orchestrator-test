@@ -25,10 +25,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@c3d2d0c3d0079a795c17a7f3fd8adf2e4b1c8125 # v5.5.1
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       
@@ -45,10 +45,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@c3d2d0c3d0079a795c17a7f3fd8adf2e4b1c8125 # v5.5.1
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       
@@ -65,10 +65,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@c3d2d0c3d0079a795c17a7f3fd8adf2e4b1c8125 # v5.5.1
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       

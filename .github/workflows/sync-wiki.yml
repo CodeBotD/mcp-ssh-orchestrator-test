@@ -16,7 +16,7 @@ jobs:
     
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       

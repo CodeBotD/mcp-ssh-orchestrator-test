@@ -21,10 +21,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@8e5e9e2adc2337b4197c497aab16fe97a93546ab # v4.2.2
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@0c77cd4579477706d09f1ae81d5f39e5198d9c3e # v4.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
       
