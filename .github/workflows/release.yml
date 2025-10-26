@@ -10,7 +10,22 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  verify-tests:
+    name: Verify Tests Passed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Wait for CI to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Test Python 3.11'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+  
   build-and-push:
+    needs: [verify-tests]
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     permissions:

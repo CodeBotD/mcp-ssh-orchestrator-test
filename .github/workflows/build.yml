@@ -2,9 +2,27 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.py'
+      - 'tests/**/*.py'
+      - 'pyproject.toml'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'config/**/*.yml'
+      - '.github/workflows/build.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - 'src/**/*.py'
+      - 'tests/**/*.py'
+      - 'pyproject.toml'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'config/**/*.yml'
+      - '.github/workflows/build.yml'
 
 jobs:
   lint:
@@ -34,6 +52,7 @@ jobs:
         continue-on-error: true
 
   test:
+    needs: [lint]
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
@@ -66,6 +85,7 @@ jobs:
         continue-on-error: true
 
   docker:
+    needs: [lint]
     name: Docker Build
     runs-on: ubuntu-latest
     steps:

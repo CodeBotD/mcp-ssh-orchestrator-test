@@ -1,0 +1,34 @@
+name: Lint Documentation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/workflows/lint-docs.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'docs/**'
+      - '.github/workflows/lint-docs.yml'
+
+jobs:
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install markdownlint-cli2
+        run: npm install -g markdownlint-cli2
+      
+      - name: Run markdownlint
+        run: markdownlint-cli2 "**/*.md" --config .markdownlint.json || true
+
