@@ -20,6 +20,7 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/samerfarida/mcp-ssh-orchestrator)](https://github.com/samerfarida/mcp-ssh-orchestrator/graphs/contributors)
 [![GitHub last commit](https://img.shields.io/github/last-commit/samerfarida/mcp-ssh-orchestrator)](https://github.com/samerfarida/mcp-ssh-orchestrator/commits/main)
 [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/samerfarida/mcp-ssh-orchestrator/build.yml?branch=main&label=Build)](https://github.com/samerfarida/mcp-ssh-orchestrator/actions)
+[![CodeQL Analysis](https://github.com/samerfarida/mcp-ssh-orchestrator/actions/workflows/codeql.yml/badge.svg)](https://github.com/samerfarida/mcp-ssh-orchestrator/actions/workflows/codeql.yml)
 
 ---
 
