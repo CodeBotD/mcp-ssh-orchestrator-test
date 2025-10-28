@@ -297,7 +297,7 @@ services:
 ### Security Attributes
 
 - **Confidentiality:** Encrypted SSH transport, no credential storage
-- **Integrity:** Command hashing, audit trails, signature verification
+- **Integrity:** Command hashing and audit trails
 - **Availability:** Health checks, graceful degradation, resource limits
 
 ### Operational Attributes

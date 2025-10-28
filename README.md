@@ -196,7 +196,7 @@ MCP SSH Orchestrator directly addresses documented vulnerabilities in the MCP ec
 
 ## What Can AI Do With This? (MCP Tools)
 
-Your AI assistant gets 12 powerful tools with built-in security:
+Your AI assistant gets 13 powerful tools with built-in security:
 
 ### Discovery & Planning
 - `ssh_list_hosts` - See all available servers
