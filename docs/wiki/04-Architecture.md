@@ -275,9 +275,9 @@ graph TB
         end
         
         subgraph "Configuration Layer"
-            CONFIG_DIR[/app/config]
-            KEYS_DIR[/app/keys]
-            SECRETS_DIR[/app/secrets]
+            CONFIG_DIR["/app/config"]
+            KEYS_DIR["/app/keys"]
+            SECRETS_DIR["/app/secrets"]
         end
         
         subgraph "System Layer"
