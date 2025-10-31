@@ -3,122 +3,94 @@
 
 # Core source code changes
 python:
-  - changed-files:
-      - any-glob-to-any-file:
-          - src/**/*.py
-          - tests/**/*.py
-          - pyproject.toml
-          - requirements*.txt
+  - src/**/*.py
+  - tests/**/*.py
+  - pyproject.toml
+  - requirements*.txt
 
 # Documentation changes
 documentation:
-  - changed-files:
-      - any-glob-to-any-file:
-          - docs/**/*
-          - README.md
-          - CHANGELOG.md
-          - CONTRIBUTING.md
-          - SECURITY.md
-          - "*.md"
+  - docs/**/*
+  - README.md
+  - CHANGELOG.md
+  - CONTRIBUTING.md
+  - SECURITY.md
+  - "*.md"
 
 # Configuration changes
 configuration:
-  - changed-files:
-      - any-glob-to-any-file:
-          - config/**/*
-          - examples/**/*
-          - compose/**/*
-          - Dockerfile
-          - docker-compose.yml
+  - config/**/*
+  - examples/**/*
+  - compose/**/*
+  - Dockerfile
+  - docker-compose.yml
 
 # Docker and deployment
 docker:
-  - changed-files:
-      - any-glob-to-any-file:
-          - Dockerfile
-          - compose/**/*
-          - docker-compose.yml
+  - Dockerfile
+  - compose/**/*
+  - docker-compose.yml
 
 # Security-related changes
 security:
-  - changed-files:
-      - any-glob-to-any-file:
-          - secrets/**/*
-          - keys/**/*
-          - config/credentials.yml
-          - config/policy.yml
-          - docs/SECURITY.md
+  - secrets/**/*
+  - keys/**/*
+  - config/credentials.yml
+  - config/policy.yml
+  - docs/SECURITY.md
 
 # Testing changes
 testing:
-  - changed-files:
-      - any-glob-to-any-file:
-          - tests/**/*
-          - "test_*.py"
-          - "*_test.py"
+  - tests/**/*
+  - "test_*.py"
+  - "*_test.py"
 
 # Assets and branding
 assets:
-  - changed-files:
-      - any-glob-to-any-file:
-          - assets/**/*
-          - "*.svg"
-          - "*.png"
-          - "*.jpg"
-          - "*.jpeg"
-          - "*.gif"
+  - assets/**/*
+  - "*.svg"
+  - "*.png"
+  - "*.jpg"
+  - "*.jpeg"
+  - "*.gif"
 
 # CI/CD and GitHub workflows
 ci:
-  - changed-files:
-      - any-glob-to-any-file:
-          - .github/**/*
-          - .github/workflows/**/*
-          - .github/actions/**/*
+  - .github/**/*
+  - .github/workflows/**/*
+  - .github/actions/**/*
 
 # Dependencies and package management
 dependencies:
-  - changed-files:
-      - any-glob-to-any-file:
-          - pyproject.toml
-          - requirements*.txt
-          - Pipfile
-          - Pipfile.lock
-          - poetry.lock
+  - pyproject.toml
+  - requirements*.txt
+  - Pipfile
+  - Pipfile.lock
+  - poetry.lock
 
 # Server configuration
 server-config:
-  - changed-files:
-      - any-glob-to-any-file:
-          - servers/**/*
-          - config/servers.yml
-          - config/credentials.yml
+  - servers/**/*
+  - config/servers.yml
+  - config/credentials.yml
 
 # Policy and permissions
 policy:
-  - changed-files:
-      - any-glob-to-any-file:
-          - config/policy.yml
-          - src/mcp_ssh/policy.py
+  - config/policy.yml
+  - src/mcp_ssh/policy.py
 
 # SSH client functionality
 ssh-client:
-  - changed-files:
-      - any-glob-to-any-file:
-          - src/mcp_ssh/ssh_client.py
-          - src/mcp_ssh/tools/**/*
+  - src/mcp_ssh/ssh_client.py
+  - src/mcp_ssh/tools/**/*
 
 # MCP server functionality
 mcp-server:
-  - changed-files:
-      - any-glob-to-any-file:
-          - src/mcp_ssh/mcp_server.py
-          - src/mcp_ssh/config.py
-          - servers/**/*
+  - src/mcp_ssh/mcp_server.py
+  - src/mcp_ssh/config.py
+  - servers/**/*
 
 # Breaking changes (major version updates)
 breaking:
-  - changed-files:
-      - any-glob-to-any-file:
-          - CHANGELOG.md
-          - pyproject.toml
+  - CHANGELOG.md
+  - pyproject.toml
