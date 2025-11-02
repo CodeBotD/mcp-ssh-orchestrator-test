@@ -3,6 +3,8 @@ name: Build and Test
 on:
   push:
     branches: [main, develop]
+    tags:
+      - 'v*'
     paths:
       - 'src/**/*.py'
       - 'tests/**/*.py'
@@ -23,9 +25,18 @@ jobs:
     permissions:
       contents: read
     outputs:
-      has-code-changes: ${{ steps.filter.outputs.src == 'true' || steps.filter.outputs.tests == 'true' || steps.filter.outputs.config == 'true' || steps.filter.outputs.docker == 'true' }}
+      has-code-changes: ${{ steps.is-tag.outputs.is-tag == 'true' || steps.filter.outputs.src == 'true' || steps.filter.outputs.tests == 'true' || steps.filter.outputs.config == 'true' || steps.filter.outputs.docker == 'true' }}
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Check if tag push
+        id: is-tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "is-tag=true" >> $GITHUB_OUTPUT
+          else
+            echo "is-tag=false" >> $GITHUB_OUTPUT
+          fi
       
       - name: Check for code changes
         uses: dorny/paths-filter@v3
