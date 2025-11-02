@@ -19,12 +19,13 @@ This separation allows Docker to capture audit logs separately from MCP response
 
 ### Audit Log Types
 
-MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
+MCP SSH Orchestrator emits five types of structured JSON logs to stderr:
 
 - 1. **Policy Decision Log** - Before every command execution
 - 2. **Audit Log** - After command execution completes  
 - 3. **Progress Log** - During long-running commands (every 0.5s)
-- 4. **Error/Trace Log** - On exceptions or function completion
+- 4. **Security Audit Log** - Security-relevant events (path traversal, invalid access, etc.)
+- 5. **Error/Trace Log** - On exceptions or function completion
 
 ### 1. Policy Decision Log
 
@@ -94,6 +95,84 @@ MCP SSH Orchestrator emits four types of structured JSON logs to stderr:
 - `cancelled`: Boolean - was task cancelled?
 - `timeout`: Boolean - did task hit timeout limit?
 - `target_ip`: Actual IP address of SSH server
+
+### 4. Security Audit Log
+
+**When:** Emitted when security-relevant events are detected (path traversal attempts, invalid file access, oversized files, rate limit violations, etc.).
+
+**Purpose:** Comprehensive audit trail for security monitoring and incident response.
+
+**Example:**
+```json
+{
+  "level": "error",
+  "kind": "security_audit",
+  "type": "security_event",
+  "event_type": "path_traversal_attempt",
+  "ts": 1762112167.394149,
+  "timestamp": "2025-11-02T14:36:07-0500",
+  "attempted_path": "../etc/passwd",
+  "resolved_path": "/app/secrets/../etc/passwd",
+  "reason": "path_outside_allowed_directory",
+  "base_dir": "/app/secrets"
+}
+```
+
+**Fields:**
+
+- `level`: Always `"error"` for security events
+- `kind`: Always `"security_audit"`
+- `type`: Always `"security_event"`
+- `event_type`: Type of security event (see Event Types below)
+- `ts`: Unix timestamp (seconds since epoch, float)
+- `timestamp`: ISO 8601 formatted timestamp (human-readable)
+- `attempted_path`: Original path/input that triggered the security event (optional)
+- `resolved_path`: Resolved/absolute path after normalization (optional)
+- `reason`: Human-readable reason for the security event (optional)
+- `additional_data`: Event-specific context (field names, sizes, limits, etc.) (optional)
+
+**Security Event Types:**
+
+1. **`path_traversal_attempt`**: Path traversal detected in secret names or key paths
+   - Includes: `attempted_path`, `resolved_path`, `reason`, `base_dir`
+   - Example reasons: `"path_outside_allowed_directory"`, `"contains_traversal_pattern"`, `"absolute_path_rejected"`
+
+2. **`file_validation_failed`**: File path validation failure
+   - Includes: `attempted_path`, `resolved_path`, `reason`
+   - Example reasons: `"path_is_directory"`, `"path_is_symlink"`, `"path_not_regular_file"`, `"path_outside_allowed_directory"`
+
+3. **`file_size_limit_exceeded`**: YAML file exceeds size limit
+   - Includes: `attempted_path`, `resolved_path`, `file_size`, `max_size`
+
+4. **`input_length_limit_exceeded`**: Input string exceeds length limit
+   - Includes: `attempted_path`, `field`, `length`, `max_length`
+   - Example fields: `"secret_name"`, `"key_path"`
+
+5. **`invalid_secret_name`**: Secret name contains invalid characters
+   - Includes: `attempted_path`, `reason`
+
+6. **`dns_rate_limit_exceeded`**: DNS resolution rate limit exceeded
+   - Includes: `hostname`, `max_per_second`
+
+7. **`command_bypass_attempt`**: Command denial bypass attempt detected
+   - Includes: `original_command`, `normalized_command`, `blocked_pattern`
+
+**Log Collection Example:**
+```bash
+# Filter security audit events
+docker logs -f mcp-ssh-orchestrator 2>&1 | \
+  jq -r 'select(.kind == "security_audit") | @json'
+
+# Alert on path traversal attempts
+docker logs -f mcp-ssh-orchestrator 2>&1 | \
+  jq -r 'select(.event_type == "path_traversal_attempt") | "ALERT: \(.timestamp) - \(.reason) - \(.attempted_path)"'
+```
+
+**Security Monitoring:**
+- Alert on any `path_traversal_attempt` events
+- Monitor `file_validation_failed` for patterns
+- Track `input_length_limit_exceeded` for potential DoS attempts
+- Review `command_bypass_attempt` for policy evasion
 
 ### 3. Progress Log
 

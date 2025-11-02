@@ -12,6 +12,7 @@ from mcp_ssh.config import (
     MAX_YAML_FILE_SIZE,
     Config,
     _load_yaml,
+    _log_security_event,
     _resolve_key_path,
     _resolve_secret,
     _validate_file_path,
@@ -805,3 +806,282 @@ def test_resolve_key_path_length_validation_before_traversal_check():
     # Should be rejected for length first
     result = _resolve_key_path(key_path, keys_dir="/app/keys")
     assert result == ""
+
+
+def test_log_security_event_format():
+    """Test that security audit events are logged in valid JSON format."""
+    import json
+    import sys
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path="../etc/passwd",
+            resolved_path="/app/secrets/../etc/passwd",
+            reason="path_outside_allowed_directory",
+            additional_data={"base_dir": "/app/secrets"},
+        )
+
+        output = sys.stderr.getvalue()
+        assert output, "Should have logged to stderr"
+
+        # Parse as JSON
+        data = json.loads(output.strip())
+        assert data["level"] == "error"
+        assert data["kind"] == "security_audit"
+        assert data["type"] == "security_event"
+        assert data["event_type"] == "path_traversal_attempt"
+        assert "ts" in data
+        assert "timestamp" in data
+        assert data["attempted_path"] == "../etc/passwd"
+        assert data["resolved_path"] == "/app/secrets/../etc/passwd"
+        assert data["reason"] == "path_outside_allowed_directory"
+        assert data["base_dir"] == "/app/secrets"
+    finally:
+        sys.stderr = old_stderr
+
+
+def test_log_security_event_minimal():
+    """Test that security audit events work with minimal parameters."""
+    import json
+    import sys
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        _log_security_event(event_type="test_event")
+
+        output = sys.stderr.getvalue()
+        assert output, "Should have logged to stderr"
+
+        # Parse as JSON
+        data = json.loads(output.strip())
+        assert data["event_type"] == "test_event"
+        assert "ts" in data
+        assert "timestamp" in data
+        # Optional fields should not be present if not provided
+        assert "attempted_path" not in data
+        assert "resolved_path" not in data
+        assert "reason" not in data
+    finally:
+        sys.stderr = old_stderr
+
+
+def test_audit_logging_path_traversal_attempt():
+    """Test that path traversal attempts are logged via audit logging."""
+    import json
+    import sys
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a file outside the secrets directory
+            parent_dir = os.path.dirname(tmpdir)
+            outside_file = os.path.join(parent_dir, "outside_secret")
+            with open(outside_file, "w") as f:
+                f.write("outside-secret")
+
+            # Trigger path traversal attempt with valid secret name that has traversal
+            # Use a secret name that passes character validation but triggers path traversal
+            secret_name = "valid_secret"  # Valid characters
+            secret_file = os.path.join(tmpdir, secret_name)
+            with open(secret_file, "w") as f:
+                f.write("valid-content")
+
+            # Now try to access outside file using key_path with traversal
+            # Use key_path which allows path traversal attempts
+            result = _resolve_key_path("../outside_secret", keys_dir=tmpdir)
+
+            # Should be rejected
+            assert result == ""
+
+            # Check audit log was written
+            output = sys.stderr.getvalue()
+            assert output, "Should have logged path traversal attempt"
+
+            # Find the audit log entry
+            lines = output.strip().split("\n")
+            audit_line = None
+            for line in lines:
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        if data.get("event_type") == "path_traversal_attempt":
+                            audit_line = line
+                            break
+                    except json.JSONDecodeError:
+                        continue
+
+            assert audit_line is not None, "Should have security audit log entry"
+            data = json.loads(audit_line)
+            assert data["event_type"] == "path_traversal_attempt"
+            assert "attempted_path" in data
+            assert "reason" in data
+
+            # Clean up
+            os.remove(outside_file)
+    finally:
+        sys.stderr = old_stderr
+
+
+def test_audit_logging_invalid_file_access():
+    """Test that invalid file access attempts are logged via audit logging."""
+    import json
+    import sys
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a directory (not a file)
+            subdir = os.path.join(tmpdir, "subdir")
+            os.makedirs(subdir, exist_ok=True)
+
+            # Try to resolve directory as secret (should fail)
+            result = _resolve_secret("subdir", secrets_dir=tmpdir)
+
+            # Should be rejected
+            assert result == ""
+
+            # Check audit log was written
+            output = sys.stderr.getvalue()
+            assert output, "Should have logged invalid file access"
+
+            # Find the audit log entry for file validation failure
+            lines = output.strip().split("\n")
+            audit_line = None
+            for line in lines:
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        if data.get("event_type") == "file_validation_failed":
+                            audit_line = line
+                            break
+                    except json.JSONDecodeError:
+                        continue
+
+            assert audit_line is not None, "Should have security audit log entry"
+            data = json.loads(audit_line)
+            assert data["event_type"] == "file_validation_failed"
+            assert "attempted_path" in data
+            assert "reason" in data
+    finally:
+        sys.stderr = old_stderr
+
+
+def test_audit_logging_oversized_file():
+    """Test that oversized file attempts are logged via audit logging."""
+    import json
+    import sys
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            yaml_path = os.path.join(tmpdir, "oversized.yml")
+            # Create oversized file
+            oversized_size = MAX_YAML_FILE_SIZE + 1024
+            with open(yaml_path, "w") as f:
+                large_content = "key: " + "x" * oversized_size
+                f.write(large_content)
+
+            # Try to load oversized file
+            result = _load_yaml(yaml_path)
+
+            # Should return empty dict
+            assert result == {}
+
+            # Check audit log was written
+            output = sys.stderr.getvalue()
+            assert output, "Should have logged oversized file attempt"
+
+            # Find the audit log entry
+            lines = output.strip().split("\n")
+            audit_line = None
+            for line in lines:
+                if line.strip():
+                    try:
+                        data = json.loads(line)
+                        if data.get("event_type") == "file_size_limit_exceeded":
+                            audit_line = line
+                            break
+                    except json.JSONDecodeError:
+                        continue
+
+            assert audit_line is not None, "Should have security audit log entry"
+            data = json.loads(audit_line)
+            assert data["event_type"] == "file_size_limit_exceeded"
+            assert "attempted_path" in data
+            assert "file_size" in data
+            assert "max_size" in data
+            assert data["file_size"] > data["max_size"]
+    finally:
+        sys.stderr = old_stderr
+
+
+def test_audit_logging_does_not_break_functionality():
+    """Test that audit logging failures don't break functionality."""
+    from unittest.mock import patch
+
+    # Mock stderr.write to raise exception
+    with patch("sys.stderr.write", side_effect=Exception("Logging failed")):
+        # Should still function normally (logging errors are silent)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            secret_file = os.path.join(tmpdir, "valid_secret")
+            with open(secret_file, "w") as f:
+                f.write("secret-content")
+
+            # Should still work despite logging failure
+            result = _resolve_secret("valid_secret", secrets_dir=tmpdir)
+            assert result == "secret-content"
+
+
+def test_audit_logging_includes_timestamp():
+    """Test that audit logs include both Unix timestamp and ISO format."""
+    import json
+    import sys
+    import time
+    from io import StringIO
+
+    # Capture stderr
+    old_stderr = sys.stderr
+    sys.stderr = StringIO()
+
+    try:
+        before = time.time()
+        _log_security_event(event_type="test_event")
+        after = time.time()
+
+        output = sys.stderr.getvalue()
+        data = json.loads(output.strip())
+
+        # Check Unix timestamp
+        assert "ts" in data
+        assert isinstance(data["ts"], (int, float))
+        assert before <= data["ts"] <= after
+
+        # Check ISO timestamp
+        assert "timestamp" in data
+        assert isinstance(data["timestamp"], str)
+        # Should be in format YYYY-MM-DDTHH:MM:SS+offset
+        assert "T" in data["timestamp"]
+    finally:
+        sys.stderr = old_stderr
