@@ -5,7 +5,11 @@ All notable changes to mcp-ssh-orchestrator will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-11-02
+## [Unreleased]
+
+### Added
+
+## [0.3.0] - 2025-11-02
 
 ### Added
 - **Security Audit Logging (PR10)**: Added comprehensive security audit logging for security-relevant events
