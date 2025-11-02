@@ -648,7 +648,47 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 
 ## Audit & Monitoring
 
-### Audit Logging
+### Security Audit Logging
+
+Security-relevant events are logged to stderr in structured JSON format via `_log_security_event()`:
+
+**Security Audit Log Format:**
+```json
+{
+  "level": "error",
+  "kind": "security_audit",
+  "type": "security_event",
+  "event_type": "path_traversal_attempt",
+  "ts": 1762112167.394149,
+  "timestamp": "2025-11-02T14:36:07-0500",
+  "attempted_path": "../etc/passwd",
+  "resolved_path": "/app/secrets/../etc/passwd",
+  "reason": "path_outside_allowed_directory",
+  "base_dir": "/app/secrets"
+}
+```
+
+**Event Types Logged:**
+- `path_traversal_attempt`: Path traversal detected in secret/key resolution
+- `file_validation_failed`: Directory/symlink/non-file paths rejected
+- `file_size_limit_exceeded`: Oversized YAML files rejected
+- `input_length_limit_exceeded`: Oversized string inputs rejected
+- `invalid_secret_name`: Invalid characters in secret names
+- `dns_rate_limit_exceeded`: DNS resolution rate limit violations
+- `command_bypass_attempt`: Command denial bypass attempts detected
+
+**Audit Log Fields:**
+- `ts`: Unix timestamp (float)
+- `timestamp`: ISO 8601 formatted timestamp (string)
+- `attempted_path`: Original input that triggered the event
+- `resolved_path`: Resolved/absolute path (if applicable)
+- `reason`: Human-readable reason for the security event
+- `additional_data`: Event-specific context (sizes, limits, patterns, etc.)
+
+**Security Monitoring:**
+All security audit events are written to stderr for log aggregation and SIEM integration.
+
+### Command Execution Audit Logging
 
 All operations logged to stderr as JSON:
 

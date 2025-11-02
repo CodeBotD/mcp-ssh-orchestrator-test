@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import time
 
 import yaml
 
@@ -40,14 +41,14 @@ def _load_yaml(path: str) -> dict:
         # Check file size before loading to prevent resource exhaustion
         file_size = os.path.getsize(path)
         if file_size > MAX_YAML_FILE_SIZE:
-            _log_err(
-                "security_event",
-                {
-                    "type": "file_size_limit_exceeded",
-                    "path": path,
+            _log_security_event(
+                event_type="file_size_limit_exceeded",
+                attempted_path=path,
+                resolved_path=os.path.abspath(path),
+                reason="yaml_file_too_large",
+                additional_data={
                     "file_size": file_size,
                     "max_size": MAX_YAML_FILE_SIZE,
-                    "reason": "yaml_file_too_large",
                 },
             )
             return {}
@@ -67,6 +68,57 @@ def _log_err(kind: str, data: dict) -> None:
     try:
         sys.stderr.write(json.dumps({"level": "error", "kind": kind, **data}) + "\n")
     except Exception:
+        pass
+
+
+def _log_security_event(
+    event_type: str,
+    attempted_path: str = "",
+    resolved_path: str = "",
+    reason: str = "",
+    additional_data: dict | None = None,
+) -> None:
+    """Log security audit event to stderr in structured JSON format.
+
+    Security: Provides comprehensive audit logging for security-relevant events
+    including path traversal attempts, invalid file access, oversized files, etc.
+
+    Args:
+        event_type: Type of security event (e.g., "path_traversal_attempt",
+                   "invalid_file_access", "file_size_limit_exceeded",
+                   "input_length_limit_exceeded")
+        attempted_path: Original path/input that triggered the security event
+        resolved_path: Resolved/absolute path (if applicable)
+        reason: Human-readable reason for the security event
+        additional_data: Optional additional context (field names, sizes, etc.)
+    """
+    try:
+        audit_entry = {
+            "level": "error",
+            "kind": "security_audit",
+            "type": "security_event",
+            "event_type": event_type,
+            "ts": time.time(),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime()),
+        }
+
+        # Add path information if provided
+        if attempted_path:
+            audit_entry["attempted_path"] = attempted_path
+        if resolved_path:
+            audit_entry["resolved_path"] = resolved_path
+
+        # Add reason if provided
+        if reason:
+            audit_entry["reason"] = reason
+
+        # Merge additional data if provided
+        if additional_data:
+            audit_entry.update(additional_data)
+
+        sys.stderr.write(json.dumps(audit_entry) + "\n")
+    except Exception:
+        # Silently fail to prevent logging errors from breaking functionality
         pass
 
 
@@ -99,27 +151,23 @@ def _validate_file_path(
 
     # Validate resolved path stays within base directory
     if not file_abs.startswith(base_abs + os.sep) and file_abs != base_abs:
-        _log_err(
-            "security_event",
-            {
-                "type": "file_validation_failed",
-                "file_path": file_path,
-                "base_dir": base_abs,
-                "reason": "path_outside_allowed_directory",
-            },
+        _log_security_event(
+            event_type="file_validation_failed",
+            attempted_path=file_path,
+            resolved_path=file_abs,
+            reason="path_outside_allowed_directory",
+            additional_data={"base_dir": base_abs},
         )
         return False
 
     # If path doesn't exist, only validate if we require existence
     if not os.path.exists(file_abs):
         if require_exists:
-            _log_err(
-                "security_event",
-                {
-                    "type": "file_validation_failed",
-                    "file_path": file_path,
-                    "reason": "file_not_found",
-                },
+            _log_security_event(
+                event_type="file_validation_failed",
+                attempted_path=file_path,
+                resolved_path=file_abs,
+                reason="file_not_found",
             )
             return False
         # If we don't require existence, path is valid (file might be created later)
@@ -127,37 +175,31 @@ def _validate_file_path(
 
     # Check if path is a directory (reject directories)
     if os.path.isdir(file_abs):
-        _log_err(
-            "security_event",
-            {
-                "type": "file_validation_failed",
-                "file_path": file_path,
-                "reason": "path_is_directory",
-            },
+        _log_security_event(
+            event_type="file_validation_failed",
+            attempted_path=file_path,
+            resolved_path=file_abs,
+            reason="path_is_directory",
         )
         return False
 
     # Check if path is a symlink (reject symlinks for security)
     if os.path.islink(file_abs):
-        _log_err(
-            "security_event",
-            {
-                "type": "file_validation_failed",
-                "file_path": file_path,
-                "reason": "path_is_symlink",
-            },
+        _log_security_event(
+            event_type="file_validation_failed",
+            attempted_path=file_path,
+            resolved_path=file_abs,
+            reason="path_is_symlink",
         )
         return False
 
     # If we require existence, check if path is a regular file
     if require_exists and not os.path.isfile(file_abs):
-        _log_err(
-            "security_event",
-            {
-                "type": "file_validation_failed",
-                "file_path": file_path,
-                "reason": "path_not_regular_file",
-            },
+        _log_security_event(
+            event_type="file_validation_failed",
+            attempted_path=file_path,
+            resolved_path=file_abs,
+            reason="path_not_regular_file",
         )
         return False
 
@@ -176,14 +218,14 @@ def _resolve_secret(secret_name: str, secrets_dir: str = "") -> str:
 
     # Length validation: prevent resource exhaustion
     if len(secret_name) > MAX_SECRET_NAME_LENGTH:
-        _log_err(
-            "security_event",
-            {
-                "type": "input_length_limit_exceeded",
+        _log_security_event(
+            event_type="input_length_limit_exceeded",
+            attempted_path=secret_name,
+            reason="secret_name_too_long",
+            additional_data={
                 "field": "secret_name",
                 "length": len(secret_name),
                 "max_length": MAX_SECRET_NAME_LENGTH,
-                "reason": "secret_name_too_long",
             },
         )
         return ""
@@ -196,25 +238,19 @@ def _resolve_secret(secret_name: str, secrets_dir: str = "") -> str:
     # Security validation: only allow safe characters in secret_name
     # Allowed: alphanumeric, dash, underscore
     if not secret_name.replace("-", "").replace("_", "").isalnum():
-        _log_err(
-            "security_event",
-            {
-                "type": "invalid_secret_name",
-                "secret_name": secret_name,
-                "reason": "contains_invalid_characters",
-            },
+        _log_security_event(
+            event_type="invalid_secret_name",
+            attempted_path=secret_name,
+            reason="contains_invalid_characters",
         )
         return ""
 
     # Reject absolute paths (for secrets, enforce relative paths only)
     if os.path.isabs(secret_name):
-        _log_err(
-            "security_event",
-            {
-                "type": "path_traversal_attempt",
-                "secret_name": secret_name,
-                "reason": "absolute_path_rejected",
-            },
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path=secret_name,
+            reason="absolute_path_rejected",
         )
         return ""
 
@@ -232,15 +268,12 @@ def _resolve_secret(secret_name: str, secrets_dir: str = "") -> str:
     # Validate resolved path stays within secrets_dir
     # Check that resolved path starts with base_abs + separator
     if not resolved_abs.startswith(base_abs + os.sep) and resolved_abs != base_abs:
-        _log_err(
-            "security_event",
-            {
-                "type": "path_traversal_attempt",
-                "secret_name": secret_name,
-                "attempted_path": resolved_abs,
-                "base_dir": base_abs,
-                "reason": "path_outside_allowed_directory",
-            },
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path=secret_name,
+            resolved_path=resolved_abs,
+            reason="path_outside_allowed_directory",
+            additional_data={"base_dir": base_abs},
         )
         return ""
 
@@ -268,14 +301,14 @@ def _resolve_key_path(key_path: str, keys_dir: str = "") -> str:
 
     # Length validation: prevent resource exhaustion
     if len(key_path) > MAX_KEY_PATH_LENGTH:
-        _log_err(
-            "security_event",
-            {
-                "type": "input_length_limit_exceeded",
+        _log_security_event(
+            event_type="input_length_limit_exceeded",
+            attempted_path=key_path,
+            reason="key_path_too_long",
+            additional_data={
                 "field": "key_path",
                 "length": len(key_path),
                 "max_length": MAX_KEY_PATH_LENGTH,
-                "reason": "key_path_too_long",
             },
         )
         return ""
@@ -283,14 +316,11 @@ def _resolve_key_path(key_path: str, keys_dir: str = "") -> str:
     # Security check: reject paths containing traversal patterns
     # Check for .. patterns (including encoded variants like ....//)
     if ".." in key_path:
-        _log_err(
-            "security_event",
-            {
-                "type": "path_traversal_attempt",
-                "key_path": key_path,
-                "reason": "contains_traversal_pattern",
-                "pattern": "..",
-            },
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path=key_path,
+            reason="contains_traversal_pattern",
+            additional_data={"pattern": ".."},
         )
         return ""
 
@@ -298,14 +328,11 @@ def _resolve_key_path(key_path: str, keys_dir: str = "") -> str:
     # Convert backslashes to forward slashes for consistent checking
     normalized_for_check = key_path.replace("\\", "/")
     if ".." in normalized_for_check:
-        _log_err(
-            "security_event",
-            {
-                "type": "path_traversal_attempt",
-                "key_path": key_path,
-                "reason": "contains_traversal_pattern",
-                "pattern": "backslash_with_traversal",
-            },
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path=key_path,
+            reason="contains_traversal_pattern",
+            additional_data={"pattern": "backslash_with_traversal"},
         )
         return ""
 
@@ -317,15 +344,12 @@ def _resolve_key_path(key_path: str, keys_dir: str = "") -> str:
         # Validate absolute path is within keys_dir for security
         resolved_abs = os.path.abspath(key_path)
         if not resolved_abs.startswith(base_abs + os.sep) and resolved_abs != base_abs:
-            _log_err(
-                "security_event",
-                {
-                    "type": "path_traversal_attempt",
-                    "key_path": key_path,
-                    "attempted_path": resolved_abs,
-                    "base_dir": base_abs,
-                    "reason": "absolute_path_outside_keys_directory",
-                },
+            _log_security_event(
+                event_type="path_traversal_attempt",
+                attempted_path=key_path,
+                resolved_path=resolved_abs,
+                reason="absolute_path_outside_keys_directory",
+                additional_data={"base_dir": base_abs},
             )
             return ""
         # Validate file path: reject directories and symlinks, but allow non-existent files
@@ -345,15 +369,12 @@ def _resolve_key_path(key_path: str, keys_dir: str = "") -> str:
 
     # Validate resolved path stays within keys_dir
     if not resolved_abs.startswith(base_abs + os.sep) and resolved_abs != base_abs:
-        _log_err(
-            "security_event",
-            {
-                "type": "path_traversal_attempt",
-                "key_path": key_path,
-                "attempted_path": resolved_abs,
-                "base_dir": base_abs,
-                "reason": "path_outside_allowed_directory",
-            },
+        _log_security_event(
+            event_type="path_traversal_attempt",
+            attempted_path=key_path,
+            resolved_path=resolved_abs,
+            reason="path_outside_allowed_directory",
+            additional_data={"base_dir": base_abs},
         )
         return ""
 

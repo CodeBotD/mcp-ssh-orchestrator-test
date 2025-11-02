@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2025-11-02
 
 ### Added
+- **Security Audit Logging (PR10)**: Added comprehensive security audit logging for security-relevant events
+  - Created `_log_security_event()` function with structured JSON format
+  - Unified all security event logging to use audit format
+  - Includes both Unix timestamp (ts) and ISO 8601 timestamp (timestamp)
+  - Logs attempted_path and resolved_path for path-related events
+  - Logs additional context (field names, sizes, limits, patterns)
+  - Event types: path_traversal_attempt, file_validation_failed, file_size_limit_exceeded, input_length_limit_exceeded, invalid_secret_name, dns_rate_limit_exceeded, command_bypass_attempt
+  - Comprehensive tests for audit logging (format validation, path traversal, invalid file access, oversized files, timestamp validation)
+  - Updated documentation with security audit logging format and event types
+  - Enables security monitoring and incident response via structured audit trail
 - **Input Length Limits for Configuration Parameters (PR9)**: Added length validation for secret names and SSH key paths
   - Secret name length limit: 100 characters (prevents oversized secret names in credentials.yml)
   - SSH key path length limit: 500 characters (prevents oversized key paths)
