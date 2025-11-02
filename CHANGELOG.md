@@ -8,18 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2025-11-02
 
 ### Added
+- **Path Traversal Protection (PR1 & PR2)**: Security enhancements to prevent path traversal attacks
+  - **Secret Path Protection (`_resolve_secret`)**:
+    - Secret name validation: only alphanumeric characters, dashes, and underscores allowed
+    - Path normalization and validation to ensure paths stay within `/app/secrets`
+    - Absolute path rejection for secrets (relative paths only)
+    - Path traversal pattern detection and blocking (`../`, `..\\`)
+    - Security event logging for all traversal attempts
+  - **SSH Key Path Protection (`_resolve_key_path`)**:
+    - Traversal pattern detection and rejection
+    - Absolute path validation (must be within `keys_dir`)
+    - Relative path validation with directory confinement
+    - Cross-platform support (handles both forward slash and backslash traversal)
+    - Security event logging for all traversal attempts
+  - Comprehensive test coverage with 9 new security-focused tests per function
+- **File Path Validation (PR3)**: Added file type validation for secret and key paths
+  - Added `_validate_file_path()` helper function that validates paths are regular files
+  - Rejects directories (paths must point to files, not directories)
+  - Rejects symbolic links (symlinks rejected for security)
+  - Integrated validation into `_resolve_secret()` and `_resolve_key_path()`
+  - Added comprehensive tests for directory/symlink rejection and regular file validation
+  - Updated documentation with file type validation requirements
 - Path traversal protection documentation
   - Comprehensive path traversal protection section in `docs/SECURITY.md`
   - Secret name validation documentation with allowed characters and examples
   - SSH key path validation documentation with relative/absolute path rules
   - Security event logging examples for path traversal attempts
   - Updated credentials and configuration documentation with security features
-- **File Path Validation (PR3)**: Added file type validation for secret and key paths
-  - Added `_validate_file_path()` helper function that validates paths are regular files
-  - Rejects directories and symbolic links for security
-  - Integrated validation into `_resolve_secret()` and `_resolve_key_path()`
-  - Added comprehensive tests for directory/symlink rejection and regular file validation
-  - Updated documentation with file type validation requirements
 
 ### Fixed
 - **CI/CD Workflow Fix**: Fixed lint and build workflows to run on documentation-only PRs
@@ -29,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `skip-docs-only` job that always succeeds when no code changes detected
   - Workflows now always run (satisfies required branch protection checks) while skipping unnecessary jobs
   - Prevents "Expected - Waiting for status to be reported" blocking merges on documentation PRs
+- **Repository Maintenance**: Added `plan.plan.md` to `.gitignore` to prevent planning documents from being committed
 
 ## [0.2.1] - 2025-10-31
 
