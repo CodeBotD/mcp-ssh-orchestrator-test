@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2025-11-02
 
 ### Added
+- **DNS Rate Limiting (PR8)**: Added rate limiting and caching for DNS resolution to prevent DoS attacks
+  - Rate limiting: Maximum 10 resolutions per second per hostname (time-window based)
+  - Result caching: 60-second TTL cache for DNS results (reduces DNS server load)
+  - Timeout protection: 5-second timeout for DNS resolution (prevents hanging)
+  - Thread-safe implementation for concurrent access
+  - Rate limit violations logged as security events
+  - Comprehensive tests for rate limiting, caching, and timeout handling
+  - Updated documentation with DNS rate limiting details
 - **Command Denial Bypass Prevention (PR7)**: Enhanced command denial logic to prevent bypass attempts
   - Added `_normalize_command()` function that removes quotes, handles escaped characters, and normalizes whitespace
   - Enhanced `is_allowed()` method with dual checking (original + normalized command)
