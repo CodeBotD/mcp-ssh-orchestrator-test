@@ -13,6 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.3.4] - 2025-11-12
+
+### Added
+
+- **OSSF Scorecard Compliance**: Enhanced release workflow to meet OSSF Scorecard security requirements
+  - Added Python package SBOM generation (CycloneDX format) for supply chain transparency
+  - Implemented least-privilege token permissions (read-only at top level, write only at job level)
+  - Added concurrency control to prevent multiple simultaneous releases
+  - Added job timeouts to prevent runaway workflows (15min for tests, 45min for release)
+  - Improved SBOM generation to include only production dependencies
+
+### Changed
+
+- **Release Workflow Security**: Restructured GitHub Actions permissions following principle of least privilege
+  - Top-level permissions set to read-only for Token-Permissions check compliance
+  - Write permissions scoped to release job only where needed
+  - Added comprehensive documentation comments referencing OSSF Scorecard requirements
+
+### Fixed
+
+- **Container Tagging**: Fixed `latest` tag generation in release workflow (removed incorrect branch condition)
+- **SBOM Error Handling**: Improved SBOM generation error handling with graceful fallback when Trivy fails
+
 ## [0.3.3] - 2025-11-08
 
 ### Changed
