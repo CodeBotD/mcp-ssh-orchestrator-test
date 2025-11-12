@@ -387,6 +387,7 @@ Apache 2.0 - See [LICENSE](LICENSE) for details.
 
 - **[GitHub Repository](https://github.com/samerfarida/mcp-ssh-orchestrator)** - Star us on GitHub!
 - **[Issue Tracker](https://github.com/samerfarida/mcp-ssh-orchestrator/issues)** - Report bugs or request features
+- **[CHANGELOG](CHANGELOG.md)** - Version history and release notes
 - **[MCP Specification](https://modelcontextprotocol.io)** - Learn about MCP
 - **[Docker MCP Security Guide](https://www.docker.com/blog/mcp-security-explained/)** - Security best practices
 
