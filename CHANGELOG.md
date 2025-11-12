@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.3.6] - 2025-11-12
+
+### Changed
+
+- **Release Workflow**: Simplified release process by removing problematic Python SBOM generation
+  - Workflow now relies on GitHub's native dependency graph for Python package SBOM
+  - Container SBOM generation (Trivy) continues to work reliably
+
 ## [0.3.5] - 2025-11-12
 
 ### Changed
