@@ -105,21 +105,6 @@ jobs:
           ref="${GITHUB_REF}"
           echo "VERSION=${ref#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      # --- Generate SBOM for Python package (CycloneDX) ---
-      # This meets OSSF Scorecard SBOM check requirements
-      # See: https://github.com/ossf/scorecard/blob/main/docs/checks.md#sbom
-      - name: Generate Python package SBOM
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install cyclonedx-py
-          # Install only production dependencies (not test/dev)
-          pip install --no-deps .
-          pip install -r requirements.txt
-          # Generate SBOM from the current environment (production dependencies only)
-          # Note: cyclonedx-py requires 'environment' as a command, not a flag
-          cyclonedx-py environment -o "dist/sbom-python-${{ steps.version.outputs.VERSION }}.cdx.json" --format json
-
       - name: GPG-sign Python dists
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -195,8 +180,8 @@ jobs:
 
       # --- SBOM generation (CycloneDX) for the pushed image ---
       # Using Trivy to produce a local file deterministically, then attach + attest it
-      # This also meets OSSF Scorecard SBOM check requirements for container images
-      # See: https://github.com/ossf/scorecard/blob/main/docs/checks.md#sbom
+      # Note: GitHub's native dependency graph provides Python package SBOM via UI/API
+      # Container SBOM is included in releases for OSSF Scorecard compliance
       - name: Generate SBOM with Trivy
         id: sbom
         uses: aquasecurity/trivy-action@0.28.0

@@ -15,11 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.5] - 2025-11-12
 
-### Fixed
+### Changed
 
-- **SBOM Generation**: Fixed cyclonedx-py command syntax error in release workflow
-  - Changed from `--environment` flag to `environment` command
-  - Resolves release workflow failure during Python package SBOM generation
+- **SBOM Generation**: Removed Python package SBOM generation from release workflow
+  - GitHub's native dependency graph already provides Python package SBOM via UI/API
+  - Container SBOM (Trivy) remains in releases for OSSF Scorecard compliance
+  - Simplifies workflow and eliminates cyclonedx-py dependency issues
 
 ## [0.3.4] - 2025-11-12
 
