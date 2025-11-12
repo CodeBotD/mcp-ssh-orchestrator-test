@@ -117,7 +117,8 @@ jobs:
           pip install --no-deps .
           pip install -r requirements.txt
           # Generate SBOM from the current environment (production dependencies only)
-          cyclonedx-py --environment -o "dist/sbom-python-${{ steps.version.outputs.VERSION }}.cdx.json" --format json
+          # Note: cyclonedx-py requires 'environment' as a command, not a flag
+          cyclonedx-py environment -o "dist/sbom-python-${{ steps.version.outputs.VERSION }}.cdx.json" --format json
 
       - name: GPG-sign Python dists
         env:
