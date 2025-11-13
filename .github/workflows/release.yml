@@ -166,10 +166,11 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: true  # embed buildkit provenance in the image
           # Add annotations for multi-arch image manifest (required for description to appear on GHCR)
+          # Note: Annotation values must not contain commas or special characters that conflict with parsing
           outputs: |
             type=image,
             name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},
-            annotation-index.org.opencontainers.image.description=A secure SSH fleet orchestrator for MCP (STDIO transport). Enforces declarative policy and audited access for Claude Desktop, Cursor, and any MCP-aware client.,
+            annotation-index.org.opencontainers.image.description=A secure SSH fleet orchestrator for MCP (STDIO transport). Enforces declarative policy and audited access for Claude Desktop Cursor and MCP-aware clients,
             annotation-index.org.opencontainers.image.source=https://github.com/${{ github.repository }},
             annotation-index.org.opencontainers.image.licenses=Apache-2.0
 
