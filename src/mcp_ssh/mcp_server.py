@@ -396,6 +396,32 @@ If the user explicitly wants a policy change:
    - Should this be permanent or temporary?
 5. Propose a minimal, least-privilege YAML snippet for policy.yml that would
    allow this command pattern, using the existing policy structure.
+
+   IMPORTANT - Policy Structure:
+   - The policy file uses a `rules:` section (not `allowed_commands:` or `allowed_hashes:`)
+   - Each rule has: `action: "allow"`, `aliases: []`, `tags: []`, `commands: []`
+   - Command hashes (like "ef72e008f0ca") are internal and NOT user-configurable
+   - The config file is `policy.yml` in the config directory (not system paths)
+
+   IMPORTANT - Pattern Matching:
+   - The orchestrator uses GLOB patterns (not regex) for command matching.
+   - Use `*` for wildcards (e.g., `docker ps*` matches "docker ps", "docker ps -a")
+   - Use `?` for single character (e.g., `cat?` matches "cat", "cats" but not "catalog")
+   - Do NOT use regex anchors like `^` or `$` (e.g., use `docker node ls*` not `^docker node ls$`)
+   - Examples: `docker ps*`, `docker service ls*`, `docker info*`, `systemctl status *`
+
+   Example correct YAML structure:
+   ```yaml
+   rules:
+     - action: "allow"
+       aliases: ["docker-prod-*"]  # or ["*"] for all hosts
+       tags: ["docker"]  # or [] for all tags
+       commands:
+         - "docker node ls*"
+         - "docker service ls*"
+         - "docker info*"
+   ```
+
 6. Show ONLY the snippet and clearly label it as a suggestion that a human
    should review and apply manually. Never claim that you applied it yourself.
 
@@ -542,6 +568,34 @@ Rules:
    - password_secret / key_passphrase_secret over inline plaintext passwords.
    - narrow command patterns over broad wildcard allow rules.
    - narrow CIDR ranges over broad ones.
+
+5. IMPORTANT - Policy YAML Structure:
+   - Use `rules:` section with `action: "allow"` (NOT `allowed_commands:` or `allowed_hashes:`)
+   - Each rule requires: `action`, `aliases`, `tags`, `commands` fields
+   - Command hashes are internal tracking only - users configure command patterns, not hashes
+   - Config file location: `policy.yml` in the config directory (mounted at `/app/config` in container)
+
+6. IMPORTANT - Pattern Matching:
+   - The orchestrator uses GLOB patterns (Python fnmatch), NOT regex.
+   - Use `*` for wildcards: `docker ps*` matches "docker ps", "docker ps -a"
+   - Use `?` for single character: `cat?` matches "cat", "cats"
+   - Do NOT use regex syntax: `^`, `$`, `[0-9]+`, etc. will NOT work
+   - Examples of correct glob patterns:
+     * `docker ps*` (matches commands starting with "docker ps")
+     * `docker service ls*` (matches "docker service ls" and variations)
+     * `systemctl status *` (matches systemctl status with any service name)
+     * `docker-prod-*` (matches host aliases starting with "docker-prod-")
+
+   Example correct YAML structure:
+   ```yaml
+   rules:
+     - action: "allow"
+       aliases: ["docker-prod-*"]
+       tags: ["docker"]
+       commands:
+         - "docker node ls*"
+         - "docker service ls*"
+   ```
 
 You must always keep the orchestrator's security posture conservative.
 """
