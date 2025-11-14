@@ -9,9 +9,130 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [0.4.0] - 2025-11-13
+
+### Added
+
+- **MCP Prompts Support**: Added 6 prompts to guide LLM behavior
+  - `ssh_orchestrator_usage` - General usage guidance for SSH orchestrator tools
+  - `ssh_policy_denied_guidance` - How to handle policy denials
+  - `ssh_network_denied_guidance` - How to handle network policy denials
+  - `ssh_missing_host_guidance` - How to handle missing host aliases
+  - `ssh_missing_credentials_guidance` - How to handle missing/incomplete credentials
+  - `ssh_config_change_workflow` - Global rules for config change suggestions
+  - Prompts are exposed via MCP protocol (`prompts/list` and `prompts/get`)
+  - Prompts help LLMs understand how to safely interact with the orchestrator
+  - See: [MCP Prompts specification](https://pypi.org/project/mcp/1.21.0/#prompts)
+
+### Changed
+
+- **Structured JSON Denial Responses**: All denial responses now return structured JSON format
+  - Policy denials return JSON with `status: "denied"`, `reason: "policy"`, `alias`, `hash`, `command`
+  - Network denials return JSON with `status: "denied"`, `reason: "network"`, `alias`, `hostname`, `detail`
+  - This improves LLM understanding and enables better prompt-based guidance
+  - Per MCP recommendation for better structured outputs
+  - Updated `ssh_run()`, `ssh_run_async()`, and post-connect network denials
+
+### Fixed
+
+## [0.3.8] - 2025-11-13
+
+### Fixed
+
+- **Dockerfile & Dependabot**: Prevented accidental Python 3.14 updates
+  - Reverted Dockerfile from Python 3.14-slim to Python 3.13-slim (MCP SDK doesn't officially support 3.14 yet)
+  - Added Dependabot ignore rules to block Python 3.14+ updates in Docker ecosystem
+  - Fixed Dependabot configuration errors (removed unsupported `reviewers` property, corrected timezone to `America/Detroit`)
+  - Pinned Python 3.13-slim with SHA256 digest for reproducibility
+  - Added documentation explaining the Python version constraint
+  - See: https://github.com/modelcontextprotocol/python-sdk
+
+## [0.3.7] - 2025-11-12
+
+### Changed
+
+- **Dependencies**: Bumped MCP SDK from 1.19.0 to 1.21.0
+  - Updated to latest MCP SDK version with bug fixes and improvements
+  - Includes SEP-985: OAuth Protected Resource Metadata discovery fallback
+  - Added `get_server_capabilities()` to ClientSession
+  - All tests passing, no breaking changes detected
+  - See: https://github.com/modelcontextprotocol/python-sdk/releases/tag/v1.21.0
+
+## [0.3.6] - 2025-11-12
+
+### Changed
+
+- **Release Workflow**: Simplified release process by removing problematic Python SBOM generation
+  - Workflow now relies on GitHub's native dependency graph for Python package SBOM
+  - Container SBOM generation (Trivy) continues to work reliably
+
+## [0.3.5] - 2025-11-12
+
+### Changed
+
+- **SBOM Generation**: Removed Python package SBOM generation from release workflow
+  - GitHub's native dependency graph already provides Python package SBOM via UI/API
+  - Container SBOM (Trivy) remains in releases for OSSF Scorecard compliance
+  - Simplifies workflow and eliminates cyclonedx-py dependency issues
+
+## [0.3.4] - 2025-11-12
+
+### Added
+
+- **OSSF Scorecard Compliance**: Enhanced release workflow to meet OSSF Scorecard security requirements
+  - Added Python package SBOM generation (CycloneDX format) for supply chain transparency
+  - Implemented least-privilege token permissions (read-only at top level, write only at job level)
+  - Added concurrency control to prevent multiple simultaneous releases
+  - Added job timeouts to prevent runaway workflows (15min for tests, 45min for release)
+  - Improved SBOM generation to include only production dependencies
+
+### Changed
+
+- **Release Workflow Security**: Restructured GitHub Actions permissions following principle of least privilege
+  - Top-level permissions set to read-only for Token-Permissions check compliance
+  - Write permissions scoped to release job only where needed
+  - Added comprehensive documentation comments referencing OSSF Scorecard requirements
+
+### Fixed
+
+- **Container Tagging**: Fixed `latest` tag generation in release workflow (removed incorrect branch condition)
+- **SBOM Error Handling**: Improved SBOM generation error handling with graceful fallback when Trivy fails
+
+## [0.3.3] - 2025-11-08
+
+### Changed
+
+- **Compose Workflow Polish**: Pinned `docker-compose.yml` to `ghcr.io/samerfarida/mcp-ssh-orchestrator:0.3.3`, refreshed compose documentation, and updated `compose/setup.sh` to generate a baseline `.env` automatically when no template is present.
+- **Quick Start Bootstrap**: README now highlights the compose setup script as the fastest path to create config/keys/secrets before running Docker, aligning the hero pitch around declarative policy and zero-trust SSH orchestration.
+- **Documentation Cleanup**: Removed references to external compliance frameworks, replaced security tag examples with neutral labels (`critical`, `restricted`, `audit`, `sandbox`), and clarified governance messaging across SECURITY.md and the wiki.
+
+### Removed
+
+- **Legacy Requirements Files**: Dropped `requirements-dev.*` and `requirements-test.*` in favor of installing extras via `pip install -e ".[dev,test]"`, updating the contributor guide accordingly.
+
+### Fixed
+
+- **Unreleased Notification Note**: Carried forward the async notification handler clarification so MCP `ctx.info` calls continue emitting without keyword errors while progress updates still flow via `ctx.report_progress`.
+
+## [0.3.2] - 2025-11-07
+
+### Added
+
+- **MCP Notification Handler Builder**: Added `_build_notification_handler()` so async tasks broadcast lifecycle events through the MCP context APIs while retaining structured logging fallback when no session loop is available.
+
+### Fixed
+
+- **Async Task Notifications**: Reworked async task notifications to use the MCP 2025-06-18 notification pathway—`ssh_run_async` now captures the tool `Context`, schedules updates on the active event loop, and reports progress/info via `ctx.report_progress` / `ctx.info`, eliminating `notification_failed` warnings and restoring real-time updates ([MCP Spec](https://modelcontextprotocol.io/specification/2025-06-18/basic/index#notifications), [Python SDK](https://github.com/modelcontextprotocol/python-sdk/blob/main/README.md)).
+- **Security: SSH Host Key Validation (CWE-295)**: Documented the hardening work from commit 46a8919d95ce8e0106bf9bd0c1895ebde4d771d7 that enforces Paramiko's `RejectPolicy()`, ignores unsafe host-key options, and requires known_hosts entries to mitigate MITM risks.
+
 ## [0.3.0] - 2025-11-02
 
 ### Added
+
 - **Security Audit Logging (PR10)**: Added comprehensive security audit logging for security-relevant events
   - Created `_log_security_event()` function with structured JSON format
   - Unified all security event logging to use audit format
@@ -102,6 +223,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated credentials and configuration documentation with security features
 
 ### Fixed
+
 - **Security Fix: SSH Host Key Validation (CWE-295)**: Fixed CodeQL security alert by removing unsafe Paramiko host key policies
   - Removed `AcceptPolicy` class and `AutoAddPolicy()` usage which accept unknown host keys
   - Always use `RejectPolicy()` for strict host key verification to prevent MITM attacks
@@ -122,22 +244,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.1] - 2025-10-31
 
 ### Changed
+
 - Updated Dockerfile to use Python 3.13-slim with pinned SHA256 digest for reproducibility
 - Switched from Python 3.14 (pre-release) to stable Python 3.13
 - Changed from editable install (`pip install -e .`) to production install (`pip install .`)
 
 ### Removed
+
 - Removed `openssh-client` from Docker image (debug tool not needed in production)
 - Removed `libffi8` system dependency (not required by Python wheels)
 - Removed redundant example configuration file copies in Docker image
 - Removed unused PATH modification for user local bin directory
 
 ### Fixed
+
 - Fixed trailing whitespace in Dockerfile apt-get command
 
 ## [0.2.0] - 2025-10-25
 
 ### Added
+
 - **Async Task Support (SEP-1686)**: Complete implementation of asynchronous task execution with real-time progress monitoring
   - `ssh_run_async`: Start SSH commands asynchronously with immediate task ID return
   - `ssh_get_task_status`: Poll task status with progress percentage and elapsed time
@@ -167,6 +293,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized array formatting rules for improved readability
 
 ### Changed
+
 - Renamed docker-compose files to follow convention: `docker-compose.yml` for production (default), `docker-compose.dev.yml` for development
 - Updated `compose/setup.sh` to support both dev and end-user workflows with auto-detection
 - Refactored compose README to clearly distinguish production and development setup paths
@@ -181,9 +308,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored all YAML configuration files to follow unified style guidelines
 
 ### Removed
+
 - Old `docker-compose.prod.yml` file (consolidated into default `docker-compose.yml`)
 
 ### Files Modified
+
 - `compose/docker-compose.yml` (now default production)
 - `compose/docker-compose.dev.yml` (new development file)
 - `compose/setup.sh` (enhanced with dev/enduser modes)
@@ -321,4 +450,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audit trail for all commands
 - Read-only container mounts
 - Non-root container execution
-
