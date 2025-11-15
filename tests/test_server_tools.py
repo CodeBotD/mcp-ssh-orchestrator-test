@@ -477,4 +477,3 @@ def test_network_denied_response_helper():
     assert result["detail"] == "detail text"
     assert "hint" in result
     assert "ssh_plan" in result["hint"]
-

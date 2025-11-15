@@ -766,7 +766,18 @@ def resource_host(alias: str = "") -> dict:
         return _sanitize_host_metadata(host)
     except Exception as e:
         error_str = str(e)
+<<<<<<< HEAD
         log_json({"level": "error", "msg": "resource_host_error", "alias": alias, "error": error_str})
+=======
+        log_json(
+            {
+                "level": "error",
+                "msg": "resource_host_error",
+                "alias": alias,
+                "error": error_str,
+            }
+        )
+>>>>>>> c5b225a (feat: add MCP resources, context logging, and denial hints)
         return {"error": sanitize_error(error_str)}
 
 
@@ -823,8 +834,17 @@ def resource_host_capabilities(alias: str = "") -> dict:
             "policy_probes": policy_probes,
             "network": {
                 "require_known_host": True,
+<<<<<<< HEAD
                 "allowlist_enabled": bool(network_cfg.get("allow_ips") or network_cfg.get("allow_cidrs")),
                 "blocklist_enabled": bool(network_cfg.get("block_ips") or network_cfg.get("block_cidrs")),
+=======
+                "allowlist_enabled": bool(
+                    network_cfg.get("allow_ips") or network_cfg.get("allow_cidrs")
+                ),
+                "blocklist_enabled": bool(
+                    network_cfg.get("block_ips") or network_cfg.get("block_cidrs")
+                ),
+>>>>>>> c5b225a (feat: add MCP resources, context logging, and denial hints)
             },
             "features": {
                 "supports_async": True,
@@ -924,7 +944,13 @@ def ssh_plan(alias: str = "", command: str = "") -> ToolResult:
 
 
 @mcp.tool()
+<<<<<<< HEAD
 def ssh_run(alias: str = "", command: str = "", ctx: Context | None = None) -> ToolResult:
+=======
+def ssh_run(
+    alias: str = "", command: str = "", ctx: Context | None = None
+) -> ToolResult:
+>>>>>>> c5b225a (feat: add MCP resources, context logging, and denial hints)
     """Execute SSH command with policy, network checks, progress, timeout, and cancellation."""
     start = time.time()
     cmd_hash = ""
@@ -1032,7 +1058,13 @@ def ssh_run(alias: str = "", command: str = "", ctx: Context | None = None) -> T
                 peer_ip,
             )
             return json.dumps(
+<<<<<<< HEAD
                 _network_denied_response(alias, hostname, f"peer IP {peer_ip} not allowed"),
+=======
+                _network_denied_response(
+                    alias, hostname, f"peer IP {peer_ip} not allowed"
+                ),
+>>>>>>> c5b225a (feat: add MCP resources, context logging, and denial hints)
                 indent=2,
             )
 
@@ -1080,7 +1112,15 @@ def ssh_run(alias: str = "", command: str = "", ctx: Context | None = None) -> T
                 ctx,
                 "debug",
                 "ssh_run_error",
+<<<<<<< HEAD
                 {"alias": alias.strip(), "hash": cmd_hash, "error": sanitize_error(error_str)},
+=======
+                {
+                    "alias": alias.strip(),
+                    "hash": cmd_hash,
+                    "error": sanitize_error(error_str),
+                },
+>>>>>>> c5b225a (feat: add MCP resources, context logging, and denial hints)
             )
         return f"Run error: {sanitize_error(error_str)}"
     finally:
