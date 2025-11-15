@@ -42,4 +42,3 @@ def test_ctx_log_no_loop_noop():
     ctx = _DummyCtx()
     mcp_server._ctx_log(ctx, "debug", "no_loop")
     assert ctx.messages == []
-

@@ -132,4 +132,3 @@ def test_resource_host_capabilities_invalid_alias(resource_config):
     """ssh://host/{alias}/capabilities should validate alias."""
     result = mcp_server.resource_host_capabilities(alias="")
     assert "error" in result
-

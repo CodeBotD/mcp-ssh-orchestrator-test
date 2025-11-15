@@ -424,6 +424,8 @@ def test_ssh_run_async_network_denial_returns_json(mock_config_network_deny):
     assert "detail" in parsed
     assert "hint" in parsed
     assert "ssh_plan" in parsed["hint"]
+
+
 def test_ssh_plan_denial_has_hint(mock_config_deny_policy):
     """ssh_plan should include hint/why when not allowed."""
     preview = mcp_server.ssh_plan(alias="test1", command="ls -la")

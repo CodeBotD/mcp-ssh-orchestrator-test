@@ -395,12 +395,8 @@ _CAPABILITY_PROBES = [
     {"id": "docker_status", "command": "docker ps", "required_tags": ["docker"]},
 ]
 
-_POLICY_DENY_HINT = (
-    "Hint: Use ssh_plan to inspect allowed commands, review the SSH Orchestrator prompts, or ask if the policy should be updated."
-)
-_NETWORK_DENY_HINT = (
-    "Hint: Use ssh_plan to review host restrictions, check the SSH Orchestrator prompts, or discuss updating policy/network rules."
-)
+_POLICY_DENY_HINT = "Hint: Use ssh_plan to inspect allowed commands, review the SSH Orchestrator prompts, or ask if the policy should be updated."
+_NETWORK_DENY_HINT = "Hint: Use ssh_plan to review host restrictions, check the SSH Orchestrator prompts, or discuss updating policy/network rules."
 
 
 def _policy_denied_response(alias: str, command: str, cmd_hash: str) -> dict:
