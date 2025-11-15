@@ -47,6 +47,62 @@ This provides better type safety, schema validation, and improved client experie
 - `ssh_plan` - Dry-run command (policy testing)
 - `ssh_reload_config` - Reload configuration
 
+## MCP Resources
+
+FastMCP also exposes read-only resources so MCP clients can inspect your fleet without invoking tools.
+
+### `ssh://hosts`
+- **Purpose:** Sanitized inventory with `alias`, `host`, `port`, `tags`, `description`, and `has_credentials_ref`
+- **Response:**
+```json
+{
+  "count": 4,
+  "hosts": [
+    {"alias": "prod-web-1", "host": "10.0.0.11", "port": 22, "tags": ["production","web"], "description": "Primary public web front-end", "has_credentials_ref": true}
+  ]
+}
+```
+
+### `ssh://host/{alias}`
+- **Purpose:** Detailed metadata for a single alias, reusing `_validate_alias()` for safety
+- **Behavior:** Returns `{ "error": "<reason>" }` for invalid inputs or missing hosts
+
+### `ssh://host/{alias}/tags`
+- **Purpose:** Lightweight tag list for planning tag-based executions
+- **Response:** `{ "alias": "prod-web-1", "tags": ["production","web","critical-service"] }`
+
+### `ssh://host/{alias}/capabilities`
+- **Purpose:** High-level summary of policy-derived limits, network controls, and sample command allowances
+- **Fields:** `limits`, `policy_probes`, `network`, `features`
+- **Example snippet:**
+```json
+{
+  "alias": "prod-web-1",
+  "limits": {
+    "max_seconds": 60,
+    "max_output_bytes": 1048576,
+    "require_known_host": true,
+    "host_key_auto_add": false,
+    "deny_patterns_enabled": true
+  },
+  "policy_probes": [
+    {"probe": "basic_diagnostics", "command": "uptime", "allowed": true},
+    {"probe": "docker_status", "command": "docker ps", "allowed": false}
+  ],
+  "network": {
+    "require_known_host": true,
+    "allowlist_enabled": true,
+    "blocklist_enabled": true
+  },
+  "features": {
+    "supports_async": true,
+    "supports_cancellation": true
+  }
+}
+```
+
+Resources show up in MCP Inspector, Cursor, Claude Desktop, and any MCP-compatible client under the **Resources** tab so LLMs can reason about topology before calling tools.
+
 ## Tool Reference
 
 ### ssh_ping
@@ -210,6 +266,8 @@ ssh_describe_host --alias "web1"
 }
 ```
 
+> ℹ️ When `allowed` is `false`, the response also includes `why` and `hint` fields so MCP clients know to call `ssh_plan` again or consult the SSH Orchestrator prompts before retrying. No sensitive policy details are exposed.
+
 **Use Cases:**
 
 - Test policy rules before execution
@@ -261,6 +319,8 @@ ssh_plan --alias "prod-web-1" --command "systemctl restart nginx"
   "output": "14:30:45 up 42 days,  3:14,  1 user,  load average: 0.15, 0.08, 0.05"
 }
 ```
+
+> ❗ Policy or network denials return structured JSON with a `hint` field that reminds the caller to use `ssh_plan` or review the orchestrator prompts for next steps.
 
 **Response Fields:**
 | Field | Type | Description |
@@ -345,6 +405,7 @@ ssh_run --alias "web1" --command "systemctl status nginx"
 
 **Notes:**
 - Entries include `task_id` when a command was executed. Denied hosts omit `task_id` and include `denied`/`reason`.
+- Policy or network denials include `hint` text that points MCP clients back to `ssh_plan` or the orchestrator prompts for next steps.
 - No summary object is returned; aggregate stats can be derived from the `results` array.
 
 **Use Cases:**

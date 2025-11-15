@@ -362,6 +362,8 @@ def test_ssh_run_policy_denial_returns_json(mock_config_deny_policy):
     assert parsed["alias"] == "test1"
     assert "hash" in parsed
     assert parsed["command"] == "ls -la"
+    assert "hint" in parsed
+    assert "ssh_plan" in parsed["hint"]
 
 
 def test_ssh_run_async_policy_denial_returns_json(mock_config_deny_policy):
@@ -380,6 +382,8 @@ def test_ssh_run_async_policy_denial_returns_json(mock_config_deny_policy):
     assert parsed["alias"] == "test1"
     assert "hash" in parsed
     assert parsed["command"] == "ls -la"
+    assert "hint" in parsed
+    assert "ssh_plan" in parsed["hint"]
 
 
 def test_ssh_run_network_denial_returns_json(mock_config_network_deny):
@@ -398,6 +402,8 @@ def test_ssh_run_network_denial_returns_json(mock_config_network_deny):
     assert parsed["alias"] == "test1"
     assert parsed["hostname"] == "10.0.0.1"
     assert "detail" in parsed
+    assert "hint" in parsed
+    assert "ssh_plan" in parsed["hint"]
 
 
 def test_ssh_run_async_network_denial_returns_json(mock_config_network_deny):
@@ -416,3 +422,59 @@ def test_ssh_run_async_network_denial_returns_json(mock_config_network_deny):
     assert parsed["alias"] == "test1"
     assert parsed["hostname"] == "10.0.0.1"
     assert "detail" in parsed
+    assert "hint" in parsed
+    assert "ssh_plan" in parsed["hint"]
+def test_ssh_plan_denial_has_hint(mock_config_deny_policy):
+    """ssh_plan should include hint/why when not allowed."""
+    preview = mcp_server.ssh_plan(alias="test1", command="ls -la")
+    assert isinstance(preview, dict)
+    assert preview["allowed"] is False
+    assert preview["why"]
+    assert "hint" in preview
+    assert "ssh_plan" in preview["hint"]
+
+
+def test_ssh_run_on_tag_policy_hint(mock_config_deny_policy):
+    """Denied tag results should include guidance hint."""
+    summary = mcp_server.ssh_run_on_tag(tag="web", command="ls -la")
+    assert "results" in summary and summary["results"]
+    entry = summary["results"][0]
+    assert entry.get("denied") is True
+    assert "hint" in entry
+    assert "ssh_plan" in entry["hint"]
+
+
+def test_ssh_run_on_tag_network_hint(mock_config_network_deny):
+    """Network denials in tag runs should include detail + hint."""
+    summary = mcp_server.ssh_run_on_tag(tag="web", command="ls -la")
+    assert summary["results"]
+    entry = summary["results"][0]
+    assert entry.get("denied") is True
+    assert "detail" in entry
+    assert "hint" in entry
+    assert "ssh_plan" in entry["hint"]
+
+
+def test_policy_denied_response_helper():
+    """Ensure helper populates expected fields."""
+    result = mcp_server._policy_denied_response("alias1", "command1", "hash123")
+    assert result["status"] == "denied"
+    assert result["reason"] == "policy"
+    assert result["alias"] == "alias1"
+    assert result["hash"] == "hash123"
+    assert result["command"] == "command1"
+    assert "hint" in result
+    assert "ssh_plan" in result["hint"]
+
+
+def test_network_denied_response_helper():
+    """Ensure helper populates expected fields."""
+    result = mcp_server._network_denied_response("alias1", "host1", "detail text")
+    assert result["status"] == "denied"
+    assert result["reason"] == "network"
+    assert result["alias"] == "alias1"
+    assert result["hostname"] == "host1"
+    assert result["detail"] == "detail text"
+    assert "hint" in result
+    assert "ssh_plan" in result["hint"]
+
