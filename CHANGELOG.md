@@ -8,8 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Safe MCP resources:
+  - `ssh://hosts` (inventory), `ssh://host/{alias}`, `ssh://host/{alias}/tags`, `ssh://host/{alias}/capabilities`
+  - Reuse `_validate_alias()` + `Config` helpers and redact credentials automatically
+- Optional context logging for synchronous tooling (`ssh_run`, `ssh_run_on_tag`, `ssh_reload_config`, cancel + async polling) so MCP clients show task start/finish/cancel updates without leaking commands
+- Targeted unit tests covering resources + `_ctx_log`, plus Docker helper scripts (`scripts/docker-build.sh`, `scripts/docker-smoketest.sh`) for repeatable inspector validation
+- Helper unit tests for policy/network denial responses, plus README/wiki coverage explaining the new hint behavior
 
 ### Changed
+- README, tools reference, observability, and usage cookbook now document the new resources, context logging, and the Docker/Inspector/manual test workflow
+- Policy/network denial responses now include MCP-friendly `hint` text (and `ssh_plan` surfaces `why`/`hint` when blocked) so clients know to re-run `ssh_plan`, consult the orchestrator prompts, or explicitly ask about policy/network updates before retrying
 
 ### Fixed
 

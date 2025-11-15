@@ -17,6 +17,17 @@ MCP SSH Orchestrator provides observability through structured JSON logging to s
 
 This separation allows Docker to capture audit logs separately from MCP responses.
 
+### MCP Context Logging (Client-Facing)
+
+In addition to stderr JSON logs, sync tools now publish lightweight status messages through the MCP `Context` object whenever the client supports it (Cursor, Claude Desktop, MCP Inspector, etc.). Highlights:
+
+- `ssh_run`, `ssh_run_on_tag`, `ssh_reload_config`, `ssh_cancel`, `ssh_get_*`, and `ssh_cancel_async_task` report `ctx.debug` / `ctx.info` messages for task creation, completion, cancellation, and errors.
+- Logging is non-blocking: `_ctx_log()` detects the active event loop and schedules `ctx.*` calls via `loop.create_task(...)`. If no loop/context is available the server simply skips emission (avoiding RuntimeErrors).
+- Payloads are sanitized JSON (alias, task_id, command hash, exit_code) — never raw commands or secrets.
+- View these messages directly in MCP Inspector (Console tab) or any client that surfaces MCP context events. They complement the canonical stderr logs without replacing them.
+
+Use context logs for quick human feedback inside LLM tooling, while shipping structured JSON from stderr into your SIEM/observability stack.
+
 ### Audit Log Types
 
 MCP SSH Orchestrator emits five types of structured JSON logs to stderr:

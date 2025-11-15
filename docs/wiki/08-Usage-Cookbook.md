@@ -581,6 +581,42 @@ ssh_run --alias "web1" --command "ps aux | head -10"
 ssh_run --alias "web1" --command "top -n 1"
 ```
 
+## Inspector + Manual Validation Checklist
+
+Use this workflow whenever you need to validate a release, exercise new resources, or reproduce bugs:
+
+1. **Build the image**
+   ```bash
+   scripts/docker-build.sh
+   ```
+2. **Run MCP Inspector against the container**
+   ```bash
+   scripts/docker-smoketest.sh
+   ```
+   The helper script mirrors the bundled examples into a temporary directory, mounts them into Docker, and launches `npx @modelcontextprotocol/inspector docker run ...` so you can drive the stdio server interactively.
+3. **Resource tour**
+   - Browse `ssh://hosts`, `ssh://host/{alias}`, `ssh://host/{alias}/tags`, and `ssh://host/{alias}/capabilities`
+   - Confirm `has_credentials_ref` shows credential presence without revealing names or secrets
+4. **Tool smoke tests**
+   - `ssh_plan` → `ssh_run` for an allowed path
+   - `ssh_plan` → `ssh_run` for a denied path (policy + network)
+   - `ssh_run_on_tag` for a populated tag and a tag with zero matches
+   - Async lifecycle: `ssh_run_async`, `ssh_get_task_status`, `ssh_get_task_output`, `ssh_get_task_result`, `ssh_cancel`/`ssh_cancel_async_task`
+   - `ssh_reload_config` after editing the mounted config dir
+   - Confirm that policy/network denials include the `hint` field (and that `ssh_plan` returns `why` + `hint` when blocked) so LLM clients learn to re-run `ssh_plan`, consult the orchestrator prompts, **or escalate with a policy-update discussion** instead of looping on a forbidden command
+5. **Context logging + observability**
+   - Watch Inspector console for new `ctx.debug` / `ctx.info` events (task creation/completion, cancellation, reload)
+   - Tail `docker logs -f <container>` to capture `policy_decision`, `audit`, `progress`, and `trace` entries for success, failure, denied, and cancelled flows
+6. **Manual checklist recap**
+   - Resource browsing complete
+   - Allowed + denied commands verified
+   - Tag fan-out path validated
+   - Async lifecycle exercised end-to-end
+   - Cancellation + reload flows tested
+   - Logs reviewed for all paths, including security denials
+
+Capture the commands you ran (or Inspector screenshots) in PR descriptions to show the release has been validated end-to-end.
+
 ## Next Steps
 
 - **[Tools Reference](07-Tools-Reference)** - Complete tool documentation

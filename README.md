@@ -1,6 +1,5 @@
-# MCP SSH Orchestrator
-
 <div align="center">
+  <h1>MCP SSH Orchestrator</h1>
   <img src="assets/logo/logo-v1.png" alt="MCP SSH Orchestrator Logo" width="200" height="200">
   <h1>Zero-Trust SSH Orchestration for AI Assistants</h1>
   <p><strong>Enforce declarative policy-as-code and audited access for Claude Desktop, Cursor, and any MCP-aware client.</strong></p>
@@ -347,7 +346,34 @@ Your AI assistant gets 13 powerful tools with built-in security:
 - `ssh_reload_config` - Update hosts/credentials without restart
 - `ssh_ping` - Verify connectivity to a host
 
+### MCP Resources + Context
+- `ssh://hosts` – discover sanitized host inventory (alias, tags, description, credential presence)
+- `ssh://host/{alias}` – inspect a single host without exposing credentials
+- `ssh://host/{alias}/tags` – fetch tag-only view for planning tag executions
+- `ssh://host/{alias}/capabilities` – derived policy summary, limits, and sample command allowances per host
+- Context-aware logging now streams lightweight `ctx.debug` / `ctx.info` events (task start, completion, cancellations) in supported clients for `ssh_run`, `ssh_run_on_tag`, config reloads, and async task polling—all without exposing raw commands or secrets.
+- Policy/network denials (and `ssh_plan` previews) now ship with LLM-friendly hints so assistants automatically retry with `ssh_plan`, consult the orchestrator prompts, **or ask whether a policy/network update is appropriate** instead of looping on blocked commands.
+
 **[Complete Tools Reference with Examples](https://github.com/samerfarida/mcp-ssh-orchestrator/wiki/07-Tools-Reference)**
+
+## Docker Build & Inspector Workflow
+
+Run the hardened image locally and validate MCP discovery end-to-end:
+
+```bash
+# 1. Build the image (defaults to mcp-ssh-orchestrator:dev)
+scripts/docker-build.sh
+
+# 2. Launch the MCP Inspector against the containerized server
+scripts/docker-smoketest.sh
+```
+
+The smoke test script copies the bundled examples into a throwaway workspace, mounts them into the container, and opens `npx @modelcontextprotocol/inspector` so you can:
+- Browse the new `ssh://*` resources in the *Resources* tab
+- Exercise `ssh_plan`, allowed/denied `ssh_run`, tag fan-out, async status/result/output, and cancellation flows
+- Observe live context logs (`ctx.debug` / `ctx.info`) alongside the structured stderr audit output
+
+Repeat the same workflow inside Docker Desktop or a remote host by setting `IMAGE_NAME`, `CONFIG_ROOT`, or `npx`/`docker` overrides as needed.
 
 ## Learn More
 
