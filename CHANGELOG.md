@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.5.0] - 2025-11-15
+
+### Added
 - Safe MCP resources:
   - `ssh://hosts` (inventory), `ssh://host/{alias}`, `ssh://host/{alias}/tags`, `ssh://host/{alias}/capabilities`
   - Reuse `_validate_alias()` + `Config` helpers and redact credentials automatically
@@ -18,8 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - README, tools reference, observability, and usage cookbook now document the new resources, context logging, and the Docker/Inspector/manual test workflow
 - Policy/network denial responses now include MCP-friendly `hint` text (and `ssh_plan` surfaces `why`/`hint` when blocked) so clients know to re-run `ssh_plan`, consult the orchestrator prompts, or explicitly ask about policy/network updates before retrying
+- Development extras (`pip install ".[dev,test]"`) documented/verified so contributors can run Black/Ruff/Pytest locally just like CI
 
 ### Fixed
+- Resolved CI lint/test failures by formatting `src/mcp_ssh/mcp_server.py` and the new test suites with Black and ensuring the dev/test extras install pipeline keeps Ruff/Pytest available locally and in automation
 
 ## [0.4.0] - 2025-11-13
 
