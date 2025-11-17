@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-11-17
+
 ### Added
 - Enhanced SSH error messages with specific failure reasons (authentication, timeout, connection refused, DNS resolution, etc.)
 - Per-host exception handling in `ssh_run_on_tag` - individual host failures no longer stop entire operation
