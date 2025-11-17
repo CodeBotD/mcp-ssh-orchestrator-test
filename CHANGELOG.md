@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.6.0] - 2025-11-17
+
+### Added
 - Docker MCP Gateway secret support: secrets can now be injected as direct environment variables (matching `env:` field in `server.yml`) in addition to existing prefixed env vars and file-based secrets
 - Support for all 10 Docker MCP Registry secrets (5 passphrase + 5 password) with flexible expansion capability
 - Comprehensive test coverage for Docker MCP Gateway secret resolution including unit tests, integration tests, and priority order verification
