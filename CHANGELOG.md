@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-11-18
+
 ### Security
 - **CRITICAL FIX**: Fixed command chaining bypass vulnerability where commands like `uptime && apt list --upgradable` could bypass policy restrictions by chaining an allowed command with a denied one
 - Command chaining operators (`&&`, `||`, `;`, `|`) are now parsed and each command is validated individually
@@ -21,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `get_denied_command_in_chain()` helper method to identify which command in a chain is denied
 - Security logging for command chain parsing (`command_chain_parsed`) and denials (`command_chain_denied`)
 - Comprehensive documentation for command chaining behavior in policy.yml and troubleshooting guides
+- Pre-commit hooks configuration for code quality (Ruff, Black, Mypy, markdownlint, yamllint)
+- Validation scripts for MCP schema and YAML configuration files
+- Markdown linting fix script for automated documentation formatting
 
 ## [0.7.0] - 2025-11-17
 
