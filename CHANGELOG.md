@@ -7,24 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-11-18
+
 ### Security
 - **OSSF Scorecard Pinned-Dependencies**: Fixed all 58 Pinned-Dependencies security alerts by pinning all GitHub Actions to commit SHAs and all package managers to specific versions
-  - Pinned 43 GitHub Actions to commit SHAs (replacing version tags like `@v4`, `@v5`)
+  - Pinned 42 GitHub Actions to commit SHAs (replacing version tags like `@v4`, `@v5`)
+  - Pinned 1 GitHub Action (`codeql-action/upload-sarif`) to tag `@v4` due to monorepo sub-action verification requirements
   - Pinned pip to version 24.0 in all workflows and Dockerfile (5 instances)
   - Pinned npm package `markdownlint-cli2` to version 0.19.0
   - Improved supply chain security by using immutable commit references instead of mutable version tags
   - Expected Scorecard Pinned-Dependencies score improvement: 1/10 → 10/10
   - All changes validated with YAML syntax checks, GitHub Actions parsing (act), and consistency verification
+  - Fixed workflow verification error for `codeql-action/upload-sarif` (imposter commit error)
 
 ### Fixed
 - **Issue #1**: Fixed SSH client exception handling to be more specific - now only catches `KeyError` and `AttributeError` from host key access, preventing `RuntimeError` from known_hosts check from being incorrectly caught
 - **Issue #2**: Fixed DNS cache race condition (TOCTOU) by adding 1-second grace period to expiry check
 - **Issue #3**: Fixed cleanup thread to support graceful shutdown via `shutdown()` method and improved exception logging instead of silently ignoring errors
+- **Workflow Verification**: Fixed "imposter commit" error in Scorecard workflow by using tag `@v4` for `codeql-action/upload-sarif` (monorepo sub-action requirement)
 
 ### Changed
 - **Issue #7**: Improved type hints for `_ctx_log()` function - changed `payload: dict | None` to `payload: dict[str, Any] | None` for better type safety
 - **Issue #11**: Increased command hash length from 12 to 16 characters (48 to 64 bits) for better collision resistance in audit trails
   - **BREAKING**: External tools that parse command hashes may need to update to handle 16-character hashes instead of 12
+- **Dependencies**: Updated `sigstore/cosign-installer` from 3.6.0 to 4.0.0
+- **Dependencies**: Updated CodeQL SARIF upload action version
 
 ### Added
 - Comprehensive unit tests for exception handling fixes (3 new tests)
