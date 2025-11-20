@@ -7,11 +7,166 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-11-19
+
+### Added
+- **README Documentation Improvements (#74)**:
+  - Added interactive mermaid diagram for Defense-in-Depth Architecture visualization
+  - Enhanced Real-World Use Cases with persona-aligned scenarios (Homelab Enthusiasts, DevOps Teams, Platform Engineers)
+  - Improved code block formatting throughout the document for better readability
+
+### Changed
+- **README Structure (#74)**:
+  - Fixed all broken code blocks and formatting issues (bash, json, yaml blocks)
+  - Removed redundant "Docker Build & Inspector Workflow" section (content already in Contributing guide and Usage Cookbook)
+  - Improved flow and organization for better readability
+  - Enhanced use case scenarios to be more practical and aligned with target personas
+
+### Fixed
+- **Documentation Formatting (#74)**:
+  - Fixed stray markdown characters and formatting inconsistencies
+  - Corrected ordered list prefixes to follow markdown linting standards (MD029)
+  - Removed empty lines in code blocks
+  - Fixed all markdown linting issues for publication readiness
+
+## [0.9.0] - 2025-11-18
+
+### Added
+- **.env File Support for Consolidated Secrets Management (#72)**:
+  - Added support for consolidated `.env` file in secrets directory for easier secret management
+  - Maintains backward compatibility with individual secret files
+  - Implements caching with proper cache invalidation on missing files
+  - Supports comments, quoted values, and values with `=` characters
+  - Resolution order: environment variables → `.env` file → individual files
+  - Added 20 comprehensive tests covering all edge cases
+  - Updated all documentation with `.env` file usage and examples
+
+### Changed
+- **Documentation Comprehensive Review and Alignment (#73)**:
+  - Fixed markdown linting issues across all documentation files
+  - Added language tags to fenced code blocks for better syntax highlighting
+  - Fixed ordered list numbering in SECURITY.md and other wiki documents
+  - Improved consistency and formatting across docs/wiki files
+  - Enhanced readability and maintainability of documentation structure
+
+### Security
+- **OSSF Scorecard Pinned-Dependencies**: Fixed all 58 Pinned-Dependencies security alerts by pinning all GitHub Actions to commit SHAs and all package managers to specific versions
+  - Pinned 42 GitHub Actions to commit SHAs (replacing version tags like `@v4`, `@v5`)
+  - Pinned 1 GitHub Action (`codeql-action/upload-sarif`) to tag `@v4` due to monorepo sub-action verification requirements
+  - Pinned pip to version 24.0 in all workflows and Dockerfile (5 instances)
+  - Pinned npm package `markdownlint-cli2` to version 0.19.0
+  - Improved supply chain security by using immutable commit references instead of mutable version tags
+  - Expected Scorecard Pinned-Dependencies score improvement: 1/10 → 10/10
+  - All changes validated with YAML syntax checks, GitHub Actions parsing (act), and consistency verification
+  - Fixed workflow verification error for `codeql-action/upload-sarif` (imposter commit error)
+
+### Fixed
+- **Issue #1**: Fixed SSH client exception handling to be more specific - now only catches `KeyError` and `AttributeError` from host key access, preventing `RuntimeError` from known_hosts check from being incorrectly caught
+- **Issue #2**: Fixed DNS cache race condition (TOCTOU) by adding 1-second grace period to expiry check
+- **Issue #3**: Fixed cleanup thread to support graceful shutdown via `shutdown()` method and improved exception logging instead of silently ignoring errors
+- **Workflow Verification**: Fixed "imposter commit" error in Scorecard workflow by using tag `@v4` for `codeql-action/upload-sarif` (monorepo sub-action requirement)
+
+### Changed
+- **Issue #7**: Improved type hints for `_ctx_log()` function - changed `payload: dict | None` to `payload: dict[str, Any] | None` for better type safety
+- **Issue #11**: Increased command hash length from 12 to 16 characters (48 to 64 bits) for better collision resistance in audit trails
+  - **BREAKING**: External tools that parse command hashes may need to update to handle 16-character hashes instead of 12
+- **Dependencies**: Updated `sigstore/cosign-installer` from 3.6.0 to 4.0.0
+- **Dependencies**: Updated CodeQL SARIF upload action version
+
+### Added
+- Comprehensive unit tests for exception handling fixes (3 new tests)
+- Unit tests for DNS cache grace period mechanism
+- Unit tests for cleanup thread shutdown mechanism
+- Unit tests for hash command function (5 new tests in `test_utilities.py`)
+- `shutdown()` method to `AsyncTaskManager` for graceful cleanup thread termination
+
+## [0.8.0] - 2025-11-18
+
+### Security
+- **CRITICAL FIX**: Fixed command chaining bypass vulnerability where commands like `uptime && apt list --upgradable` could bypass policy restrictions by chaining an allowed command with a denied one
+- Command chaining operators (`&&`, `||`, `;`, `|`) are now parsed and each command is validated individually
+- All commands in a chain must be allowed for the chain to execute; if any command is denied, the entire chain is blocked
+- Enhanced error messages in `ssh_plan` to identify which specific command in a chain is denied
+- Added comprehensive security logging for command chain parsing and denials
+- Added 25+ unit tests and 8 integration tests for command chaining validation
+- Backward compatibility maintained: simple commands (no chaining) work exactly as before
+
+### Added
+- Command chain parsing function `_parse_command_chain()` supporting all chaining operators and command substitution
+- `get_denied_command_in_chain()` helper method to identify which command in a chain is denied
+- Security logging for command chain parsing (`command_chain_parsed`) and denials (`command_chain_denied`)
+- Comprehensive documentation for command chaining behavior in policy.yml and troubleshooting guides
+- Pre-commit hooks configuration for code quality (Ruff, Black, Mypy, markdownlint, yamllint)
+- Validation scripts for MCP schema and YAML configuration files
+- Markdown linting fix script for automated documentation formatting
+
+## [0.7.0] - 2025-11-17
+
+### Added
+- Enhanced SSH error messages with specific failure reasons (authentication, timeout, connection refused, DNS resolution, etc.)
+- Per-host exception handling in `ssh_run_on_tag` - individual host failures no longer stop entire operation
+- Comprehensive test coverage for SSH error scenarios (12 new unit tests, 5 new integration tests)
+- MCP Inspector automated testing script for error handling validation
+- MCP specification compliance tests for error handling patterns
+
+### Changed
+- SSH error messages now provide specific, actionable information instead of generic "SSH connection failed"
+- `ssh_run_on_tag` now handles per-host failures gracefully, continuing execution on remaining hosts
+- Error messages are sanitized for security (no IPs, hostnames, or file paths in user-facing errors)
+- Async task error handling now sanitizes error messages before storing/notifying
+
+### Fixed
+- Fixed issue where one host failure in `ssh_run_on_tag` would stop execution on all hosts
+- Improved error categorization for better troubleshooting (authentication vs network vs configuration errors)
+
+## [0.6.0] - 2025-11-17
+
 ### Added
 
 ### Changed
 
 ### Fixed
+
+## [0.6.0] - 2025-11-17
+
+### Added
+- Docker MCP Gateway secret support: secrets can now be injected as direct environment variables (matching `env:` field in `server.yml`) in addition to existing prefixed env vars and file-based secrets
+- Support for all 10 Docker MCP Registry secrets (5 passphrase + 5 password) with flexible expansion capability
+- Comprehensive test coverage for Docker MCP Gateway secret resolution including unit tests, integration tests, and priority order verification
+- Safe MCP resources:
+  - `ssh://hosts` (inventory), `ssh://host/{alias}`, `ssh://host/{alias}/tags`, `ssh://host/{alias}/capabilities`
+  - Reuse `_validate_alias()` + `Config` helpers and redact credentials automatically
+- Optional context logging for synchronous tooling (`ssh_run`, `ssh_run_on_tag`, `ssh_reload_config`, cancel + async polling) so MCP clients show task start/finish/cancel updates without leaking commands
+- Targeted unit tests covering resources + `_ctx_log`, plus Docker helper scripts (`scripts/docker-build.sh`, `scripts/docker-smoketest.sh`) for repeatable inspector validation
+- Helper unit tests for policy/network denial responses, plus README/wiki coverage explaining the new hint behavior
+
+### Changed
+- Secret resolution priority updated to support Docker MCP Gateway pattern:
+  1. Direct env var (Docker MCP Gateway): `<SECRET_NAME>` (matches `env:` field in `server.yml`)
+  2. Prefixed env var (standalone/backward compatibility): `MCP_SSH_SECRET_<SECRET_NAME>`
+  3. File-based (standalone): `/app/secrets/<secret_name>`
+- README, tools reference, observability, and usage cookbook now document the new resources, context logging, and the Docker/Inspector/manual test workflow
+- Policy/network denial responses now include MCP-friendly `hint` text (and `ssh_plan` surfaces `why`/`hint` when blocked) so clients know to re-run `ssh_plan`, consult the orchestrator prompts, or explicitly ask about policy/network updates before retrying
+
+### Fixed
+
+## [0.5.0] - 2025-11-15
+
+### Added
+- Safe MCP resources:
+  - `ssh://hosts` (inventory), `ssh://host/{alias}`, `ssh://host/{alias}/tags`, `ssh://host/{alias}/capabilities`
+  - Reuse `_validate_alias()` + `Config` helpers and redact credentials automatically
+- Optional context logging for synchronous tooling (`ssh_run`, `ssh_run_on_tag`, `ssh_reload_config`, cancel + async polling) so MCP clients show task start/finish/cancel updates without leaking commands
+- Targeted unit tests covering resources + `_ctx_log`, plus Docker helper scripts (`scripts/docker-build.sh`, `scripts/docker-smoketest.sh`) for repeatable inspector validation
+- Helper unit tests for policy/network denial responses, plus README/wiki coverage explaining the new hint behavior
+
+### Changed
+- README, tools reference, observability, and usage cookbook now document the new resources, context logging, and the Docker/Inspector/manual test workflow
+- Policy/network denial responses now include MCP-friendly `hint` text (and `ssh_plan` surfaces `why`/`hint` when blocked) so clients know to re-run `ssh_plan`, consult the orchestrator prompts, or explicitly ask about policy/network updates before retrying
+- Development extras (`pip install ".[dev,test]"`) documented/verified so contributors can run Black/Ruff/Pytest locally just like CI
+
+### Fixed
+- Resolved CI lint/test failures by formatting `src/mcp_ssh/mcp_server.py` and the new test suites with Black and ensuring the dev/test extras install pipeline keeps Ruff/Pytest available locally and in automation
 
 ## [0.4.0] - 2025-11-13
 

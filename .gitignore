@@ -72,8 +72,12 @@ known_hosts
 # Keep example files
 !examples/*.yml
 !examples/*.key.example
+!secrets/.env.example
 
 
 # Planning documents (not meant to be committed)
 plan.plan.md
 *.plan.md
+
+# Pre-commit cache
+.cache/
